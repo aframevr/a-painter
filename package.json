@@ -1,0 +1,14 @@
+{
+  "name": "a-painter",
+  "version": "0.1.0",
+  "description": "A-Painter",
+  "scripts": {
+    "start": "live-server"
+  },
+  "repository": "fernandojsg/a-painter",
+  "license": "MIT",
+  "dependencies": {
+    "aframe": "^0.3.1",
+    "live-server": "^1.1.0"
+  }
+}
