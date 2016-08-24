@@ -2,10 +2,12 @@
 function Lines() {
   this.lines = [];
   document.addEventListener('keyup', function(event){
+    if (event.keyCode === 76) {
+      lines.loadBinary();
+    }
     if (event.keyCode === 83) {
       var dataviews = this.getBinary();
       var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-
       // FileSaver.js defines `saveAs` for saving files out of the browser
       var filename = "apainter.bin";
       saveAs(blob, filename);
@@ -31,6 +33,105 @@ Lines.prototype = {
         dataViews.push(this.lines[i].getBinary());
       }
       return dataViews;
+    },
+    loadBinary: function () {
+
+      var loader = new THREE.XHRLoader(this.manager);
+      loader.setResponseType('arraybuffer');
+
+      var url = 'apainter.bin';
+      loader.load(url, function (buffer) {
+        var offset = 0;
+        var data = new DataView(buffer);
+
+        function readQuaternion() {
+          var output = new THREE.Quaternion(
+            data.getFloat32(offset, true),
+            data.getFloat32(offset + 4, true),
+            data.getFloat32(offset + 8, true),
+            data.getFloat32(offset + 12, true)
+          );
+          offset+=16;
+          return output;
+        }
+
+        function readVector3() {
+          var output = new THREE.Vector3(
+            data.getFloat32(offset, true),
+            data.getFloat32(offset + 4, true),
+            data.getFloat32(offset + 8, true)
+          );
+          offset+=12;
+          return output;
+        }
+
+        function readColor() {
+          var output = new THREE.Color(
+            data.getFloat32(offset, true),
+            data.getFloat32(offset + 4, true),
+            data.getFloat32(offset + 8, true)
+          );
+          offset+=12;
+          return output;
+        }
+
+        function readFloat() {
+          var output = data.getFloat32(offset, true);
+          offset+=4;
+          return output;
+        }
+
+        function readInt() {
+          var output = data.getUint32(offset, true);
+          offset+=4;
+          return output;
+        }
+
+        var numLines = readInt();
+        for (var l = 0; l < numLines; l++) {
+          var color = readColor();
+          var numPoints = readInt();
+
+          var lineWidth = 0.01;
+          var line = lines.addNewLine(color, lineWidth);
+
+          console.log('line', l, color, lineWidth, numPoints);
+
+          var entity = document.createElement('a-entity');
+          document.querySelector('a-scene').appendChild(entity);
+          entity.object3D.add(line.mesh);
+
+          for (var i = 0; i < numPoints; i++) {
+            var point = readVector3();
+            var quat = readQuaternion();
+            var intensity = readFloat();
+            console.log(point,quat,intensity);
+            if (i==0) {
+              line.setInitialPosition(point, quat);
+            } else {
+              line.addPoint(point, quat, intensity);
+            }
+          }
+/*
+          var i = 0;
+          var interval = setInterval(function(){
+            var point = readVector3();
+            var quat = readQuaternion();
+            var intensity = readFloat();
+
+            if (i==0) {
+              line.setInitialPosition(point, quat);
+            } else {
+              line.addPoint(point, quat, intensity);
+            }
+
+            if (++i === numPoints) {
+              clearInterval(interval);
+            }
+          }, 10);
+*/
+        }
+      });
     }
 };
 
@@ -66,32 +167,35 @@ function Line (color, lineWidth) {
 
 var BinaryWriter = function(bufferSize) {
   this.dataview = new DataView(new ArrayBuffer(bufferSize));
+  this.offset = 0;
 }
 
 BinaryWriter.prototype = {
   writeVector: function(offset, vector, isLittleEndian) {
-    offset = this.writeFloat(this.dataview, offset, vector.x, isLittleEndian);
-    offset = this.writeFloat(this.dataview, offset, vector.y, isLittleEndian);
-    return this.writeFloat(this.dataview, offset, vector.z, isLittleEndian);
+    this.writeFloat(this.offset, vector.x, isLittleEndian);
+    this.writeFloat(this.offset + 4, vector.y, isLittleEndian);
+    this.writeFloat(this.offset + 8, vector.z, isLittleEndian);
+    this.offset+=12;
   },
   writeColor: function(offset, vector, isLittleEndian) {
-    offset = this.writeFloat(this.dataview, offset, vector.r, isLittleEndian);
-    offset = this.writeFloat(this.dataview, offset, vector.g, isLittleEndian);
-    return this.writeFloat(this.dataview, offset, vector.b, isLittleEndian);
+    this.writeFloat(this.offset, vector.r, isLittleEndian);
+    this.writeFloat(this.offset + 4, vector.g, isLittleEndian);
+    this.writeFloat(this.offset + 8, vector.b, isLittleEndian);
+    this.offset+=12;
   },
   writeUint32: function(offset, int, isLittleEndian) {
-    this.dataview.setUint32(offset, int, isLittleEndian);
-    return offset + 4;
+    this.dataview.setUint32(this.offset, int, isLittleEndian);
+    this.offset += 4;
   },
   writeFloat: function(offset, float, isLittleEndian) {
-    this.dataview.setFloat32(offset, float, isLittleEndian);
-    return offset + 4;
+    this.dataview.setFloat32(this.offset, float, isLittleEndian);
+    this.offset += 4;
   },
   writeArray: function(offset, array, isLittleEndian) {
     for (var i=0;i<array.length;i++) {
-      offset = this.writeFloat(this.dataview, offset, array[i], isLittleEndian);
+      this.writeFloat(this.offset, array[i], isLittleEndian);
+      this.offset += 4;
     }
-    return offset;
   },
   getDataView: function() {
     return this.dataview;
@@ -242,19 +346,16 @@ Line.prototype = {
     var points = this.points;
     var bufferSize = 84 + ((1+3+4) * 4 * points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
-    var offset = 0;
-
     var isLittleEndian = true;
-    var offset = 0;
 
-    offset = binaryWriter.writeColor(offset, color, isLittleEndian);
-    offset = binaryWriter.writeUint32(offset, points.length, isLittleEndian);
+    binaryWriter.writeColor(color, isLittleEndian);
+    binaryWriter.writeUint32(points.length, isLittleEndian);
 
     for (var i = 0; i < points.length; i++) {
       var point = points[i];
-      offset = binaryWriter.writeArray(offset, point.position, isLittleEndian);
-      offset = binaryWriter.writeArray(offset, point.rotation, isLittleEndian);
-      offset = binaryWriter.writeFloat(offset, point.intensity, isLittleEndian);
+      binaryWriter.writeArray(point.position, isLittleEndian);
+      binaryWriter.writeArray(point.rotation, isLittleEndian);
+      binaryWriter.writeFloat(point.intensity, isLittleEndian);
     }
     return binaryWriter.getDataView();
   },
