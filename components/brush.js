@@ -1,4 +1,41 @@
 /* global AFRAME THREE */
+function Lines() {
+  this.lines = [];
+  document.addEventListener('keyup', function(event){
+    if (event.keyCode === 83) {
+      var dataviews = this.getBinary();
+      var blob = new Blob(dataviews, {type: 'application/octet-binary'});
+
+      // FileSaver.js defines `saveAs` for saving files out of the browser
+      var filename = "apainter.bin";
+      saveAs(blob, filename);
+    }
+  }.bind(this));
+}
+
+Lines.prototype = {
+    addNewLine: function(color, lineWidth) {
+      var line = new Line(color, lineWidth);
+      this.lines.push(line);
+      return line;
+    },
+    getBinary: function() {
+      var dataViews = [];
+
+      var binaryWriter = new BinaryWriter(4);
+      var isLittleEndian = true;
+      binaryWriter.writeUint32(0, this.lines.length, isLittleEndian);
+      dataViews.push(binaryWriter.getDataView());
+
+      for (var i=0;i<this.lines.length; i++) {
+        dataViews.push(this.lines[i].getBinary());
+      }
+      return dataViews;
+    }
+};
+
+var lines = new Lines();
+
 function Line (color, lineWidth) {
   this.points = [];
   this.lineWidth = lineWidth;
@@ -27,40 +64,50 @@ function Line (color, lineWidth) {
   this.mesh.vertices = this.vertices;
 }
 
+var BinaryWriter = function(bufferSize) {
+  this.dataview = new DataView(new ArrayBuffer(bufferSize));
+}
 
-var BinaryWriter = (function() {
-  var that = {};
-
-  var writeVector = function(dataview, offset, vector, isLittleEndian) {
-    offset = writeFloat(dataview, offset, vector.x, isLittleEndian);
-    offset = writeFloat(dataview, offset, vector.y, isLittleEndian);
-    return writeFloat(dataview, offset, vector.z, isLittleEndian);
-  };
-
-  var writeColor = function(dataview, offset, vector, isLittleEndian) {
-    offset = writeFloat(dataview, offset, vector.r, isLittleEndian);
-    offset = writeFloat(dataview, offset, vector.g, isLittleEndian);
-    return writeFloat(dataview, offset, vector.b, isLittleEndian);
-  };
-
-  var writeFloat = function(dataview, offset, float, isLittleEndian) {
-    dataview.setFloat32(offset, float, isLittleEndian);
+BinaryWriter.prototype = {
+  writeVector: function(offset, vector, isLittleEndian) {
+    offset = this.writeFloat(this.dataview, offset, vector.x, isLittleEndian);
+    offset = this.writeFloat(this.dataview, offset, vector.y, isLittleEndian);
+    return this.writeFloat(this.dataview, offset, vector.z, isLittleEndian);
+  },
+  writeColor: function(offset, vector, isLittleEndian) {
+    offset = this.writeFloat(this.dataview, offset, vector.r, isLittleEndian);
+    offset = this.writeFloat(this.dataview, offset, vector.g, isLittleEndian);
+    return this.writeFloat(this.dataview, offset, vector.b, isLittleEndian);
+  },
+  writeUint32: function(offset, int, isLittleEndian) {
+    this.dataview.setUint32(offset, int, isLittleEndian);
     return offset + 4;
-  };
-
-  var writeArray = function(dataview, offset, array, isLittleEndian) {
+  },
+  writeFloat: function(offset, float, isLittleEndian) {
+    this.dataview.setFloat32(offset, float, isLittleEndian);
+    return offset + 4;
+  },
+  writeArray: function(offset, array, isLittleEndian) {
     for (var i=0;i<array.length;i++) {
-      offset = writeFloat(dataview, offset, array[i], isLittleEndian);
+      offset = this.writeFloat(this.dataview, offset, array[i], isLittleEndian);
     }
     return offset;
+  },
+  getDataView: function() {
+    return this.dataview;
   }
+};
+
+/*
+var BinaryWriter = (function() {
+  return;
 
   var geometryToDataView = function(line) {
     var color = line.stroke.color;
     var points = line.points;
     var bufferSize = 84 + ((1+3+4) * 4 * points.length);
-    var buffer = new ArrayBuffer(bufferSize);
-    var dv = new DataView(buffer);
+    var binaryWriter = new BinaryWriter(bufferSize);
+    dv = binaryWriter.getDataView();
     var offset = 0;
 
     var isLittleEndian = true;
@@ -87,7 +134,7 @@ var BinaryWriter = (function() {
     // FileSaver.js defines `saveAs` for saving files out of the browser
     //saveAs(blob, filename);
   };
-
+/*
   var loader = new THREE.XHRLoader(this.manager);
   loader.setResponseType('arraybuffer');
 
@@ -151,8 +198,7 @@ var BinaryWriter = (function() {
     entity.object3D.add(line.mesh);
 
     var i = 0;
-    setInterval(function(){
-      console.log("12341234");
+    var interval = setInterval(function(){
       var point = readVector3();
       var quat = readQuaternion();
       var intensity = readFloat();
@@ -163,7 +209,9 @@ var BinaryWriter = (function() {
         line.addPoint(point, quat, intensity);
       }
 
-      i++;
+      if (++i === numPoints) {
+        clearInterval(interval);
+      }
     }, 10);
 
 /*
@@ -179,15 +227,37 @@ var BinaryWriter = (function() {
       }
     }
 */
+/*
   });
 
   //save(line,'test.bin');
   that.save = save;
   return that;
 }());
-
+*/
 
 Line.prototype = {
+  getBinary: function () {
+    var color = this.color;
+    var points = this.points;
+    var bufferSize = 84 + ((1+3+4) * 4 * points.length);
+    var binaryWriter = new BinaryWriter(bufferSize);
+    var offset = 0;
+
+    var isLittleEndian = true;
+    var offset = 0;
+
+    offset = binaryWriter.writeColor(offset, color, isLittleEndian);
+    offset = binaryWriter.writeUint32(offset, points.length, isLittleEndian);
+
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i];
+      offset = binaryWriter.writeArray(offset, point.position, isLittleEndian);
+      offset = binaryWriter.writeArray(offset, point.rotation, isLittleEndian);
+      offset = binaryWriter.writeFloat(offset, point.intensity, isLittleEndian);
+    }
+    return binaryWriter.getDataView();
+  },
   setInitialPosition: function (position, rotation) {
     var direction = new THREE.Vector3();
     direction.set(0, 1.7, 1);
@@ -357,12 +427,14 @@ AFRAME.registerComponent('brush', {
         this.lineWidthModifier = value * 2;
         if (value > 0.1) {
           if (!this.active) {
-            this.drawLine();
+            this.startNewLine();
             this.active = true;
           }
         } else {
           this.active = false;
-          console.log(this.currentLine.getJSON());
+          if (this.currentLine) {
+            console.log(this.currentLine.getJSON());
+          }
           this.currentLine = null;
         }
       }
@@ -383,8 +455,8 @@ AFRAME.registerComponent('brush', {
   remove: function () {
   },
 
-  drawLine: function () {
-    this.currentLine = new Line(this.color, this.lineWidth);
+  startNewLine: function () {
+    this.currentLine = lines.addNewLine(this.color, this.lineWidth);
 
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();
