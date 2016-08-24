@@ -6,11 +6,13 @@ function Lines() {
       lines.loadBinary();
     }
     if (event.keyCode === 83) {
+      /*
       var dataviews = this.getBinary();
       var blob = new Blob(dataviews, {type: 'application/octet-binary'});
       // FileSaver.js defines `saveAs` for saving files out of the browser
       var filename = "apainter.bin";
       saveAs(blob, filename);
+      */
     }
   }.bind(this));
 }
@@ -26,7 +28,7 @@ Lines.prototype = {
 
       var binaryWriter = new BinaryWriter(4);
       var isLittleEndian = true;
-      binaryWriter.writeUint32(0, this.lines.length, isLittleEndian);
+      binaryWriter.writeUint32(this.lines.length, isLittleEndian);
       dataViews.push(binaryWriter.getDataView());
 
       for (var i=0;i<this.lines.length; i++) {
@@ -100,7 +102,8 @@ Lines.prototype = {
           var entity = document.createElement('a-entity');
           document.querySelector('a-scene').appendChild(entity);
           entity.object3D.add(line.mesh);
-
+// 17
+// 3 + 4 + 1 = 8
           for (var i = 0; i < numPoints; i++) {
             var point = readVector3();
             var quat = readQuaternion();
@@ -171,30 +174,27 @@ var BinaryWriter = function(bufferSize) {
 }
 
 BinaryWriter.prototype = {
-  writeVector: function(offset, vector, isLittleEndian) {
-    this.writeFloat(this.offset, vector.x, isLittleEndian);
-    this.writeFloat(this.offset + 4, vector.y, isLittleEndian);
-    this.writeFloat(this.offset + 8, vector.z, isLittleEndian);
-    this.offset+=12;
+  writeVector: function(vector, isLittleEndian) {
+    this.writeFloat(vector.x, isLittleEndian);
+    this.writeFloat(vector.y, isLittleEndian);
+    this.writeFloat(vector.z, isLittleEndian);
   },
-  writeColor: function(offset, vector, isLittleEndian) {
-    this.writeFloat(this.offset, vector.r, isLittleEndian);
-    this.writeFloat(this.offset + 4, vector.g, isLittleEndian);
-    this.writeFloat(this.offset + 8, vector.b, isLittleEndian);
-    this.offset+=12;
+  writeColor: function(vector, isLittleEndian) {
+    this.writeFloat(vector.r, isLittleEndian);
+    this.writeFloat(vector.g, isLittleEndian);
+    this.writeFloat(vector.b, isLittleEndian);
   },
-  writeUint32: function(offset, int, isLittleEndian) {
+  writeUint32: function(int, isLittleEndian) {
     this.dataview.setUint32(this.offset, int, isLittleEndian);
     this.offset += 4;
   },
-  writeFloat: function(offset, float, isLittleEndian) {
+  writeFloat: function(float, isLittleEndian) {
     this.dataview.setFloat32(this.offset, float, isLittleEndian);
     this.offset += 4;
   },
-  writeArray: function(offset, array, isLittleEndian) {
+  writeArray: function(array, isLittleEndian) {
     for (var i=0;i<array.length;i++) {
-      this.writeFloat(this.offset, array[i], isLittleEndian);
-      this.offset += 4;
+      this.writeFloat(array[i], isLittleEndian);
     }
   },
   getDataView: function() {
@@ -344,17 +344,21 @@ Line.prototype = {
   getBinary: function () {
     var color = this.color;
     var points = this.points;
-    var bufferSize = 84 + ((1+3+4) * 4 * points.length);
+    // Point = vector3(3) + quat(4) + intensity(1)
+    // Color = 3*4 = 12
+    // NumPoints = 4
+    var bufferSize = 16 + ((1+3+4) * 4 * points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
     var isLittleEndian = true;
 
+    console.log(color, points.length);
     binaryWriter.writeColor(color, isLittleEndian);
     binaryWriter.writeUint32(points.length, isLittleEndian);
 
     for (var i = 0; i < points.length; i++) {
       var point = points[i];
-      binaryWriter.writeArray(point.position, isLittleEndian);
-      binaryWriter.writeArray(point.rotation, isLittleEndian);
+      binaryWriter.writeArray(point.position.toArray(), isLittleEndian);
+      binaryWriter.writeArray(point.rotation.toArray(), isLittleEndian);
       binaryWriter.writeFloat(point.intensity, isLittleEndian);
     }
     return binaryWriter.getDataView();
