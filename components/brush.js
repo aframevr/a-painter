@@ -27,6 +27,166 @@ function Line (color, lineWidth) {
   this.mesh.vertices = this.vertices;
 }
 
+
+var BinaryWriter = (function() {
+  var that = {};
+
+  var writeVector = function(dataview, offset, vector, isLittleEndian) {
+    offset = writeFloat(dataview, offset, vector.x, isLittleEndian);
+    offset = writeFloat(dataview, offset, vector.y, isLittleEndian);
+    return writeFloat(dataview, offset, vector.z, isLittleEndian);
+  };
+
+  var writeColor = function(dataview, offset, vector, isLittleEndian) {
+    offset = writeFloat(dataview, offset, vector.r, isLittleEndian);
+    offset = writeFloat(dataview, offset, vector.g, isLittleEndian);
+    return writeFloat(dataview, offset, vector.b, isLittleEndian);
+  };
+
+  var writeFloat = function(dataview, offset, float, isLittleEndian) {
+    dataview.setFloat32(offset, float, isLittleEndian);
+    return offset + 4;
+  };
+
+  var writeArray = function(dataview, offset, array, isLittleEndian) {
+    for (var i=0;i<array.length;i++) {
+      offset = writeFloat(dataview, offset, array[i], isLittleEndian);
+    }
+    return offset;
+  }
+
+  var geometryToDataView = function(line) {
+    var color = line.stroke.color;
+    var points = line.points;
+    var bufferSize = 84 + ((1+3+4) * 4 * points.length);
+    var buffer = new ArrayBuffer(bufferSize);
+    var dv = new DataView(buffer);
+    var offset = 0;
+
+    var isLittleEndian = true;
+    var offset = 0;
+
+    offset = writeColor(dv, offset, color, isLittleEndian);
+
+    dv.setUint32(offset, points.length, isLittleEndian);
+    offset+=4;
+
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i];
+      offset = writeArray(dv, offset, point.position, isLittleEndian);
+      offset = writeArray(dv, offset, point.rotation, isLittleEndian);
+      offset = writeFloat(dv, offset, point.intensity, isLittleEndian);
+    }
+    return dv;
+  };
+
+  var save = function(geometry, filename) {
+    var dv = geometryToDataView(geometry);
+    var blob = new Blob([dv], {type: 'application/octet-binary'});
+
+    // FileSaver.js defines `saveAs` for saving files out of the browser
+    //saveAs(blob, filename);
+  };
+
+  var loader = new THREE.XHRLoader(this.manager);
+  loader.setResponseType('arraybuffer');
+
+  var url = 'stroke.bin';
+  loader.load(url, function (buffer) {
+
+    var offset = 0;
+    var data = new DataView(buffer);
+
+    function readQuaternion() {
+      var output = new THREE.Quaternion(
+        data.getFloat32(offset, true),
+        data.getFloat32(offset + 4, true),
+        data.getFloat32(offset + 8, true),
+        data.getFloat32(offset + 12, true)
+      );
+      offset+=16;
+      return output;
+    }
+
+    function readVector3() {
+      var output = new THREE.Vector3(
+        data.getFloat32(offset, true),
+        data.getFloat32(offset + 4, true),
+        data.getFloat32(offset + 8, true)
+      );
+      offset+=12;
+      return output;
+    }
+
+    function readColor() {
+      var output = new THREE.Color(
+        data.getFloat32(offset, true),
+        data.getFloat32(offset + 4, true),
+        data.getFloat32(offset + 8, true)
+      );
+      offset+=12;
+      return output;
+    }
+
+    function readFloat() {
+      var output = data.getFloat32(offset, true);
+      offset+=4;
+      return output;
+    }
+
+    function readInt() {
+      var output = data.getUint32(offset, true);
+      offset+=4;
+      return output;
+    }
+
+    var color = readColor();
+    var numPoints = readInt();
+
+    var lineWidth = 0.01;
+    var line = new Line(color, lineWidth);
+
+    var entity = document.createElement('a-entity');
+    document.querySelector('a-scene').appendChild(entity);
+    entity.object3D.add(line.mesh);
+
+    var i = 0;
+    setInterval(function(){
+      console.log("12341234");
+      var point = readVector3();
+      var quat = readQuaternion();
+      var intensity = readFloat();
+
+      if (i==0) {
+        line.setInitialPosition(point, quat);
+      } else {
+        line.addPoint(point, quat, intensity);
+      }
+
+      i++;
+    }, 10);
+
+/*
+    for (var i=0;i<numPoints;i++) {
+      var point = readVector3();
+      var quat = readQuaternion();
+      var intensity = readFloat();
+
+      if (i==0) {
+        line.setInitialPosition(point, quat);
+      } else {
+        line.addPoint(point, quat, intensity);
+      }
+    }
+*/
+  });
+
+  //save(line,'test.bin');
+  that.save = save;
+  return that;
+}());
+
+
 Line.prototype = {
   setInitialPosition: function (position, rotation) {
     var direction = new THREE.Vector3();
