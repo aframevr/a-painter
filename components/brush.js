@@ -2,17 +2,16 @@
 function Lines() {
   this.lines = [];
   document.addEventListener('keyup', function(event){
+    console.log(event.keyCode);
     if (event.keyCode === 76) {
       lines.loadBinary();
     }
-    if (event.keyCode === 83) {
-      /*
+    if (event.keyCode === 86) {
       var dataviews = this.getBinary();
       var blob = new Blob(dataviews, {type: 'application/octet-binary'});
       // FileSaver.js defines `saveAs` for saving files out of the browser
       var filename = "apainter.bin";
       saveAs(blob, filename);
-      */
     }
   }.bind(this));
 }
@@ -102,7 +101,8 @@ Lines.prototype = {
           var entity = document.createElement('a-entity');
           document.querySelector('a-scene').appendChild(entity);
           entity.object3D.add(line.mesh);
-
+// 17
+// 3 + 4 + 1 = 8
           for (var i = 0; i < numPoints; i++) {
             var point = readVector3();
             var quat = readQuaternion();
@@ -343,7 +343,10 @@ Line.prototype = {
   getBinary: function () {
     var color = this.color;
     var points = this.points;
-    var bufferSize = 84 + ((1+3+4) * 4 * points.length);
+    // Point = vector3(3) + quat(4) + intensity(1)
+    // Color = 3*4 = 12
+    // NumPoints = 4
+    var bufferSize = 16 + ((1+3+4) * 4 * points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
     var isLittleEndian = true;
 
