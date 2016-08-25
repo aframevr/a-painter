@@ -15,10 +15,39 @@ var urlParams;
 function Lines() {
   this.lines = [];
   document.addEventListener('keyup', function(event){
+    console.log(event.keyCode);
+
     if (event.keyCode === 76) {
       lines.loadBinary('apainter.bin');
     }
-    if (event.keyCode === 86) {
+    if (event.keyCode === 85) { // u
+      // Upload
+      var dataviews = this.getBinary();
+      var blob = new Blob(dataviews, {type: 'application/octet-binary'});
+
+      //var file = fileInput;
+      var fd = new FormData();
+      fd.append("file", blob);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", 'https://file.io'); // ?expires=1y
+      xhr.onreadystatechange = function (data) {
+        if (xhr.readyState == 4) {
+          var response = JSON.parse(xhr.response);
+          if (response.success) {
+            alert('Drawing uploaded correctly\nPlease use this link to share it:\n' + 'http://dev.fernandojsg.com/a-painter/?url=' + response.link);
+          }
+        }
+      };
+      xhr.send(fd);
+
+/*
+      var file = uploadcare.fileFrom('object', blob);
+      file.done(function(fileInfo) {
+        console.log(fileInfo);
+      });
+*/
+    }
+    if (event.keyCode === 86) { // v
       var dataviews = this.getBinary();
       var blob = new Blob(dataviews, {type: 'application/octet-binary'});
       // FileSaver.js defines `saveAs` for saving files out of the browser
