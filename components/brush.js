@@ -1,10 +1,22 @@
+var urlParams;
+(window.onpopstate = function () {
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.search.substring(1);
+
+    urlParams = {};
+    while (match = search.exec(query))
+       urlParams[decode(match[1])] = decode(match[2]);
+})();
+
 /* global AFRAME THREE */
 function Lines() {
   this.lines = [];
   document.addEventListener('keyup', function(event){
-    console.log(event.keyCode);
     if (event.keyCode === 76) {
-      lines.loadBinary();
+      lines.loadBinary('apainter.bin');
     }
     if (event.keyCode === 86) {
       var dataviews = this.getBinary();
@@ -35,12 +47,11 @@ Lines.prototype = {
       }
       return dataViews;
     },
-    loadBinary: function () {
+    loadBinary: function (url) {
 
       var loader = new THREE.XHRLoader(this.manager);
       loader.setResponseType('arraybuffer');
 
-      var url = 'apainter.bin';
       loader.load(url, function (buffer) {
         var offset = 0;
         var data = new DataView(buffer);
@@ -96,18 +107,13 @@ Lines.prototype = {
           var lineWidth = 0.01;
           var line = lines.addNewLine(color, lineWidth);
 
-          console.log('line', l, color, lineWidth, numPoints);
-
           var entity = document.createElement('a-entity');
           document.querySelector('a-scene').appendChild(entity);
           entity.object3D.add(line.mesh);
-// 17
-// 3 + 4 + 1 = 8
           for (var i = 0; i < numPoints; i++) {
             var point = readVector3();
             var quat = readQuaternion();
             var intensity = readFloat();
-            console.log(point,quat,intensity);
             if (i==0) {
               line.setInitialPosition(point, quat);
             } else {
@@ -573,3 +579,10 @@ AFRAME.registerComponent('brush', {
     entity.object3D.add(this.currentLine.mesh);
   }
 });
+
+
+(function(){
+  if (urlParams.url) {
+    lines.loadBinary(urlParams.url);
+  }
+})();
