@@ -37,6 +37,8 @@ function Lines() {
             alert('Drawing uploaded correctly\nPlease use this link to share it:\n' + 'http://dev.fernandojsg.com/a-painter/?url=' + response.link);
             console.log('Uploaded link: ' + 'http://dev.fernandojsg.com/a-painter/?url=' + response.link);
           }
+        } else {
+          // alert('An error occurred while uploading the drawing, please try again');
         }
       };
       xhr.send(fd);
