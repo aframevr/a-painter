@@ -14,8 +14,10 @@
         <img id="floor" src="images/floor.jpg">
         <img id="skymap" src="images/sky.jpg">
         <img id="color" src="images/colorwheel.png">
+        <img id="uitestimg" src="images/ui_test.png">
         <a-asset-item id="controller-mtl" src="models/controller.mtl"></a-asset-item>
         <a-asset-item id="controller-obj" src="models/controller.obj"></a-asset-item>
+        <a-asset-item id="uitest-obj" src="models/ui_test.obj"></a-asset-item>
       </a-assets>
       <a-entity id="point" light="color: #f4f4f4; intensity: 0.6; type: point"></a-entity>
       <a-entity id="hemisphere" light="color: #47c9ff; intensity: 0.8; type: hemisphere"></a-entity>
@@ -34,16 +36,17 @@
                 vive-controls="hand: right"
                 obj-model="obj: #controller-obj; mtl: #controller-mtl">
                 <a-entity visible="true" colorwheel geometry="primitive:plane; width: 0.1; height: 0.1" position="0 0.027 0.06" rotation="90 0 0" material="shader: flat; transparent:true; color: #fff; src:#color; side:double">
-                  <a-entity marker geometry="primitive: sphere; radius: 0.005" position="0 0 0" material="color: #fff; roughness: 1.0; metalness:0.0">
-                  </a-entity>
+                  <a-entity marker geometry="primitive: sphere; radius: 0.005" position="0 0 0" material="color: #fff; roughness: 1.0; metalness:0.0"></a-entity>
                 </a-entity>
+                
+                <a-entity material="depthTest:false;shader:flat;side:double;transparent:true;color:#ffffff;fog:false;src:#uitestimg" obj-model="obj: #uitest-obj"></a-entity>
       </a-entity>
       <a-entity id="ground"
                 geometry="primitive: circle; radius: 12;"
                 rotation="-90 0 0"
                 material="shader: flat; src: #floor">
       </a-entity>
-      <a-entity position="0 0 0" id="sky" geometry="primitive:sphere;radius:30;phiLength:360;phiStart:0;thetaLength:90" material="shader:flat;side:back;height:2048;src:#skymap;width:2048"></a-entity>
+      <a-entity position="0 0 0" id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
     </a-scene>
   </body>
 </html>
