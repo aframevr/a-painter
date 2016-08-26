@@ -19,11 +19,11 @@ function Lines() {
       */
 //      line.addPoint(new THREE.Vector3(endX + 1, endY, 0), rotation, 1.0);
   //    line.addPoint(new THREE.Vector3(endX + 2, endY, 0), rotation, 1.0);
-
+/*
       var entity = document.createElement('a-entity');
       document.querySelector('a-scene').appendChild(entity);
       entity.object3D.add(line.mesh);
-
+*/
     }
     if (event.keyCode === 85) { // u
       // Upload
@@ -148,16 +148,24 @@ Lines.prototype = {
           var entity = document.createElement('a-entity');
           document.querySelector('a-scene').appendChild(entity);
           entity.object3D.add(line.mesh);
+          var prev = new THREE.Vector3();
           for (var i = 0; i < numPoints; i++) {
             var point = readVector3();
             var quat = readQuaternion();
             var intensity = readFloat();
+            if (point.equals(prev)) {
+              continue;
+            }
+            prev=point.clone();
             if (i==0) {
               line.setInitialPosition(point, quat);
             } else {
               line.addPoint(point, quat, intensity);
             }
           }
+
+
+          line.computeNormals();
 /*
           var i = 0;
           var interval = setInterval(function(){
