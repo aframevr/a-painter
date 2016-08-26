@@ -180,7 +180,7 @@ Line.prototype = {
     var binaryWriter = new BinaryWriter(bufferSize);
     var isLittleEndian = true;
 
-    console.log(color, points.length);
+    //console.log(color, points.length);
     binaryWriter.writeColor(color, isLittleEndian);
     binaryWriter.writeUint32(points.length, isLittleEndian);
 
@@ -400,8 +400,8 @@ this.computeNormals();
         pB.fromArray( this.vertices, i + 3 );
         pC.fromArray( this.vertices, i + 6 );
       } else {
-        pB.fromArray( this.vertices, i );
         pA.fromArray( this.vertices, i + 3 );
+        pB.fromArray( this.vertices, i );
         pC.fromArray( this.vertices, i + 6 );
       }
       pair = !pair;
@@ -410,7 +410,7 @@ this.computeNormals();
       ab.subVectors( pA, pB );
       cb.cross( ab );
       cb.normalize();
-      console.log(pair, cb.toS(), i, i+3, i+6, pA.toS(), pB.toS(), pC.toS());
+      //console.log(pair, cb.toS(), i, i+3, i+6, pA.toS(), pB.toS(), pC.toS());
       //cb.set(1,0,0);
       this.normals[ n++ ] += cb.x;
       this.normals[ n++ ] += cb.y;
@@ -424,12 +424,19 @@ this.computeNormals();
       this.normals[ n++ ] += cb.y;
       this.normals[ n++ ] += cb.z;
     }
+
+    /*
     for ( var i = 0, il = this.vertices.length; i < il; i +=3 ) {
     		      pA.fromArray(this.normals,i).divideScalar(3).normalize();
     		      this.normals[i]= pA.x;
     		      this.normals[i+1]= pA.y;
     		      this.normals[i+2]= pA.z;
     		    }
+            */
+
+    this.geometry.normalizeNormals();
+
+    //this.geometry.computeVertexNormals();
     //console.log(this.vertices);
   }
 };
