@@ -1,3 +1,129 @@
+THREE.BufferGeometry.prototype.computeVertexNormals2 = function () {
+  console.log("WER");
+		var index = this.index;
+		var attributes = this.attributes;
+		var groups = this.groups;
+
+		if ( attributes.position ) {
+
+			var positions = attributes.position.array;
+
+			if ( attributes.normal === undefined ) {
+
+				this.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( positions.length ), 3 ) );
+
+			} else {
+
+				// reset existing normals to zero
+
+				var array = attributes.normal.array;
+
+				for ( var i = 0, il = array.length; i < il; i ++ ) {
+
+					array[ i ] = 0;
+
+				}
+
+			}
+
+			var normals = attributes.normal.array;
+
+			var vA, vB, vC,
+
+			pA = new THREE.Vector3(),
+			pB = new THREE.Vector3(),
+			pC = new THREE.Vector3(),
+
+			cb = new THREE.Vector3(),
+			ab = new THREE.Vector3();
+
+			// indexed elements
+
+			if ( index ) {
+
+				var indices = index.array;
+
+				if ( groups.length === 0 ) {
+
+					this.addGroup( 0, indices.length );
+
+				}
+
+				for ( var j = 0, jl = groups.length; j < jl; ++ j ) {
+
+					var group = groups[ j ];
+
+					var start = group.start;
+					var count = group.count;
+
+					for ( var i = start, il = start + count; i < il; i += 3 ) {
+
+						vA = indices[ i + 0 ] * 3;
+						vB = indices[ i + 1 ] * 3;
+						vC = indices[ i + 2 ] * 3;
+
+						pA.fromArray( positions, vA );
+						pB.fromArray( positions, vB );
+						pC.fromArray( positions, vC );
+
+						cb.subVectors( pC, pB );
+						ab.subVectors( pA, pB );
+						cb.cross( ab );
+
+						normals[ vA ] += cb.x;
+						normals[ vA + 1 ] += cb.y;
+						normals[ vA + 2 ] += cb.z;
+
+						normals[ vB ] += cb.x;
+						normals[ vB + 1 ] += cb.y;
+						normals[ vB + 2 ] += cb.z;
+
+						normals[ vC ] += cb.x;
+						normals[ vC + 1 ] += cb.y;
+						normals[ vC + 2 ] += cb.z;
+
+					}
+
+				}
+
+			} else {
+
+				// non-indexed elements (unconnected triangle soup)
+
+				for ( var i = 0, il = positions.length; i < il; i += 9 ) {
+
+					pA.fromArray( positions, i );
+					pB.fromArray( positions, i + 3 );
+					pC.fromArray( positions, i + 6 );
+
+					cb.subVectors( pC, pB );
+					ab.subVectors( pA, pB );
+					cb.cross( ab );
+
+					normals[ i ] = cb.x;
+					normals[ i + 1 ] = cb.y;
+					normals[ i + 2 ] = cb.z;
+
+					normals[ i + 3 ] = cb.x;
+					normals[ i + 4 ] = cb.y;
+					normals[ i + 5 ] = cb.z;
+
+					normals[ i + 6 ] = cb.x;
+					normals[ i + 7 ] = cb.y;
+					normals[ i + 8 ] = cb.z;
+
+				}
+
+			}
+
+			this.normalizeNormals();
+
+			attributes.normal.needsUpdate = true;
+
+		}
+};
+
+
 function Line (color, lineWidth) {
   this.points = [];
   this.lineWidth = lineWidth;
@@ -15,7 +141,7 @@ function Line (color, lineWidth) {
     roughness: 0.5,
     metalness: 0.5,
     side: THREE.DoubleSide,
-    //shading: THREE.FlatShading,
+    shading: THREE.FlatShading,
     /*
     map: this.texture,
     transparent: true,
@@ -28,13 +154,13 @@ function Line (color, lineWidth) {
   this.geometry = new THREE.BufferGeometry();
   //this.vertices = new Float32Array(this.maxPoints * 3 * 2);
   this.vertices = new Float32Array(this.maxPoints * 3 * 3);
-  this.normals = new Float32Array(this.maxPoints * 3 * 3);
+  //this.normals = new Float32Array(this.maxPoints * 3 * 3);
   this.uvs = new Float32Array(this.maxPoints * 2 * 2);
 
   this.geometry.setDrawRange(0, 0);
   this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
   this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
-  this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
+  //this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
 
   this.mesh = new THREE.Mesh(this.geometry, material);
   this.mesh.drawMode = THREE.TriangleStripDrawMode;
@@ -92,16 +218,18 @@ Line.prototype = {
     this.vertices[ this.idx++ ] = posB.y;
     this.vertices[ this.idx++ ] = posB.z;
 
-
+    this.prevPoints = [
+      posA.clone(), posB.clone()
+    ];
 /*
     for (var j = 0; j < this.vertices.length / 2; j += 3) {
-      this.vertices[ i++ ] = posA.x;
-      this.vertices[ i++ ] = posA.y;
-      this.vertices[ i++ ] = posA.z;
+      this.vertices[ this.idx++ ] = posA.x;
+      this.vertices[ this.idx++ ] = posA.y;
+      this.vertices[ this.idx++ ] = posA.z;
 
-      this.vertices[ i++ ] = posB.x;
-      this.vertices[ i++ ] = posB.y;
-      this.vertices[ i++ ] = posB.z;
+      this.vertices[ this.idx++ ] = posB.x;
+      this.vertices[ this.idx++ ] = posB.y;
+      this.vertices[ this.idx++ ] = posB.z;
     }
 /*
     i = 0;
@@ -169,6 +297,23 @@ Line.prototype = {
 //    var idxUV = this.uvs.length - 4;
 
     var idx = this.idx;
+  /*
+    this.vertices[ this.idx++ ] = this.prevPoints[0].x;
+    this.vertices[ this.idx++ ] = this.prevPoints[0].y;
+    this.vertices[ this.idx++ ] = this.prevPoints[0].z;
+
+    this.vertices[ this.idx++ ] = this.prevPoints[1].x;
+    this.vertices[ this.idx++ ] = this.prevPoints[1].y;
+    this.vertices[ this.idx++ ] = this.prevPoints[1].z;
+
+    this.vertices[ this.idx++ ] = posA.x;
+    this.vertices[ this.idx++ ] = posA.y;
+    this.vertices[ this.idx++ ] = posA.z;
+
+    this.vertices[ this.idx++ ] = this.prevPoints[0].x;
+    this.vertices[ this.idx++ ] = this.prevPoints[0].y;
+    this.vertices[ this.idx++ ] = this.prevPoints[0].z;
+*/
     this.vertices[ this.idx++ ] = posA.x;
     this.vertices[ this.idx++ ] = posA.y;
     this.vertices[ this.idx++ ] = posA.z;
@@ -185,14 +330,18 @@ Line.prototype = {
     this.uvs[ idxUV++ ] = .1;
 */
 
-    this.geometry.attributes.normal.needsUpdate = true;
+    this.prevPoints = [
+      posA.clone(), posB.clone()
+    ];
+
+    //this.geometry.attributes.normal.needsUpdate = true;
     this.geometry.attributes.position.needsUpdate = true;
     this.geometry.attributes.uv.needsUpdate = true;
     this.geometry.computeVertexNormals();
-    //this.geometry.computeFaceNormals();
-    //this.geometry.normalsNeedUpdate = true;
+    this.geometry.computeFaceNormals();
+    this.geometry.normalsNeedUpdate = true;
     this.numPoints++;
-    this.geometry.setDrawRange(0, this.numPoints * 2);
+    this.geometry.setDrawRange(0, this.numPoints * 3);
 
     this.points.push({
       'position': position,

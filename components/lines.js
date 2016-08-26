@@ -5,6 +5,25 @@ function Lines() {
 
     if (event.keyCode === 76) {
       lines.loadBinary('apainter2.bin');
+      /*
+      var line = lines.addNewLine(new THREE.Color(1.0,0.5,0.2), 0.2);
+      var initX = 4;
+      var endX = 1;
+      var initY = 5;
+      var endY = 1;
+      var rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0));
+      line.setInitialPosition(new THREE.Vector3(initX, initY, 0), rotation);
+      var rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0));
+      line.addPoint(new THREE.Vector3(endX + 0, endY, 0), rotation, 1.0);
+      console.log(line.mesh.geometry.attributes.position);
+      */
+//      line.addPoint(new THREE.Vector3(endX + 1, endY, 0), rotation, 1.0);
+  //    line.addPoint(new THREE.Vector3(endX + 2, endY, 0), rotation, 1.0);
+
+      var entity = document.createElement('a-entity');
+      document.querySelector('a-scene').appendChild(entity);
+      entity.object3D.add(line.mesh);
+
     }
     if (event.keyCode === 85) { // u
       // Upload
