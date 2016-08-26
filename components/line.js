@@ -217,7 +217,7 @@ Line.prototype = {
     this.vertices[ this.idx++ ] = posB.x;
     this.vertices[ this.idx++ ] = posB.y;
     this.vertices[ this.idx++ ] = posB.z;
-
+    this.prevPoint = position.clone();
     this.prevPoints = [
       posA.clone(), posB.clone()
     ];
@@ -252,8 +252,11 @@ Line.prototype = {
     };
   },
   addPoint: function (position, rotation, intensity) {
-
-    this.lineWidth = 0.2;
+    if (this.prevPoint.equals(position)) {
+      return;
+    }
+    this.prevPoint = position.clone();
+    //this.lineWidth = 0.2;
 /*
     // Rotate vertices
     for (var j = 0; j < this.vertices.length - 3; j += 3) {
@@ -354,7 +357,7 @@ Line.prototype = {
       this.normals[i+2]= pA.z;
     }
 */
-
+this.computeNormals();
     this.geometry.attributes.normal.needsUpdate = true;
     this.geometry.attributes.position.needsUpdate = true;
     //this.geometry.attributes.uv.needsUpdate = true;
@@ -427,7 +430,7 @@ Line.prototype = {
     		      this.normals[i+1]= pA.y;
     		      this.normals[i+2]= pA.z;
     		    }
-    console.log(this.vertices);
+    //console.log(this.vertices);
   }
 };
 
