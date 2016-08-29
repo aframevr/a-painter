@@ -28,8 +28,8 @@
         <a-asset-item id="controller-mtl" src="models/controller.mtl"></a-asset-item>
         <a-asset-item id="controller-obj" src="models/controller.obj"></a-asset-item>
       </a-assets>
-      <a-entity id="point" light="color: #f4f4f4; intensity: 0.6; type: point"></a-entity>
-      <a-entity id="hemisphere" light="color: #47c9ff; intensity: 0.8; type: hemisphere"></a-entity>
+      <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
+      <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="left-hand"
                 brush="color: #ff0; linewidth: 1"
                 vive-controls="hand: left; model: false"
