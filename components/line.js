@@ -141,12 +141,10 @@ function Line (color, lineWidth) {
     roughness: 0.5,
     metalness: 0.5,
     side: THREE.DoubleSide,
-    //shading: THREE.FlatShading,
-    /*
+    //shading: THREE.FlatShading
     map: this.texture,
     transparent: true,
-    alphaTest: 0.5
-*/
+    //alphaTest: 0.5
   });
   this.idx = 0;
   this.numPoints = 0;
@@ -268,16 +266,19 @@ Line.prototype = {
       this.vertices[ j + 4 ] = this.vertices[ j + 10 ];
       this.vertices[ j + 5 ] = this.vertices[ j + 11 ];
     }
-/*
-    for (i = 0; i < this.uvs.length; i += 2) {
-      //var v = (j / 2) / (this.uvs.length / 2);
-      this.uvs[ j  ] = 1/this.uvs.length;
-      this.uvs[ j + 1 ] = 0;
-
-      this.uvs[ j + 2] = 1/this.uvs.length;
-      this.uvs[ j + 3] = 1;
-    }
 */
+
+    var uv=0;
+    for (i=0;i<this.numPoints; i++) {
+      this.uvs[ uv++ ] = i/(this.numPoints-1);
+      this.uvs[ uv++ ] = 0;
+
+      this.uvs[ uv++ ] = i/(this.numPoints-1);
+      this.uvs[ uv++ ] = 1;
+    }
+
+    console.log(this.uvs);
+
     var direction = new THREE.Vector3();
     direction.set(0, 1.7, 1);
     direction.applyQuaternion(rotation);
@@ -357,10 +358,10 @@ Line.prototype = {
       this.normals[i+2]= pA.z;
     }
 */
-this.computeNormals();
+    this.computeNormals();
     this.geometry.attributes.normal.needsUpdate = true;
     this.geometry.attributes.position.needsUpdate = true;
-    //this.geometry.attributes.uv.needsUpdate = true;
+    this.geometry.attributes.uv.needsUpdate = true;
 
     //this.geometry.computeVertexNormals();
     //this.geometry.computeFaceNormals();
