@@ -144,7 +144,7 @@ function Line (color, lineWidth) {
     //shading: THREE.FlatShading
     map: this.texture,
     transparent: true,
-    //alphaTest: 0.5
+    alphaTest: 0.5
   });
   this.idx = 0;
   this.numPoints = 0;
