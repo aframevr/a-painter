@@ -6,18 +6,18 @@
     <meta name="description" content="A-Painter">
     <script src="node_modules/aframe/dist/aframe.js"></script>
     <script src="vendor/saveas.js"></script>
+    <script>
+      UPLOADCARE_LOCALE = 'en';
+      UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
+    </script>
+    <script src="//ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
+
     <script src="components/urlparams.js"></script>
     <script src="components/lines.js"></script>
     <script src="components/line.js"></script>
     <script src="components/binarywriter.js"></script>
     <script src="components/brush.js"></script>
     <script src="components/colorwheel.js"></script>
-    <script>
-      UPLOADCARE_LOCALE = 'en';
-      UPLOADCARE_TABS = 'file url facebook gdrive dropbox instagram evernote flickr skydrive';
-      UPLOADCARE_PUBLIC_KEY = '55320f006163a205ac13';
-    </script>
-    <!--<script src="//ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>-->
   </head>
   <body style="background-color: #030404">
     <a-scene debug="true">

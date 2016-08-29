@@ -1,33 +1,30 @@
-var BinaryWriter = function(bufferSize) {
+var BinaryWriter = function (bufferSize) {
   this.dataview = new DataView(new ArrayBuffer(bufferSize));
   this.offset = 0;
+  this.isLittleEndian = true;
 }
 
 BinaryWriter.prototype = {
-  writeVector: function(vector, isLittleEndian) {
-    this.writeFloat(vector.x, isLittleEndian);
-    this.writeFloat(vector.y, isLittleEndian);
-    this.writeFloat(vector.z, isLittleEndian);
+  writeVector: function (value) {
+    this.writeArray(value.toArray(), this.isLittleEndian);
   },
-  writeColor: function(vector, isLittleEndian) {
-    this.writeFloat(vector.r, isLittleEndian);
-    this.writeFloat(vector.g, isLittleEndian);
-    this.writeFloat(vector.b, isLittleEndian);
+  writeColor: function (value) {
+    this.writeArray(value.toArray(), this.isLittleEndian);
   },
-  writeUint32: function(int, isLittleEndian) {
-    this.dataview.setUint32(this.offset, int, isLittleEndian);
+  writeUint32: function (value) {
+    this.dataview.setUint32(this.offset, value, this.isLittleEndian);
     this.offset += 4;
   },
-  writeFloat: function(float, isLittleEndian) {
-    this.dataview.setFloat32(this.offset, float, isLittleEndian);
+  writeFloat: function (value) {
+    this.dataview.setFloat32(this.offset, value, this.isLittleEndian);
     this.offset += 4;
   },
-  writeArray: function(array, isLittleEndian) {
-    for (var i=0;i<array.length;i++) {
-      this.writeFloat(array[i], isLittleEndian);
+  writeArray: function (value) {
+    for (var i = 0; i < value.length; i++) {
+      this.writeFloat(value[i]);
     }
   },
-  getDataView: function() {
+  getDataView: function () {
     return this.dataview;
   }
 };
