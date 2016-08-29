@@ -166,7 +166,7 @@ Lines.prototype = {
 
 
           line.computeNormals();
-
+/*
           var vnh = new THREE.VertexNormalsHelper( line.mesh, 0.01 );
       		document.querySelector('a-scene').object3D.add(vnh);
 
