@@ -142,9 +142,11 @@ function Line (color, lineWidth) {
     metalness: 0.5,
     side: THREE.DoubleSide,
     //shading: THREE.FlatShading
+    /*
     map: this.texture,
     transparent: true,
     alphaTest: 0.5
+    */
   });
   this.idx = 0;
   this.numPoints = 0;
@@ -276,8 +278,6 @@ Line.prototype = {
       this.uvs[ uv++ ] = i/(this.numPoints-1);
       this.uvs[ uv++ ] = 1;
     }
-
-    console.log(this.uvs);
 
     var direction = new THREE.Vector3();
     direction.set(0, 1.7, 1);
