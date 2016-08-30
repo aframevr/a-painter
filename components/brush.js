@@ -79,7 +79,7 @@ AFRAME.registerComponent('brush', {
           this.active = false;
           if (this.currentLine) {
             console.log(this.currentLine.getJSON());
-            var vnh = new THREE.VertexNormalsHelper( this.currentLine.mesh, 0.01 );
+            var vnh = new THREE.VertexNormalsHelper( this.currentLine.mesh, 0.03 );
             document.querySelector('a-scene').object3D.add(vnh);
           }
           this.currentLine = null;

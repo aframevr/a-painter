@@ -1,129 +1,6 @@
-THREE.BufferGeometry.prototype.computeVertexNormals2 = function () {
-		var index = this.index;
-		var attributes = this.attributes;
-		var groups = this.groups;
-
-		if ( attributes.position ) {
-
-			var positions = attributes.position.array;
-
-			if ( attributes.normal === undefined ) {
-
-				this.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( positions.length ), 3 ) );
-
-			} else {
-
-				// reset existing normals to zero
-
-				var array = attributes.normal.array;
-
-				for ( var i = 0, il = array.length; i < il; i ++ ) {
-
-					array[ i ] = 0;
-
-				}
-
-			}
-
-			var normals = attributes.normal.array;
-
-			var vA, vB, vC,
-
-			pA = new THREE.Vector3(),
-			pB = new THREE.Vector3(),
-			pC = new THREE.Vector3(),
-
-			cb = new THREE.Vector3(),
-			ab = new THREE.Vector3();
-
-			// indexed elements
-
-			if ( index ) {
-
-				var indices = index.array;
-
-				if ( groups.length === 0 ) {
-
-					this.addGroup( 0, indices.length );
-
-				}
-
-				for ( var j = 0, jl = groups.length; j < jl; ++ j ) {
-
-					var group = groups[ j ];
-
-					var start = group.start;
-					var count = group.count;
-
-					for ( var i = start, il = start + count; i < il; i += 3 ) {
-
-						vA = indices[ i + 0 ] * 3;
-						vB = indices[ i + 1 ] * 3;
-						vC = indices[ i + 2 ] * 3;
-
-						pA.fromArray( positions, vA );
-						pB.fromArray( positions, vB );
-						pC.fromArray( positions, vC );
-
-						cb.subVectors( pC, pB );
-						ab.subVectors( pA, pB );
-						cb.cross( ab );
-
-						normals[ vA ] += cb.x;
-						normals[ vA + 1 ] += cb.y;
-						normals[ vA + 2 ] += cb.z;
-
-						normals[ vB ] += cb.x;
-						normals[ vB + 1 ] += cb.y;
-						normals[ vB + 2 ] += cb.z;
-
-						normals[ vC ] += cb.x;
-						normals[ vC + 1 ] += cb.y;
-						normals[ vC + 2 ] += cb.z;
-
-					}
-
-				}
-
-			} else {
-
-				// non-indexed elements (unconnected triangle soup)
-
-				for ( var i = 0, il = positions.length; i < il; i += 9 ) {
-
-					pA.fromArray( positions, i );
-					pB.fromArray( positions, i + 3 );
-					pC.fromArray( positions, i + 6 );
-
-					cb.subVectors( pC, pB );
-					ab.subVectors( pA, pB );
-					cb.cross( ab );
-
-					normals[ i ] = cb.x;
-					normals[ i + 1 ] = cb.y;
-					normals[ i + 2 ] = cb.z;
-
-					normals[ i + 3 ] = cb.x;
-					normals[ i + 4 ] = cb.y;
-					normals[ i + 5 ] = cb.z;
-
-					normals[ i + 6 ] = cb.x;
-					normals[ i + 7 ] = cb.y;
-					normals[ i + 8 ] = cb.z;
-
-				}
-
-			}
-
-			this.normalizeNormals();
-
-			attributes.normal.needsUpdate = true;
-
-		}
-};
-
 function Line (color, lineWidth) {
   this.points = [];
+  this.prevPoint = null;
   this.lineWidth = lineWidth;
   this.lineWidthModifier = 0.0;
   this.color = color.clone();
@@ -188,37 +65,6 @@ Line.prototype = {
     }
     return binaryWriter.getDataView();
   },
-  setInitialPosition: function (position, rotation) {
-    //this.numPoints++;
-    var direction = new THREE.Vector3();
-    direction.set(0, 1.7, 1);
-    direction.applyQuaternion(rotation);
-    direction.normalize();
-    var posBase = position.clone().add(direction.clone().multiplyScalar(-0.08));
-
-    direction.set(1, 0, 0);
-    direction.applyQuaternion(rotation);
-    direction.normalize();
-
-    var posA = posBase.clone();
-    var posB = posBase.clone();
-    var lineWidth = this.lineWidth * this.lineWidthModifier;
-    posA.add(direction.clone().multiplyScalar(lineWidth));
-    posB.add(direction.clone().multiplyScalar(-lineWidth));
-
-    this.vertices[ this.idx++ ] = posA.x;
-    this.vertices[ this.idx++ ] = posA.y;
-    this.vertices[ this.idx++ ] = posA.z;
-
-    this.vertices[ this.idx++ ] = posB.x;
-    this.vertices[ this.idx++ ] = posB.y;
-    this.vertices[ this.idx++ ] = posB.z;
-    this.prevPoint = position.clone();
-    this.prevPoints = [
-      posA.clone(), posB.clone()
-    ];
-    this.numPoints++;
-  },
   getJSON: function () {
     return {
       stroke: {color: this.color},
@@ -226,7 +72,7 @@ Line.prototype = {
     };
   },
   addPoint: function (position, rotation, intensity) {
-    if (this.prevPoint.equals(position)) {
+    if (this.prevPoint && this.prevPoint.equals(position)) {
       return;
     }
     this.prevPoint = position.clone();
@@ -257,7 +103,6 @@ Line.prototype = {
     posA.add(direction.clone().multiplyScalar(lineWidth));
     posB.add(direction.clone().multiplyScalar(-lineWidth));
 
-
     this.vertices[ this.idx++ ] = posA.x;
     this.vertices[ this.idx++ ] = posA.y;
     this.vertices[ this.idx++ ] = posA.z;
@@ -270,7 +115,7 @@ Line.prototype = {
     this.geometry.attributes.normal.needsUpdate = true;
     this.geometry.attributes.position.needsUpdate = true;
     this.geometry.attributes.uv.needsUpdate = true;
-    //this.geometry.computeVertexNormals();
+    // this.geometry.computeVertexNormals();
 
     this.numPoints++;
     // 2 -> 4
@@ -294,44 +139,55 @@ Line.prototype = {
     cb = new THREE.Vector3(),
     ab = new THREE.Vector3();
 
-    for ( var i = 0, il = this.idx; i < il; i ++ ) {
-      this.normals[i] = 0;
+    for (var i = 0, il = this.idx; i < il; i ++) {
+      this.normals[ i ] = 0;
     }
 
     var n = 0;
     var pair = true;
-    for ( var i = 0, il = this.idx; i < il; i += 3 ) {
-
+    for (var i = 0, il = this.idx; i < il; i += 3) {
       if (pair) {
-        pA.fromArray( this.vertices, i );
-        pB.fromArray( this.vertices, i + 3 );
-        pC.fromArray( this.vertices, i + 6 );
+        pA.fromArray(this.vertices, i);
+        pB.fromArray(this.vertices, i + 3);
+        pC.fromArray(this.vertices, i + 6);
       } else {
-        pA.fromArray( this.vertices, i + 3 );
-        pB.fromArray( this.vertices, i );
-        pC.fromArray( this.vertices, i + 6 );
+        pA.fromArray(this.vertices, i + 3);
+        pB.fromArray(this.vertices, i);
+        pC.fromArray(this.vertices, i + 6);
       }
       pair = !pair;
 
-      cb.subVectors( pC, pB );
-      ab.subVectors( pA, pB );
-      cb.cross( ab );
+      cb.subVectors(pC, pB);
+      ab.subVectors(pA, pB);
+      cb.cross(ab);
       cb.normalize();
-      // cb.set(1,0,0);
 
-      this.normals[ n++ ] += cb.x;
-      this.normals[ n++ ] += cb.y;
-      this.normals[ n++ ] += cb.z;
+      this.normals[ i ] += cb.x;
+      this.normals[ i + 1 ] += cb.y;
+      this.normals[ i + 2 ] += cb.z;
 
-      this.normals[ n++ ] += cb.x;
-      this.normals[ n++ ] += cb.y;
-      this.normals[ n++ ] += cb.z;
+      this.normals[ i + 3 ] += cb.x;
+      this.normals[ i + 4 ] += cb.y;
+      this.normals[ i + 5 ] += cb.z;
 
-      this.normals[ n++ ] += cb.x;
-      this.normals[ n++ ] += cb.y;
-      this.normals[ n++ ] += cb.z;
+      this.normals[ i + 6 ] += cb.x;
+      this.normals[ i + 7 ] += cb.y;
+      this.normals[ i + 8 ] += cb.z;
     }
 
+    for (var i = 2 * 3, il = this.idx - 2 * 3; i < il; i ++) {
+      this.normals[ i ] = this.normals[ i ] / 3;
+    }
+
+    this.normals[ 3 ] = this.normals[ 3 ] / 2;
+    this.normals[ 3 + 1 ] = this.normals[ 3 + 1 ] / 2;
+    this.normals[ 3 + 2 ] = this.normals[ 3 * 1 + 2 ] / 2;
+
+    this.normals[ this.idx - 2 * 3] = this.normals[  this.idx - 2 * 3 ] / 2;
+    this.normals[ this.idx - 2 * 3 + 1 ] = this.normals[  this.idx - 2 * 3 + 1] / 2;
+    this.normals[ this.idx - 2 * 3 + 2] = this.normals[  this.idx - 2 * 3 + 2] / 2;
+
+    console.log(this.idx - 2 * 3, this.idx - 2 * 3+1,this.idx - 2 * 3+2, this.idx);
     this.geometry.normalizeNormals();
   }
 };

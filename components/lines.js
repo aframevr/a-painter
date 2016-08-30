@@ -141,37 +141,13 @@ Lines.prototype = {
               continue;
             }
             prev=point.clone();
-            if (i==0) {
-              line.setInitialPosition(point, quat);
-            } else {
-              line.addPoint(point, quat, intensity);
-            }
+            line.addPoint(point, quat, intensity);
           }
 
+          line.computeVertexNormals();
 
-          line.computeNormals();
-/*
           var vnh = new THREE.VertexNormalsHelper( line.mesh, 0.01 );
-      		document.querySelector('a-scene').object3D.add(vnh);
-
-/*
-          var i = 0;
-          var interval = setInterval(function(){
-            var point = readVector3();
-            var quat = readQuaternion();
-            var intensity = readFloat();
-
-            if (i==0) {
-              line.setInitialPosition(point, quat);
-            } else {
-              line.addPoint(point, quat, intensity);
-            }
-
-            if (++i === numPoints) {
-              clearInterval(interval);
-            }
-          }, 10);
-*/
+          document.querySelector('a-scene').object3D.add(vnh);
         }
       });
     }
