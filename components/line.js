@@ -1,3 +1,11 @@
+/*
+addPoint: function (position, rotation, intensity, timestamp)
+reset: function ()
+onSizeChanged: function (size)
+onColorChanged: function(color)
+tick: function (timeoffset, delta)
+ */
+
 function Line (color, lineWidth) {
   this.points = [];
   this.prevPoint = null;
@@ -162,7 +170,7 @@ Line.prototype = {
       cb.cross(ab);
       cb.normalize();
 
-      this.normals[ i ] += cb.x;
+      this.normals[ i ]     += cb.x;
       this.normals[ i + 1 ] += cb.y;
       this.normals[ i + 2 ] += cb.z;
 
@@ -175,10 +183,24 @@ Line.prototype = {
       this.normals[ i + 8 ] += cb.z;
     }
 
+    /*
+    first and last vertice (0 and 8) belongs just to one triangle
+    second and penultimate (1 and 7) belongs to two triangles
+    the rest of the vertices belongs to three triangles
+
+      1_____3_____5_____7
+      /\    /\    /\    /\
+     /  \  /  \  /  \  /  \
+    /____\/____\/____\/____\
+    0    2     4     6     8
+    */
+
+    // Vertices that are shared across three triangles
     for (var i = 2 * 3, il = this.idx - 2 * 3; i < il; i ++) {
       this.normals[ i ] = this.normals[ i ] / 3;
     }
 
+    // Second and penultimate triangle, that shares just two triangles
     this.normals[ 3 ] = this.normals[ 3 ] / 2;
     this.normals[ 3 + 1 ] = this.normals[ 3 + 1 ] / 2;
     this.normals[ 3 + 2 ] = this.normals[ 3 * 1 + 2 ] / 2;
@@ -187,7 +209,6 @@ Line.prototype = {
     this.normals[ this.idx - 2 * 3 + 1 ] = this.normals[  this.idx - 2 * 3 + 1] / 2;
     this.normals[ this.idx - 2 * 3 + 2] = this.normals[  this.idx - 2 * 3 + 2] / 2;
 
-    console.log(this.idx - 2 * 3, this.idx - 2 * 3+1,this.idx - 2 * 3+2, this.idx);
     this.geometry.normalizeNormals();
   }
 };
