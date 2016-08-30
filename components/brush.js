@@ -109,7 +109,7 @@ AFRAME.registerComponent('brush', {
     var translation = new THREE.Vector3();
     var scale = new THREE.Vector3();
     this.obj.matrixWorld.decompose(translation, rotation, scale);
-    this.currentLine.setInitialPosition(translation, rotation);
+    this.currentLine.addPoint(translation, rotation, 0);
 
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
