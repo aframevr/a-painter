@@ -68,8 +68,8 @@ AFRAME.registerSystem('brush', {
       }
     }.bind(this));
   },
-  addNewLine: function (brushName, color, lineWidth) {
-    var brushIdx = Math.floor(Math.random() * AFRAME.APAINTER.brushes.length);
+  addNewLine: function (brushIdx, color, lineWidth) {
+    console.log(brushIdx);
     var line = Object.create(AFRAME.APAINTER.brushes[brushIdx]);
     line.init(color, lineWidth);
     this.lines.push(line);
@@ -147,7 +147,7 @@ AFRAME.registerSystem('brush', {
         var numPoints = readInt();
 
         var lineWidth = 0.01;
-        var line = this.addNewLine('TODO', color, lineWidth);
+        var line = this.addNewLine(this.currentBrushIdx, color, lineWidth);
 
         var entity = document.createElement('a-entity');
         document.querySelector('a-scene').appendChild(entity);
@@ -177,6 +177,7 @@ AFRAME.registerComponent('brush', {
   },
   init: function () {
     this.idx = 0;
+    this.currentBrushIdx = 0;
 
     this.active = false;
     this.obj = this.el.object3D;
@@ -237,8 +238,9 @@ AFRAME.registerComponent('brush', {
     }.bind(this));
 
     this.el.addEventListener('buttondown', function (evt) {
+      // Grip
       if (evt.detail.id === 2) {
-        this.color.set(0, 0, 0);
+        this.currentBrushIdx = (this.currentBrushIdx + 1) % AFRAME.APAINTER.brushes.length;
       }
     }.bind(this));
     this.el.addEventListener('buttonchanged', function (evt) {
@@ -274,7 +276,7 @@ AFRAME.registerComponent('brush', {
   },
 
   startNewLine: function () {
-    this.currentLine = this.system.addNewLine('TODO', this.color, this.lineWidth);
+    this.currentLine = this.system.addNewLine(this.currentBrushIdx, this.color, this.lineWidth);
 
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();

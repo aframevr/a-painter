@@ -221,15 +221,19 @@ basicLine = Object.assign({}, line, {
   materialType: 'flat'
 });
 
-texturedLine1 = Object.assign({}, line, {
-  materialType: 'textured',
-  textureSrc: 'stroke1.png'
-});
+var lines = [
+  { name: 'flat', materialType: 'flat', thumbnail: '' },
+  { name: 'smooth', materialType: 'smooth', thumbnail: '' },
+  { name: 'bristles', materialType: 'textured', textureSrc: 'brushes/bristles0.png', thumbnail: 'brushes/thumb_bristles0.png' },
+  { name: 'fur', materialType: 'textured', textureSrc: 'brushes/fur0.png', thumbnail: 'brushes/thumb_fur0.png' },
+  { name: 'fur 2', materialType: 'textured', textureSrc: 'brushes/fur1.png', thumbnail: 'brushes/thumb_fur1.png' },
+  { name: 'grunge', materialType: 'textured', textureSrc: 'brushes/grunge0.png', thumbnail: 'brushes/thumb_grunge0.png' },
+  { name: 'roundflat', materialType: 'textured', textureSrc: 'brushes/roundflat.png', thumbnail: 'brushes/thumb_roundflat.png' },
+  { name: 'roundsoft', materialType: 'textured', textureSrc: 'brushes/roundsoft.png', thumbnail: 'brushes/thumb_roundsoft.png' },
+  { name: 'smoke', materialType: 'textured', textureSrc: 'brushes/smoke0.png', thumbnail: 'brushes/thumb_smoke0.png' },
+]
 
-smoothLine = Object.assign({}, line, {
-  materialType: 'smooth'
-});
-
-AFRAME.APAINTER.registerBrush('flat', basicLine);
-AFRAME.APAINTER.registerBrush('smooth', smoothLine);
-AFRAME.APAINTER.registerBrush('textured1', texturedLine1);
+for (var i=0;i<lines.length;i++) {
+  var definition = lines[i];
+  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, definition));
+}
