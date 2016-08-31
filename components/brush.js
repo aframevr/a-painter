@@ -1,13 +1,28 @@
+/*
+Brush API
+constructor(color, width)
+addPoint: function (position, rotation, intensity, timestamp)
+reset: function ()
+tick: function (timeoffset, delta)
+*/
+
+AFRAME.APAINTER = {
+  brushes: [],
+  registerBrush: function (name, brush) {
+    console.log('New brush registered `' + name + '`');
+    this.brushes.push(brush);
+  }
+};
+
 AFRAME.registerSystem('brush', {
   schema: {},
   init: function () {
     this.lines = [];
-    this.brushes = [];
-    AFRAME.APAINTER = this;
     if (urlParams.url) {
       this.loadBinary(urlParams.url);
     }
 
+    // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function(event){
       if (event.keyCode === 76) {
         this.loadBinary('apainter2.bin');
@@ -53,17 +68,15 @@ AFRAME.registerSystem('brush', {
       }
     }.bind(this));
   },
-  registerBrush: function(info, brush) {
-    // info: {name, thumbnail, [group]}
-    console.log('New brush registered', info.name);
-    this.brushes.push(brush);
-  },
-  addNewLine: function(brushName, color, lineWidth) {
-    var line = new Line(color, lineWidth);
+  addNewLine: function (brushName, color, lineWidth) {
+    var brushIdx = Math.floor(Math.random() * AFRAME.APAINTER.brushes.length);
+    brushIdx = 3;
+    var line = Object.create(AFRAME.APAINTER.brushes[brushIdx]);
+    line.init(color, lineWidth);
     this.lines.push(line);
     return line;
   },
-  getBinary: function() {
+  getBinary: function () {
     var dataViews = [];
 
     var binaryWriter = new BinaryWriter(4);
@@ -152,16 +165,17 @@ AFRAME.registerSystem('brush', {
           line.addPoint(point, quat, intensity);
         }
 
-        line.computeVertexNormals();
-
-        var vnh = new THREE.VertexNormalsHelper( line.mesh, 0.01 );
-        document.querySelector('a-scene').object3D.add(vnh);
+        // line.computeVertexNormals();
       }
     }.bind(this));
   }
 });
 
 AFRAME.registerComponent('brush', {
+  schema: {
+    color: { default: '' },
+    linewidth: { default: '' }
+  },
   init: function () {
     this.idx = 0;
 
@@ -240,11 +254,9 @@ AFRAME.registerComponent('brush', {
           }
         } else {
           this.active = false;
-          if (this.currentLine) {
+          /*if (this.currentLine) {
             console.log(this.currentLine.getJSON());
-            var vnh = new THREE.VertexNormalsHelper( this.currentLine.mesh, 0.03 );
-            document.querySelector('a-scene').object3D.add(vnh);
-          }
+          }*/
           this.currentLine = null;
         }
       }
