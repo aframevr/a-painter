@@ -1,4 +1,4 @@
-var boxes = {
+var cubes = {
   init: function(color, width) {
     this.points = [];
     this.prevPoint = null;
@@ -53,9 +53,11 @@ var boxes = {
     direction.normalize();
     var posBase = position.clone().add(direction.clone().multiplyScalar(-0.08));
 
-    var geometry = new THREE.IcosahedronGeometry( 0.01 * intensity, 0 );
+    var geometry = new THREE.BoxGeometry(1,1,1);
     var sphere = new THREE.Mesh( geometry, this.material );
 
+    var sca = intensity*0.02 * Math.random();
+    sphere.scale.set(sca,sca,sca);
     sphere.position.copy(posBase);
     sphere.rotation.copy(rotation);
 
@@ -71,4 +73,4 @@ var boxes = {
   }
 };
 
-AFRAME.APAINTER.registerBrush('boxes', boxes);
+AFRAME.APAINTER.registerBrush('cubes', cubes);

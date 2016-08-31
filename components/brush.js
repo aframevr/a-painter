@@ -70,7 +70,7 @@ AFRAME.registerSystem('brush', {
   },
   addNewLine: function (brushName, color, lineWidth) {
     var brushIdx = Math.floor(Math.random() * AFRAME.APAINTER.brushes.length);
-    brushIdx = 3;
+    brushIdx = 4;
     var line = Object.create(AFRAME.APAINTER.brushes[brushIdx]);
     line.init(color, lineWidth);
     this.lines.push(line);
