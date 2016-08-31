@@ -19,29 +19,39 @@
     <script src="components/brushes/boxes.js"></script>
     <script src="components/brushes/cubes.js"></script>
     <script src="components/colorwheel.js"></script>
-    <script src="components/json-model.js"></script>
-    <script src="components/paint-controls.js"></script>
   </head>
   <body style="background-color: #030404">
     <a-scene debug="true">
       <a-assets>
-        <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
-        <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
-        <img id="uinormal" src="https://cdn.aframe.io/a-painter/images/ui-normal.png">
-        <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
+        <img id="floor" src="images/floor.jpg">
+        <img id="skymap" src="images/sky.jpg">
+        <img id="color" src="images/colorwheel.png">
+        <img id="uitestimg" src="images/ui_test.png">
+        <a-asset-item id="controller-mtl" src="models/controller.mtl"></a-asset-item>
+        <a-asset-item id="controller-obj" src="models/controller.obj"></a-asset-item>
+        <a-asset-item id="uitest-obj" src="models/ui_test.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="left-hand"
                 brush="color: #ff0; linewidth: 1"
-                paint-controls="hand: left">
-
-                <a-entity id="left-ui" material="flatShading:true;shader:flat;transparent:true;color:#ffffff;fog:false;src:#uinormal;side:double" obj-model="obj:#uiobj" position="0 0.04 -0.15"></a-entity>
+                vive-controls="hand: left; model: false"
+                obj-model="obj: #controller-obj; mtl: #controller-mtl">
+                <!--<a-entity geometry="primitive: sphere; radius: 0.035" position="0 -0.03 -0.02" material="color:#ff9; shader:flat"></a-entity>-->
+                <a-entity visible="true" colorwheel geometry="primitive:plane; width: 0.1; height: 0.1" position="0 0.027 0.06" rotation="90 0 0" material="shader: flat; transparent:true; color: #fff; src:#color; side:double">
+                  <a-entity marker geometry="primitive: sphere; radius: 0.005" position="0 0 0" material="color: #fff; roughness: 1.0; metalness:0.0">
+                  </a-entity>
+                </a-entity>
       </a-entity>
       <a-entity id="right-hand"
                 brush="color: #ff0; linewidth: 1"
-                paint-controls="hand: right">
-                <a-entity id="right-ui" material="flatShading:true;shader:flat;transparent:true;color:#ffffff;fog:false;src:#uinormal;side:double" obj-model="obj:#uiobj" position="0 0.04 -0.15"></a-entity>
+                vive-controls="hand: right"
+                obj-model="obj: #controller-obj; mtl: #controller-mtl">
+                <a-entity visible="true" colorwheel geometry="primitive:plane; width: 0.1; height: 0.1" position="0 0.027 0.06" rotation="90 0 0" material="shader: flat; transparent:true; color: #fff; src:#color; side:double">
+                  <a-entity marker geometry="primitive: sphere; radius: 0.005" position="0 0 0" material="color: #fff; roughness: 1.0; metalness:0.0"></a-entity>
+                </a-entity>
+                
+                <a-entity material="depthTest:false;shader:flat;side:double;transparent:true;color:#ffffff;fog:false;src:#uitestimg" obj-model="obj: #uitest-obj"></a-entity>
       </a-entity>
       <a-entity id="ground"
                 geometry="primitive: circle; radius: 12;"
