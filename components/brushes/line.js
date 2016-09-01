@@ -1,10 +1,10 @@
 var line = {
   init: function(color, brushSize) {
-    // this.data.points = [];
+    this.points = [];
     this.prevPoint = null;
 
-    this.data.size = brushSize;
-    this.data.color = color.clone();
+    this.size = brushSize;
+    this.color = color.clone();
 
     this.idx = 0;
     this.numPoints = 0;
@@ -28,7 +28,7 @@ var line = {
   getMaterial: function() {
     if (this.materialType === 'smooth') {
       return new THREE.MeshStandardMaterial({
-        color: this.data.color,
+        color: this.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -39,7 +39,7 @@ var line = {
       this.texture = textureLoader.load(this.textureSrc, function (texture) {
       });
       return new THREE.MeshStandardMaterial({
-        color: this.data.color,
+        color: this.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -51,17 +51,17 @@ var line = {
 
     // Flat basic material
     return new THREE.MeshBasicMaterial({
-      color: this.data.color,
+      color: this.color,
       side: THREE.DoubleSide,
     });
   },
   getJSON: function () {
     return {
-      stroke: {color: this.data.color},
-      points: this.data.points
+      stroke: {color: this.color},
+      points: this.points
     };
   },
-  addPoint: function (position, rotation, intensity) {
+  addPoint: function (position, rotation, pressure) {
     if (this.prevPoint && this.prevPoint.equals(position)) {
       return;
     }
@@ -89,7 +89,7 @@ var line = {
 
     var posA = posBase.clone();
     var posB = posBase.clone();
-    var brushSize = this.data.size * intensity;
+    var brushSize = this.size * pressure;
     posA.add(direction.clone().multiplyScalar(brushSize));
     posB.add(direction.clone().multiplyScalar(-brushSize));
 
@@ -113,10 +113,11 @@ var line = {
     // 4 -> 8
     this.geometry.setDrawRange(0, this.numPoints * 2);
 
-    this.data.points.push({
+    this.points.push({
       'position': position,
       'rotation': rotation,
-      'intensity': intensity
+      'pressure': pressure,
+      'timestamp': timestamp
     });
   },
   computeVertexNormals: function () {
