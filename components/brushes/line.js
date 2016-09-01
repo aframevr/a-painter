@@ -61,7 +61,7 @@ var line = {
       points: this.points
     };
   },
-  addPoint: function (position, rotation, pressure) {
+  addPoint: function (position, rotation, pressure, timestamp) {
     if (this.prevPoint && this.prevPoint.equals(position)) {
       return;
     }
