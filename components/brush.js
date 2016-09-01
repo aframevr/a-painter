@@ -10,6 +10,10 @@ AFRAME.APAINTER = {
     return this.brushes
       .filter(function (brush){ return brush.used; })
       .map(function(brush){return brush.name;});
+  },
+  getBrushByName: function (name) {
+    return this.brushes
+      .find(function (brush){ return brush.name === name; });
   }
 };
 
@@ -42,7 +46,6 @@ AFRAME.APAINTER.brushInterface = {
       binaryWriter.writeFloat32(point.intensity);
       binaryWriter.writeUint32(point.timestamp);
     }
-    console.log(bufferSize, binaryWriter.offset);
     return binaryWriter.getDataView();
   }
 };
@@ -101,9 +104,13 @@ AFRAME.registerSystem('brush', {
       }
     }.bind(this));
   },
-  addNewStroke: function (brushIdx, color, size) {
-    brushIdx = 0;
-    var brush = AFRAME.APAINTER.brushes[brushIdx];
+  addNewStroke: function (brushName, color, size) {
+    var brush = AFRAME.APAINTER.getBrushByName(brushName);
+    if (!brush) {
+      console.error('Invalid brush name: ', brushName);
+      return;
+    }
+
     brush.used = true;
     var stroke = Object.create(Object.assign(AFRAME.APAINTER.brushInterface, brush));
     stroke.brush = brush;
@@ -292,20 +299,20 @@ AFRAME.registerComponent('brush', {
       var translation = new THREE.Vector3();
       var scale = new THREE.Vector3();
       this.obj.matrixWorld.decompose(translation, rotation, scale);
-
-      this.currentLine.addPoint(translation, rotation, this.brushSizeModifier);
+      this.currentLine.addPoint(translation, rotation, this.brushSizeModifier, time);
     }
   },
 
   startNewLine: function () {
-    this.currentLine = this.system.addNewStroke(this.currentBrushIdx, this.color, this.brushSize);
-
+    var name = AFRAME.APAINTER.brushes[this.currentBrushIdx].name;
+    this.currentLine = this.system.addNewStroke(name, this.color, this.brushSize);
+/*
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();
     var scale = new THREE.Vector3();
     this.obj.matrixWorld.decompose(translation, rotation, scale);
     this.currentLine.addPoint(translation, rotation, 0);
-
+*/
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
     entity.object3D.add(this.currentLine.mesh);
