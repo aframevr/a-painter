@@ -2,7 +2,8 @@ var line = {
   init: function(color, brushSize) {
     this.points = [];
     this.prevPoint = null;
-    this.brushSize = brushSize;
+
+    this.size = brushSize;
     this.color = color.clone();
 
     this.idx = 0;
@@ -88,7 +89,7 @@ var line = {
 
     var posA = posBase.clone();
     var posB = posBase.clone();
-    var brushSize = this.brushSize * intensity;
+    var brushSize = this.size * intensity;
     posA.add(direction.clone().multiplyScalar(brushSize));
     posB.add(direction.clone().multiplyScalar(-brushSize));
 

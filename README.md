@@ -12,9 +12,9 @@ uint8 num_brushes_used
 uint32 num_strokes
 [num_strokes] x {
   uint8 brush_index (Based on the previous definition order)
-  float32x4 color (rgba)
+  float32x3 color (rgb)
   float32 size
-  int32 num_points
+  uint32 num_points
   [num_points] x {
     float32x3 position (vector3)
     float32x4 orientation (quaternion)
@@ -23,5 +23,5 @@ uint32 num_strokes
   }
 }
 
-string = uint8 (size) + size * uchar
+string = uint8 (size) + size * uint8
 ```

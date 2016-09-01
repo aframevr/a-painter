@@ -15,7 +15,6 @@ AFRAME.APAINTER = {
 
 
 AFRAME.APAINTER.brushInterface = {
-  points: [],
   init: function (color, width) {},
   addPoint: function (position, rotation, intensity, timestamp) {},
   reset: function () {},
@@ -24,10 +23,9 @@ AFRAME.APAINTER.brushInterface = {
     // Color = 3*4 = 12
     // NumPoints = 4
     // Brush index = 1
-    // [Point] = vector3 + quat + intensity = (3+4+1)*4(float) = 64
+    // [Point] = vector3 + quat + intensity + timestamp = (3+4+1+1)*4 = 36
     var bufferSize = 21 + (36 * this.points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
-    this.size = 0.01;
 
     binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
     binaryWriter.writeColor(this.color);    // color
@@ -173,7 +171,7 @@ AFRAME.registerSystem('brush', {
         var color = binaryReader.readColor();
         var size = binaryReader.readFloat();
         var numPoints = binaryReader.readUint32();
-
+        // console.info(brushIndex, color, size, numPoints);
         var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
