@@ -37,8 +37,6 @@ var line = {
       // Texture
       var textureLoader = new THREE.TextureLoader();
       this.texture = textureLoader.load(this.textureSrc, function (texture) {
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
       });
       return new THREE.MeshStandardMaterial({
         color: this.color,
