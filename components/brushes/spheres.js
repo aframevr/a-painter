@@ -1,4 +1,4 @@
-var boxes = {
+var spheres = {
   init: function(color, width) {
     this.points = [];
     this.prevPoint = null;
@@ -71,4 +71,4 @@ var boxes = {
   }
 };
 
-AFRAME.APAINTER.registerBrush('boxes', boxes);
+AFRAME.APAINTER.registerBrush('spheres', spheres);
