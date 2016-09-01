@@ -97,10 +97,10 @@ var line = {
     }
 
     var direction = new THREE.Vector3();
-    direction.set(0, 1.7, 1);
+    direction.set(0, 0.7, 1);
     direction.applyQuaternion(rotation);
     direction.normalize();
-    var posBase = position.clone().add(direction.clone().multiplyScalar(-0.08));
+    var posBase = position.clone().add(direction.clone().multiplyScalar(-0.03));
 
     direction = new THREE.Vector3();
     direction.set(1, 0, 0);
