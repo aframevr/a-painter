@@ -7,7 +7,9 @@ AFRAME.APAINTER = {
     this.brushes.push(brush);
   },
   getUsedBrushes: function () {
-    this.brushes.filter(function (brush){ return brush.used; });
+    return this.brushes
+      .filter(function (brush){ return brush.used; })
+      .map(function(brush){return brush.name;});
   }
 };
 
@@ -23,12 +25,11 @@ AFRAME.APAINTER.brushInterface = {
     // NumPoints = 4
     // Brush index = 1
     // [Point] = vector3 + quat + intensity = (3+4+1)*4(float) = 64
-    var bufferSize = 17 + (64 * this.points.length);
+    var bufferSize = 21 + (36 * this.points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
+    this.size = 0.01;
 
-    //binaryWriter.writeUint8(usedBrush.indexOf(this.brush.name));  // brush index
-    var brushIndex = AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name);
-    binaryWriter.writeUint8(brushIndex);    // brush index
+    binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
     binaryWriter.writeColor(this.color);    // color
     binaryWriter.writeFloat32(this.size);   // brush size
 
@@ -43,6 +44,7 @@ AFRAME.APAINTER.brushInterface = {
       binaryWriter.writeFloat32(point.intensity);
       binaryWriter.writeUint32(point.timestamp);
     }
+    console.log(bufferSize, binaryWriter.offset);
     return binaryWriter.getDataView();
   }
 };
@@ -58,7 +60,7 @@ AFRAME.registerSystem('brush', {
     // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function(event){
       if (event.keyCode === 76) {
-        this.loadBinary('apainter3.bin');
+        this.loadBinary('apainter.bin');
       }
       if (event.keyCode === 85) { // u
         // Upload
@@ -119,18 +121,16 @@ AFRAME.registerSystem('brush', {
     var usedBrushes = AFRAME.APAINTER.getUsedBrushes();
 
     // MAGIC(8) + version (2) + usedBrushesNum(2) + usedBrushesStrings(*)
-    var size = MAGIC.length + usedBrushes.join('').length + 4;
-
+    var size = MAGIC.length + usedBrushes.join(' ').length + 9;
     var binaryWriter = new BinaryWriter(size);
 
     // Header magic and version
     binaryWriter.writeString(MAGIC);
     binaryWriter.writeUint16(AFRAME.APAINTER.version);
 
-
     binaryWriter.writeUint8(usedBrushes.length);
     for (var i = 0; i < usedBrushes.length; i++) {
-      binaryWriter.writeString(usedBrushes[i].name);
+      binaryWriter.writeString(usedBrushes[i]);
     }
 
     // Number of strokes
@@ -171,10 +171,9 @@ AFRAME.registerSystem('brush', {
       for (var l = 0; l < numStrokes; l++) {
         var brushIndex = binaryReader.readUint8();
         var color = binaryReader.readColor();
-        var size = binaryReader.readColor();
+        var size = binaryReader.readFloat();
         var numPoints = binaryReader.readUint32();
 
-        size = 0.01;
         var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
