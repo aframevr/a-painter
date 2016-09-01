@@ -1,23 +1,87 @@
-/*
-Brush API
-constructor(color, width)
-addPoint: function (position, rotation, intensity, timestamp)
-reset: function ()
-tick: function (timeoffset, delta)
-*/
-
 AFRAME.APAINTER = {
+  version: 1,
   brushes: [],
   registerBrush: function (name, brush) {
     console.log('New brush registered `' + name + '`');
+    brush.used = false; // Used to know which brushes have been used on the drawing
     this.brushes.push(brush);
+  },
+  getUsedBrushes: function () {
+    return this.brushes
+      .filter(function (brush){ return brush.used; })
+      .map(function(brush){return brush.name;});
+  },
+  getBrushByName: function (name) {
+    return this.brushes
+      .find(function (brush){ return brush.name === name; });
+  }
+};
+
+
+AFRAME.APAINTER.brushInterface = {
+  init: function (color, width) {
+    this.data = {
+      points: []
+    }
+  },
+  addPoint: function (position, rotation, intensity, timestamp) {},
+  reset: function () {},
+  tick: function (timeoffset, delta) {},
+  _addPoint: function (position, rotation, intensity, timestamp) {
+    this.data.push({
+      'position': position,
+      'rotation': rotation,
+      'pressure': pressure,
+      'timestamp': timestamp
+    });
+    this.addPoint(position, rotation, intensity, timestamp);
+  },
+  getBinary: function () {
+    // Color = 3*4 = 12
+    // NumPoints = 4
+    // Brush index = 1
+    // [Point] = vector3 + quat + intensity + timestamp = (3+4+1+1)*4 = 36
+    var bufferSize = 21 + (36 * this.points.length);
+    var binaryWriter = new BinaryWriter(bufferSize);
+
+    binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
+    binaryWriter.writeColor(this.color);    // color
+    binaryWriter.writeFloat32(this.size);   // brush size
+
+    // Number of points
+    binaryWriter.writeUint32(this.points.length);
+
+    // Points
+    for (var i = 0; i < this.points.length; i++) {
+      var point = this.points[i];
+      binaryWriter.writeFloat32Array(point.position.toArray());
+      binaryWriter.writeFloat32Array(point.rotation.toArray());
+      binaryWriter.writeFloat32(point.intensity);
+      binaryWriter.writeUint32(point.timestamp);
+    }
+    return binaryWriter.getDataView();
   }
 };
 
 AFRAME.registerSystem('brush', {
   schema: {},
+  getUrlParams: function () {
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.search.substring(1);
+
+    urlParams = {};
+    while (match = search.exec(query)) {
+      urlParams[decode(match[1])] = decode(match[2]);
+    }
+    return urlParams;
+  },
   init: function () {
-    this.lines = [];
+    this.strokes = [];
+
+    var urlParams = this.getUrlParams();
     if (urlParams.url) {
       this.loadBinary(urlParams.url);
     }
@@ -25,7 +89,7 @@ AFRAME.registerSystem('brush', {
     // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function(event){
       if (event.keyCode === 76) {
-        this.loadBinary('apainter2.bin');
+        this.loadBinary('apainter.bin');
       }
       if (event.keyCode === 85) { // u
         // Upload
@@ -68,103 +132,99 @@ AFRAME.registerSystem('brush', {
       }
     }.bind(this));
   },
-  addNewLine: function (brushIdx, color, lineWidth) {
-    console.log(brushIdx);
-    var line = Object.create(AFRAME.APAINTER.brushes[brushIdx]);
-    line.init(color, lineWidth);
-    this.lines.push(line);
-    return line;
+  addNewStroke: function (brushName, color, size) {
+    var brush = AFRAME.APAINTER.getBrushByName(brushName);
+    if (!brush) {
+      console.error('Invalid brush name: ', brushName);
+      return;
+    }
+
+    brush.used = true;
+    var stroke = Object.create(Object.assign(AFRAME.APAINTER.brushInterface, brush));
+    stroke.brush = brush;
+    stroke.init(color, size);
+    this.strokes.push(stroke);
+    return stroke;
   },
   getBinary: function () {
     var dataViews = [];
+    var MAGIC = 'apainter';
 
-    var binaryWriter = new BinaryWriter(4);
-    var isLittleEndian = true;
-    binaryWriter.writeUint32(this.lines.length, isLittleEndian);
+    // Used brushes
+    var usedBrushes = AFRAME.APAINTER.getUsedBrushes();
+
+    // MAGIC(8) + version (2) + usedBrushesNum(2) + usedBrushesStrings(*)
+    var size = MAGIC.length + usedBrushes.join(' ').length + 9;
+    var binaryWriter = new BinaryWriter(size);
+
+    // Header magic and version
+    binaryWriter.writeString(MAGIC);
+    binaryWriter.writeUint16(AFRAME.APAINTER.version);
+
+    binaryWriter.writeUint8(usedBrushes.length);
+    for (var i = 0; i < usedBrushes.length; i++) {
+      binaryWriter.writeString(usedBrushes[i]);
+    }
+
+    // Number of strokes
+    binaryWriter.writeUint32(this.strokes.length);
     dataViews.push(binaryWriter.getDataView());
 
-    for (var i=0;i<this.lines.length; i++) {
-      dataViews.push(this.lines[i].getBinary());
+    // Strokes
+    for (var i = 0; i < this.strokes.length; i++) {
+      dataViews.push(this.strokes[i].getBinary());
     }
     return dataViews;
   },
   loadBinary: function (url) {
-
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
     loader.setResponseType('arraybuffer');
 
     loader.load(url, function (buffer) {
-      var offset = 0;
-      var data = new DataView(buffer);
-
-      function readQuaternion() {
-        var output = new THREE.Quaternion(
-          data.getFloat32(offset, true),
-          data.getFloat32(offset + 4, true),
-          data.getFloat32(offset + 8, true),
-          data.getFloat32(offset + 12, true)
-        );
-        offset+=16;
-        return output;
+      var binaryReader = new BinaryReader(buffer);
+      var magic = binaryReader.readString();
+      if (magic !== 'apainter') {
+        console.error('Invalid `magic` header');
+        return;
       }
 
-      function readVector3() {
-        var output = new THREE.Vector3(
-          data.getFloat32(offset, true),
-          data.getFloat32(offset + 4, true),
-          data.getFloat32(offset + 8, true)
-        );
-        offset+=12;
-        return output;
+      var version = binaryReader.readUint16();
+      if (version !== AFRAME.APAINTER.version) {
+        console.error('Invalid version: ', version, '(Expected: ' + AFRAME.APAINTER.version + ')');
       }
 
-      function readColor() {
-        var output = new THREE.Color(
-          data.getFloat32(offset, true),
-          data.getFloat32(offset + 4, true),
-          data.getFloat32(offset + 8, true)
-        );
-        offset+=12;
-        return output;
+      var numUsedBrushes = binaryReader.readUint8();
+      var usedBrushes = [];
+      for (var b = 0; b < numUsedBrushes; b++) {
+        usedBrushes.push(binaryReader.readString());
       }
 
-      function readFloat() {
-        var output = data.getFloat32(offset, true);
-        offset+=4;
-        return output;
-      }
-
-      function readInt() {
-        var output = data.getUint32(offset, true);
-        offset+=4;
-        return output;
-      }
-
-      var numLines = readInt();
-      for (var l = 0; l < numLines; l++) {
-        var color = readColor();
-        var numPoints = readInt();
-
-        var lineWidth = 0.01;
-        var line = this.addNewLine(this.currentBrushIdx, color, lineWidth);
+      var numStrokes = binaryReader.readUint32();
+      for (var l = 0; l < numStrokes; l++) {
+        var brushIndex = binaryReader.readUint8();
+        var color = binaryReader.readColor();
+        var size = binaryReader.readFloat();
+        var numPoints = binaryReader.readUint32();
+        // console.info(brushIndex, color, size, numPoints);
+        var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
         document.querySelector('a-scene').appendChild(entity);
-        entity.object3D.add(line.mesh);
+        entity.object3D.add(stroke.mesh);
+
         var prev = new THREE.Vector3();
         for (var i = 0; i < numPoints; i++) {
-          var point = readVector3();
-          var quat = readQuaternion();
-          var intensity = readFloat();
+          var point = binaryReader.readVector3();
+          var quat = binaryReader.readQuaternion();
+          var intensity = binaryReader.readFloat();
+          var timestamp = binaryReader.readUint32();
           if (point.equals(prev)) {
             continue;
           }
-          prev=point.clone();
-          line.addPoint(point, quat, intensity);
+          prev = point.clone();
+          stroke.addPoint(point, quat, intensity, timestamp);
         }
-
-        // line.computeVertexNormals();
       }
     }.bind(this));
   }
@@ -183,8 +243,8 @@ AFRAME.registerComponent('brush', {
     this.obj = this.el.object3D;
     this.currentLine = null;
     this.color = new THREE.Color(0xd03760);
-    this.lineWidth = 0.01;
-    this.lineWidthModifier = 0.0;
+    this.brushSize = 0.01;
+    this.brushSizeModifier = 0.0;
     this.textures = {};
     this.currentMap = 0;
 
@@ -226,7 +286,7 @@ AFRAME.registerComponent('brush', {
 
     this.el.addEventListener('stroke-changed', function (evt) {
       this.currentMap = evt.detail.strokeId;
-      this.lineWidth = evt.detail.lineWidth * 0.05;
+      this.brushSize = evt.detail.brushSize * 0.05;
     }.bind(this));
 
     this.el.addEventListener('axismove', function (evt) {
@@ -247,7 +307,7 @@ AFRAME.registerComponent('brush', {
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;
-        this.lineWidthModifier = value * 2;
+        this.brushSizeModifier = value * 2;
         if (value > 0.1) {
           if (!this.active) {
             this.startNewLine();
@@ -255,9 +315,6 @@ AFRAME.registerComponent('brush', {
           }
         } else {
           this.active = false;
-          /*if (this.currentLine) {
-            console.log(this.currentLine.getJSON());
-          }*/
           this.currentLine = null;
         }
       }
@@ -270,20 +327,20 @@ AFRAME.registerComponent('brush', {
       var translation = new THREE.Vector3();
       var scale = new THREE.Vector3();
       this.obj.matrixWorld.decompose(translation, rotation, scale);
-
-      this.currentLine.addPoint(translation, rotation, this.lineWidthModifier);
+      this.currentLine.addPoint(translation, rotation, this.brushSizeModifier, time);
     }
   },
 
   startNewLine: function () {
-    this.currentLine = this.system.addNewLine(this.currentBrushIdx, this.color, this.lineWidth);
-
+    var name = AFRAME.APAINTER.brushes[this.currentBrushIdx].name;
+    this.currentLine = this.system.addNewStroke(name, this.color, this.brushSize);
+/*
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();
     var scale = new THREE.Vector3();
     this.obj.matrixWorld.decompose(translation, rotation, scale);
     this.currentLine.addPoint(translation, rotation, 0);
-
+*/
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
     entity.object3D.add(this.currentLine.mesh);
