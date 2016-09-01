@@ -1,9 +1,8 @@
 var line = {
-  init: function(color, width) {
+  init: function(color, brushSize) {
     this.points = [];
     this.prevPoint = null;
-    this.lineWidth = width;
-    this.lineWidthModifier = 0.0;
+    this.brushSize = brushSize;
     this.color = color.clone();
 
     this.idx = 0;
@@ -55,26 +54,6 @@ var line = {
       side: THREE.DoubleSide,
     });
   },
-  getBinary: function () {
-    var color = this.color;
-    var points = this.points;
-    // Point = vector3(3) + quat(4) + intensity(1)
-    // Color = 3*4 = 12
-    // NumPoints = 4
-    var bufferSize = 16 + ((1+3+4) * 4 * points.length);
-    var binaryWriter = new BinaryWriter(bufferSize);
-    //console.log(color, points.length);
-    binaryWriter.writeColor(color);
-    binaryWriter.writeUint32(points.length);
-
-    for (var i = 0; i < points.length; i++) {
-      var point = points[i];
-      binaryWriter.writeArray(point.position.toArray());
-      binaryWriter.writeArray(point.rotation.toArray());
-      binaryWriter.writeFloat(point.intensity);
-    }
-    return binaryWriter.getDataView();
-  },
   getJSON: function () {
     return {
       stroke: {color: this.color},
@@ -109,9 +88,9 @@ var line = {
 
     var posA = posBase.clone();
     var posB = posBase.clone();
-    var lineWidth = this.lineWidth * intensity;
-    posA.add(direction.clone().multiplyScalar(lineWidth));
-    posB.add(direction.clone().multiplyScalar(-lineWidth));
+    var brushSize = this.brushSize * intensity;
+    posA.add(direction.clone().multiplyScalar(brushSize));
+    posB.add(direction.clone().multiplyScalar(-brushSize));
 
     this.vertices[ this.idx++ ] = posA.x;
     this.vertices[ this.idx++ ] = posA.y;
