@@ -19,6 +19,11 @@ AFRAME.APAINTER = {
 
 
 AFRAME.APAINTER.brushInterface = {
+  data: {
+    points: [],
+    color: null,
+    size: 0
+  },
   init: function (color, width) {},
   addPoint: function (position, rotation, intensity, timestamp) {},
   reset: function () {},
@@ -28,19 +33,19 @@ AFRAME.APAINTER.brushInterface = {
     // NumPoints = 4
     // Brush index = 1
     // [Point] = vector3 + quat + intensity + timestamp = (3+4+1+1)*4 = 36
-    var bufferSize = 21 + (36 * this.points.length);
+    var bufferSize = 21 + (36 * this.data.points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
 
     binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
-    binaryWriter.writeColor(this.color);    // color
-    binaryWriter.writeFloat32(this.size);   // brush size
+    binaryWriter.writeColor(this.data.color);    // color
+    binaryWriter.writeFloat32(this.data.size);   // brush size
 
     // Number of points
-    binaryWriter.writeUint32(this.points.length);
+    binaryWriter.writeUint32(this.data.points.length);
 
     // Points
-    for (var i = 0; i < this.points.length; i++) {
-      var point = this.points[i];
+    for (var i = 0; i < this.data.points.length; i++) {
+      var point = this.data.points[i];
       binaryWriter.writeFloat32Array(point.position.toArray());
       binaryWriter.writeFloat32Array(point.rotation.toArray());
       binaryWriter.writeFloat32(point.intensity);

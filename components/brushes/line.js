@@ -1,10 +1,10 @@
 var line = {
   init: function(color, brushSize) {
-    this.points = [];
+    // this.data.points = [];
     this.prevPoint = null;
 
-    this.size = brushSize;
-    this.color = color.clone();
+    this.data.size = brushSize;
+    this.data.color = color.clone();
 
     this.idx = 0;
     this.numPoints = 0;
@@ -28,7 +28,7 @@ var line = {
   getMaterial: function() {
     if (this.materialType === 'smooth') {
       return new THREE.MeshStandardMaterial({
-        color: this.color,
+        color: this.data.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -39,7 +39,7 @@ var line = {
       this.texture = textureLoader.load(this.textureSrc, function (texture) {
       });
       return new THREE.MeshStandardMaterial({
-        color: this.color,
+        color: this.data.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -51,14 +51,14 @@ var line = {
 
     // Flat basic material
     return new THREE.MeshBasicMaterial({
-      color: this.color,
+      color: this.data.color,
       side: THREE.DoubleSide,
     });
   },
   getJSON: function () {
     return {
-      stroke: {color: this.color},
-      points: this.points
+      stroke: {color: this.data.color},
+      points: this.data.points
     };
   },
   addPoint: function (position, rotation, intensity) {
@@ -89,7 +89,7 @@ var line = {
 
     var posA = posBase.clone();
     var posB = posBase.clone();
-    var brushSize = this.size * intensity;
+    var brushSize = this.data.size * intensity;
     posA.add(direction.clone().multiplyScalar(brushSize));
     posB.add(direction.clone().multiplyScalar(-brushSize));
 
@@ -113,7 +113,7 @@ var line = {
     // 4 -> 8
     this.geometry.setDrawRange(0, this.numPoints * 2);
 
-    this.points.push({
+    this.data.points.push({
       'position': position,
       'rotation': rotation,
       'intensity': intensity
