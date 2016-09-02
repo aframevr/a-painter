@@ -42,11 +42,13 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
     var tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 1, y: 1, z: 1 }, 100)
+        .to({ x: 1, y: 1, z: 1 }, 200)
         .onUpdate(function() {
           uiEl.setAttribute('scale', this);
         })
+        .easing(AFRAME.TWEEN.Easing.Exponential.Out)
         .start();
+
   },
 
   close: function() {
@@ -57,6 +59,7 @@ AFRAME.registerComponent('ui', {
         .onUpdate(function () {
           uiEl.setAttribute('scale', this);
         })
+        .easing(AFRAME.TWEEN.Easing.Exponential.Out)
         .start();
   }
 });
