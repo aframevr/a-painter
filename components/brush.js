@@ -24,23 +24,23 @@ AFRAME.APAINTER.brushInterface = {
       points: []
     }
   },
-  addPoint: function (position, rotation, intensity, timestamp) {},
+  addPoint: function (position, rotation, pressure, timestamp) {},
   reset: function () {},
   tick: function (timeoffset, delta) {},
-  _addPoint: function (position, rotation, intensity, timestamp) {
+  _addPoint: function (position, rotation, pressure, timestamp) {
     this.data.push({
       'position': position,
       'rotation': rotation,
       'pressure': pressure,
       'timestamp': timestamp
     });
-    this.addPoint(position, rotation, intensity, timestamp);
+    this.addPoint(position, rotation, pressure, timestamp);
   },
   getBinary: function () {
     // Color = 3*4 = 12
     // NumPoints = 4
     // Brush index = 1
-    // [Point] = vector3 + quat + intensity + timestamp = (3+4+1+1)*4 = 36
+    // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
     var bufferSize = 21 + (36 * this.points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
 
@@ -56,7 +56,7 @@ AFRAME.APAINTER.brushInterface = {
       var point = this.points[i];
       binaryWriter.writeFloat32Array(point.position.toArray());
       binaryWriter.writeFloat32Array(point.rotation.toArray());
-      binaryWriter.writeFloat32(point.intensity);
+      binaryWriter.writeFloat32(point.pressure);
       binaryWriter.writeUint32(point.timestamp);
     }
     return binaryWriter.getDataView();
@@ -206,7 +206,6 @@ AFRAME.registerSystem('brush', {
         var color = binaryReader.readColor();
         var size = binaryReader.readFloat();
         var numPoints = binaryReader.readUint32();
-        // console.info(brushIndex, color, size, numPoints);
         var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
@@ -217,13 +216,13 @@ AFRAME.registerSystem('brush', {
         for (var i = 0; i < numPoints; i++) {
           var point = binaryReader.readVector3();
           var quat = binaryReader.readQuaternion();
-          var intensity = binaryReader.readFloat();
+          var pressure = binaryReader.readFloat();
           var timestamp = binaryReader.readUint32();
           if (point.equals(prev)) {
             continue;
           }
           prev = point.clone();
-          stroke.addPoint(point, quat, intensity, timestamp);
+          stroke.addPoint(point, quat, pressure, timestamp);
         }
       }
     }.bind(this));
