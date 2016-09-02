@@ -1,6 +1,6 @@
 var line = {
   init: function(color, brushSize) {
-    this.points = [];
+    //this.data.points = [];
     this.prevPoint = null;
 
     this.size = brushSize;
@@ -58,7 +58,7 @@ var line = {
   getJSON: function () {
     return {
       stroke: {color: this.color},
-      points: this.points
+      points: this.data.points
     };
   },
   addPoint: function (position, rotation, pressure, timestamp) {
@@ -113,7 +113,7 @@ var line = {
     // 4 -> 8
     this.geometry.setDrawRange(0, this.numPoints * 2);
 
-    this.points.push({
+    this.data.points.push({
       'position': position,
       'rotation': rotation,
       'pressure': pressure,
