@@ -13,9 +13,9 @@ AFRAME.APAINTER = {
     });
 
     if (this.brushes[name]) {
-      throw new Error('The component `' + name + '` has been already registered. ' +
-                      'Check that you are not loading two versions of the same component ' +
-                      'or two different components of the same name.');
+      throw new Error('The brush `' + name + '` has been already registered. ' +
+                      'Check that you are not loading two versions of the same brush ' +
+                      'or two different brushes of the same name.');
     }
 
     var NewBrush = function () {
@@ -54,8 +54,6 @@ AFRAME.APAINTER = {
         // Number of points
         binaryWriter.writeUint32(this.data.points.length);
 
-        console.log(this.data.points.length);
-
         // Points
         for (var i = 0; i < this.data.points.length; i++) {
           var point = this.data.points[i];
@@ -86,18 +84,6 @@ AFRAME.APAINTER = {
     NewBrush.prototype.addPoint = wrapAddPoint(NewBrush.prototype.addPoint);
     this.brushes[name] = NewBrush;
 
-    /*{
-        Brush: NewComponent,
-        /*
-        dependencies: NewComponent.prototype.dependencies,
-        multiple: NewComponent.prototype.multiple,
-        parse: NewComponent.prototype.parse,
-        parseAttrValueForCache: NewComponent.prototype.parseAttrValueForCache,
-        schema: utils.extend(processSchema(NewComponent.prototype.schema)),
-        stringify: NewComponent.prototype.stringify,
-        type: NewComponent.prototype.type
-
-    };*/
     console.log('New brush registered `' + name + '`');
     NewBrush.used = false; // Used to know which brushes have been used on the drawing
     return NewBrush;
