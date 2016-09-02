@@ -16,6 +16,9 @@
     <!-- app -->
     <script src="src/binarymanager.js"></script>
     <script src="src/ui2d.js"></script>
+    <!-- systems -->
+    <script src="src/systems/brush.js"></script>
+    <script src="src/systems/ui.js"></script>
     <!-- components -->
     <script src="src/components/brush.js"></script>
     <script src="src/components/json-model.js"></script>
@@ -31,7 +34,7 @@
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body style="background-color: #030404">
-    <a-scene debug="true" antialias="true">
+    <a-scene debug="true" antialias="true" stats>
       <a-assets>
         <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
         <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
@@ -47,11 +50,11 @@
         <a-animation begin="fadeout" attribute="material.opacity" fill="none" from="1" to="0" dur="3000"></a-animation>
       </a-entity>
       <a-entity id="left-hand"
-                brush="color: #ff9"
+                brush="color: #ff0;"
                 paint-controls="hand: left"
                 ui></a-entity>
       <a-entity id="right-hand"
-                brush="color: #ff9"
+                brush="color: #ff0;"
                 paint-controls="hand: right"
                 ui></a-entity>
       <a-entity id="ground"

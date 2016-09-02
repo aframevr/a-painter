@@ -20,7 +20,7 @@ AFRAME.registerComponent('json-model', {
         child.position.applyMatrix4(Rotation);
       });
       self.el.setObject3D('mesh', group);
-      self.el.emit('model-loaded', {format: 'json', model: group});
+      self.el.emit('model-loaded', {format: 'json', model: group, src: src});
     });
   }
 });
