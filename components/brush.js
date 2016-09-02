@@ -18,23 +18,10 @@ AFRAME.APAINTER = {
                       'or two different brushes of the same name.');
     }
 
-    var NewBrush = function () {
-      this.data = {
-        points: [],
-        color: new THREE.Color(),
-        intensity: 0
-      };
-    };
-
     var BrushInterface = function () {
     }
 
     BrushInterface.prototype = {
-      init: function (color, width) {
-        this.data = {
-          points: []
-        }
-      },
       addPoint: function (position, rotation, pressure, timestamp) {},
       reset: function () {},
       tick: function (timeoffset, delta) {},
@@ -46,8 +33,7 @@ AFRAME.APAINTER = {
         // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
         var bufferSize = 21 + (36 * this.data.points.length);
         var binaryWriter = new BinaryWriter(bufferSize);
-
-        binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
+        binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brushName));  // brush index
         binaryWriter.writeColor(this.color);    // color
         binaryWriter.writeFloat32(this.size);   // brush size
 
@@ -66,6 +52,17 @@ AFRAME.APAINTER = {
       }
     };
 
+    function wrapInit (initMethod) {
+      return function init (color, brushSize) {
+        this.data = {
+          points: [],
+          size: 0,
+          color: new THREE.Color()
+        };
+        initMethod.call(this, color, brushSize);
+      };
+    }
+
     function wrapAddPoint (addPointMethod) {
       return function addPoint (position, rotation, pressure, timestamp) {
         this.data.points.push({
@@ -78,9 +75,11 @@ AFRAME.APAINTER = {
       };
     }
 
+    var NewBrush = function () {};
     NewBrush.prototype = Object.create(BrushInterface.prototype, proto);
-    NewBrush.prototype.name = name;
+    NewBrush.prototype.brushName = name;
     NewBrush.prototype.constructor = NewBrush;
+    NewBrush.prototype.init = wrapInit(NewBrush.prototype.init);
     NewBrush.prototype.addPoint = wrapAddPoint(NewBrush.prototype.addPoint);
     this.brushes[name] = NewBrush;
 
@@ -124,7 +123,7 @@ AFRAME.APAINTER.brushInterface = {
     var bufferSize = 21 + (36 * this.data.points.length);
     var binaryWriter = new BinaryWriter(bufferSize);
 
-    binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
+    binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brushName));  // brush index
     binaryWriter.writeColor(this.color);    // color
     binaryWriter.writeFloat32(this.size);   // brush size
 
@@ -287,8 +286,6 @@ AFRAME.registerSystem('brush', {
         var size = binaryReader.readFloat();
         var numPoints = binaryReader.readUint32();
 
-        console.log(brushIndex,color,size,numPoints, brushIndex, usedBrushes);
-
         var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
@@ -319,7 +316,7 @@ AFRAME.registerComponent('brush', {
   },
   init: function () {
     this.idx = 0;
-    this.currentBrushIdx = 0;
+    this.currentBrushName = 'flat';
 
     this.active = false;
     this.obj = this.el.object3D;
@@ -382,7 +379,7 @@ AFRAME.registerComponent('brush', {
     this.el.addEventListener('buttondown', function (evt) {
       // Grip
       if (evt.detail.id === 2) {
-        this.currentBrushIdx = (this.currentBrushIdx + 1) % AFRAME.APAINTER.brushes.length;
+        //this.currentBrushIdx = (this.currentBrushIdx + 1) % AFRAME.APAINTER.brushes.length;
       }
     }.bind(this));
     this.el.addEventListener('buttonchanged', function (evt) {
@@ -414,8 +411,8 @@ AFRAME.registerComponent('brush', {
   },
 
   startNewLine: function () {
-    var name = AFRAME.APAINTER.brushes[this.currentBrushIdx].name;
-    this.currentLine = this.system.addNewStroke(name, this.color, this.brushSize);
+    this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
+
 /*
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();
