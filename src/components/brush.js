@@ -111,6 +111,17 @@ AFRAME.registerSystem('brush', {
     }
     return dataViews;
   },
+  getPointerPosition: function () {
+    var pointerPosition = new THREE.Vector3();
+    var direction = new THREE.Vector3(0, 1.7, 1);
+    return function getPointerPosition (position, rotation) {
+      var direction2 = direction.clone();
+      direction2.applyQuaternion(rotation);
+      direction2.normalize();
+      pointerPosition.copy(position).add(direction2.multiplyScalar(-0.08));
+      return pointerPosition;
+    }
+  }(),
   loadBinary: function (url) {
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
@@ -148,17 +159,14 @@ AFRAME.registerSystem('brush', {
         document.querySelector('a-scene').appendChild(entity);
         entity.object3D.add(stroke.mesh);
 
-        var prev = new THREE.Vector3();
         for (var i = 0; i < numPoints; i++) {
-          var point = binaryManager.readVector3();
-          var quat = binaryManager.readQuaternion();
+          var position = binaryManager.readVector3();
+          var rotation = binaryManager.readQuaternion();
           var pressure = binaryManager.readFloat();
           var timestamp = binaryManager.readUint32();
-          if (point.equals(prev)) {
-            continue;
-          }
-          prev = point.clone();
-          stroke.addPoint(point, quat, pressure, timestamp);
+
+          var pointerPosition = this.getPointerPosition(position, rotation);
+          stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
         }
       }
     }.bind(this));
@@ -249,27 +257,21 @@ AFRAME.registerComponent('brush', {
       }
     }.bind(this));
   },
+  tick: function () {
+    var position = new THREE.Vector3();
+    var rotation = new THREE.Quaternion();
+    var scale = new THREE.Vector3();
 
-  tick: function (time, delta) {
-    if (this.currentLine && this.active) {
-      var rotation = new THREE.Quaternion();
-      var translation = new THREE.Vector3();
-      var scale = new THREE.Vector3();
-      this.obj.matrixWorld.decompose(translation, rotation, scale);
-      this.currentLine.addPoint(translation, rotation, this.brushSizeModifier, time);
+    return function tick (time, delta) {
+      if (this.currentLine && this.active) {
+        this.obj.matrixWorld.decompose(position, rotation, scale);
+        var pointerPosition = this.getPointerPosition(position, rotation);
+        this.currentLine.addPoint(translation, rotation, pointerPosition, this.brushSizeModifier, time);
+      }
     }
-  },
-
+  }(),
   startNewLine: function () {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
-
-/*
-    var rotation = new THREE.Quaternion();
-    var translation = new THREE.Vector3();
-    var scale = new THREE.Vector3();
-    this.obj.matrixWorld.decompose(translation, rotation, scale);
-    this.currentLine.addPoint(translation, rotation, 0);
-*/
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
     entity.object3D.add(this.currentLine.mesh);
