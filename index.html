@@ -4,23 +4,26 @@
     <meta charset="utf-8">
     <title>A-Painter</title>
     <meta name="description" content="A-Painter">
+    <!-- vendor -->
     <script src="node_modules/aframe/dist/aframe.js"></script>
-    <script src="vendor/saveas.js"></script>
     <script>
       UPLOADCARE_LOCALE = 'en';
       UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
     </script>
     <script src="//ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
-
-    <script src="components/binarywriter.js"></script>
-    <script src="components/binaryreader.js"></script>
-    <script src="components/brush.js"></script>
-    <script src="components/brushes/line.js"></script>
-    <script src="components/brushes/spheres.js"></script>
-    <script src="components/brushes/cubes.js"></script>
-    <script src="components/json-model.js"></script>
-    <script src="components/paint-controls.js"></script>
-    <script src="components/ui.js"></script>
+    <script src="vendor/saveas.js"></script>
+    <!-- app -->
+    <script src="src/binarymanager.js"></script>
+    <script src="src/main.js"></script>
+    <!-- components -->
+    <script src="src/components/brush.js"></script>
+    <script src="src/components/json-model.js"></script>
+    <script src="src/components/paint-controls.js"></script>
+    <script src="src/components/ui.js"></script>
+    <!-- brushes -->
+    <script src="src/brushes/line.js"></script>
+    <script src="src/brushes/spheres.js"></script>
+    <script src="src/brushes/cubes.js"></script>
   </head>
   <body style="background-color: #030404">
     <a-scene debug="true">

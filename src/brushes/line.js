@@ -1,18 +1,10 @@
 var line = {
   init: function(color, brushSize) {
-    //this.data.points = [];
-    this.prevPoint = null;
-
-    this.size = brushSize;
-    this.color = color.clone();
-
     this.idx = 0;
-    this.numPoints = 0;
-    this.maxPoints = 1000;
     this.geometry = new THREE.BufferGeometry();
-    this.vertices = new Float32Array(this.maxPoints * 3 * 3);
-    this.normals = new Float32Array(this.maxPoints * 3 * 3);
-    this.uvs = new Float32Array(this.maxPoints * 2 * 2);
+    this.vertices = new Float32Array(this.data.maxPoints * 3 * 3);
+    this.normals = new Float32Array(this.data.maxPoints * 3 * 3);
+    this.uvs = new Float32Array(this.data.maxPoints * 2 * 2);
 
     this.geometry.setDrawRange(0, 0);
     this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
@@ -28,7 +20,7 @@ var line = {
   getMaterial: function() {
     if (this.materialType === 'smooth') {
       return new THREE.MeshStandardMaterial({
-        color: this.color,
+        color: this.data.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -39,7 +31,7 @@ var line = {
       this.texture = textureLoader.load(this.textureSrc, function (texture) {
       });
       return new THREE.MeshStandardMaterial({
-        color: this.color,
+        color: this.data.color,
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
@@ -51,28 +43,17 @@ var line = {
 
     // Flat basic material
     return new THREE.MeshBasicMaterial({
-      color: this.color,
+      color: this.data.color,
       side: THREE.DoubleSide,
     });
   },
-  getJSON: function () {
-    return {
-      stroke: {color: this.color},
-      points: this.data.points
-    };
-  },
   addPoint: function (position, rotation, pressure, timestamp) {
-    if (this.prevPoint && this.prevPoint.equals(position)) {
-      return;
-    }
-    this.prevPoint = position.clone();
-
     var uv = 0;
-    for (i = 0; i < this.numPoints; i++) {
-      this.uvs[ uv++ ] = i / (this.numPoints - 1);
+    for (i = 0; i < this.data.numPoints; i++) {
+      this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
       this.uvs[ uv++ ] = 0;
 
-      this.uvs[ uv++ ] = i / (this.numPoints - 1);
+      this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
       this.uvs[ uv++ ] = 1;
     }
 
@@ -89,7 +70,7 @@ var line = {
 
     var posA = posBase.clone();
     var posB = posBase.clone();
-    var brushSize = this.size * pressure;
+    var brushSize = this.data.size * pressure;
     posA.add(direction.clone().multiplyScalar(brushSize));
     posB.add(direction.clone().multiplyScalar(-brushSize));
 
@@ -105,20 +86,8 @@ var line = {
     this.geometry.attributes.normal.needsUpdate = true;
     this.geometry.attributes.position.needsUpdate = true;
     this.geometry.attributes.uv.needsUpdate = true;
-    // this.geometry.computeVertexNormals();
 
-    this.numPoints++;
-    // 2 -> 4
-    // 3 -> 6
-    // 4 -> 8
-    this.geometry.setDrawRange(0, this.numPoints * 2);
-
-    this.data.points.push({
-      'position': position,
-      'rotation': rotation,
-      'pressure': pressure,
-      'timestamp': timestamp
-    });
+    this.geometry.setDrawRange(0, this.data.numPoints * 2);
   },
   computeVertexNormals: function () {
     var vA, vB, vC,
@@ -212,7 +181,7 @@ var lines = [
   { name: 'smoke', materialType: 'textured', textureSrc: 'brushes/smoke0.png', thumbnail: 'brushes/thumb_smoke0.png' },
 ]
 
-for (var i=0;i<lines.length;i++) {
+for (var i = 0; i < lines.length; i++) {
   var definition = lines[i];
   AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, definition));
 }
