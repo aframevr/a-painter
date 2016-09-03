@@ -1,68 +1,3 @@
-AFRAME.APAINTER = {
-  version: 1,
-  brushes: [],
-  registerBrush: function (name, brush) {
-    console.log('New brush registered `' + name + '`');
-    brush.used = false; // Used to know which brushes have been used on the drawing
-    this.brushes.push(brush);
-  },
-  getUsedBrushes: function () {
-    return this.brushes
-      .filter(function (brush){ return brush.used; })
-      .map(function(brush){return brush.name;});
-  },
-  getBrushByName: function (name) {
-    return this.brushes
-      .find(function (brush){ return brush.name === name; });
-  }
-};
-
-
-AFRAME.APAINTER.brushInterface = {
-  init: function (color, width) {
-    this.data = {
-      points: []
-    }
-  },
-  addPoint: function (position, rotation, pressure, timestamp) {},
-  reset: function () {},
-  tick: function (timeoffset, delta) {},
-  _addPoint: function (position, rotation, pressure, timestamp) {
-    this.data.push({
-      'position': position,
-      'rotation': rotation,
-      'pressure': pressure,
-      'timestamp': timestamp
-    });
-    this.addPoint(position, rotation, pressure, timestamp);
-  },
-  getBinary: function () {
-    // Color = 3*4 = 12
-    // NumPoints = 4
-    // Brush index = 1
-    // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
-    var bufferSize = 21 + (36 * this.points.length);
-    var binaryWriter = new BinaryWriter(bufferSize);
-
-    binaryWriter.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brush.name));  // brush index
-    binaryWriter.writeColor(this.color);    // color
-    binaryWriter.writeFloat32(this.size);   // brush size
-
-    // Number of points
-    binaryWriter.writeUint32(this.points.length);
-
-    // Points
-    for (var i = 0; i < this.points.length; i++) {
-      var point = this.points[i];
-      binaryWriter.writeFloat32Array(point.position.toArray());
-      binaryWriter.writeFloat32Array(point.rotation.toArray());
-      binaryWriter.writeFloat32(point.pressure);
-      binaryWriter.writeUint32(point.timestamp);
-    }
-    return binaryWriter.getDataView();
-  }
-};
-
 AFRAME.registerSystem('brush', {
   schema: {},
   getUrlParams: function () {
@@ -133,15 +68,15 @@ AFRAME.registerSystem('brush', {
     }.bind(this));
   },
   addNewStroke: function (brushName, color, size) {
-    var brush = AFRAME.APAINTER.getBrushByName(brushName);
-    if (!brush) {
+    var Brush = AFRAME.APAINTER.getBrushByName(brushName);
+    if (!Brush) {
       console.error('Invalid brush name: ', brushName);
       return;
     }
 
-    brush.used = true;
-    var stroke = Object.create(Object.assign(AFRAME.APAINTER.brushInterface, brush));
-    stroke.brush = brush;
+    Brush.used = true;
+    var stroke = new Brush();
+    stroke.brush = Brush;
     stroke.init(color, size);
     this.strokes.push(stroke);
     return stroke;
@@ -154,21 +89,21 @@ AFRAME.registerSystem('brush', {
     var usedBrushes = AFRAME.APAINTER.getUsedBrushes();
 
     // MAGIC(8) + version (2) + usedBrushesNum(2) + usedBrushesStrings(*)
-    var size = MAGIC.length + usedBrushes.join(' ').length + 9;
-    var binaryWriter = new BinaryWriter(size);
+    var bufferSize = MAGIC.length + usedBrushes.join(' ').length + 9;
+    var binaryManager = new BinaryManager(new ArrayBuffer(bufferSize));
 
     // Header magic and version
-    binaryWriter.writeString(MAGIC);
-    binaryWriter.writeUint16(AFRAME.APAINTER.version);
+    binaryManager.writeString(MAGIC);
+    binaryManager.writeUint16(AFRAME.APAINTER.version);
 
-    binaryWriter.writeUint8(usedBrushes.length);
+    binaryManager.writeUint8(usedBrushes.length);
     for (var i = 0; i < usedBrushes.length; i++) {
-      binaryWriter.writeString(usedBrushes[i]);
+      binaryManager.writeString(usedBrushes[i]);
     }
 
     // Number of strokes
-    binaryWriter.writeUint32(this.strokes.length);
-    dataViews.push(binaryWriter.getDataView());
+    binaryManager.writeUint32(this.strokes.length);
+    dataViews.push(binaryManager.getDataView());
 
     // Strokes
     for (var i = 0; i < this.strokes.length; i++) {
@@ -182,30 +117,31 @@ AFRAME.registerSystem('brush', {
     loader.setResponseType('arraybuffer');
 
     loader.load(url, function (buffer) {
-      var binaryReader = new BinaryReader(buffer);
-      var magic = binaryReader.readString();
+      var binaryManager = new BinaryManager(buffer);
+      var magic = binaryManager.readString();
       if (magic !== 'apainter') {
         console.error('Invalid `magic` header');
         return;
       }
 
-      var version = binaryReader.readUint16();
+      var version = binaryManager.readUint16();
       if (version !== AFRAME.APAINTER.version) {
         console.error('Invalid version: ', version, '(Expected: ' + AFRAME.APAINTER.version + ')');
       }
 
-      var numUsedBrushes = binaryReader.readUint8();
+      var numUsedBrushes = binaryManager.readUint8();
       var usedBrushes = [];
       for (var b = 0; b < numUsedBrushes; b++) {
-        usedBrushes.push(binaryReader.readString());
+        usedBrushes.push(binaryManager.readString());
       }
 
-      var numStrokes = binaryReader.readUint32();
+      var numStrokes = binaryManager.readUint32();
       for (var l = 0; l < numStrokes; l++) {
-        var brushIndex = binaryReader.readUint8();
-        var color = binaryReader.readColor();
-        var size = binaryReader.readFloat();
-        var numPoints = binaryReader.readUint32();
+        var brushIndex = binaryManager.readUint8();
+        var color = binaryManager.readColor();
+        var size = binaryManager.readFloat();
+        var numPoints = binaryManager.readUint32();
+
         var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
 
         var entity = document.createElement('a-entity');
@@ -214,10 +150,10 @@ AFRAME.registerSystem('brush', {
 
         var prev = new THREE.Vector3();
         for (var i = 0; i < numPoints; i++) {
-          var point = binaryReader.readVector3();
-          var quat = binaryReader.readQuaternion();
-          var pressure = binaryReader.readFloat();
-          var timestamp = binaryReader.readUint32();
+          var point = binaryManager.readVector3();
+          var quat = binaryManager.readQuaternion();
+          var pressure = binaryManager.readFloat();
+          var timestamp = binaryManager.readUint32();
           if (point.equals(prev)) {
             continue;
           }
@@ -236,7 +172,7 @@ AFRAME.registerComponent('brush', {
   },
   init: function () {
     this.idx = 0;
-    this.currentBrushIdx = 0;
+    this.currentBrushName = 'flat';
 
     this.active = false;
     this.obj = this.el.object3D;
@@ -296,12 +232,6 @@ AFRAME.registerComponent('brush', {
       this.el.emit('color-changed', {color: this.color, x: evt.detail.axis[0], y: evt.detail.axis[1]});
     }.bind(this));
 
-    this.el.addEventListener('buttondown', function (evt) {
-      // Grip
-      if (evt.detail.id === 2) {
-        this.currentBrushIdx = (this.currentBrushIdx + 1) % AFRAME.APAINTER.brushes.length;
-      }
-    }.bind(this));
     this.el.addEventListener('buttonchanged', function (evt) {
       // Trigger
       if (evt.detail.id === 1) {
@@ -331,8 +261,8 @@ AFRAME.registerComponent('brush', {
   },
 
   startNewLine: function () {
-    var name = AFRAME.APAINTER.brushes[this.currentBrushIdx].name;
-    this.currentLine = this.system.addNewStroke(name, this.color, this.brushSize);
+    this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
+
 /*
     var rotation = new THREE.Quaternion();
     var translation = new THREE.Vector3();
