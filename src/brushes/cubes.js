@@ -5,7 +5,7 @@ var cubes = {
   },
   getMaterial: function() {
     return new THREE.MeshStandardMaterial({
-      color: this.color,
+      color: this.data.color,
       roughness: 0.5,
       metalness: 0.5,
       side: THREE.DoubleSide,
@@ -14,9 +14,9 @@ var cubes = {
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
     var geometry = new THREE.BoxGeometry(1,1,1);
-    var sphere = new THREE.Mesh( geometry, this.material );
+    var sphere = new THREE.Mesh(geometry, this.material);
 
-    var sca = intensity*0.02 * Math.random();
+    var sca = pressure * 0.02 * Math.random();
     sphere.scale.set(sca,sca,sca);
     sphere.position.copy(pointerPosition);
     sphere.rotation.copy(rotation);

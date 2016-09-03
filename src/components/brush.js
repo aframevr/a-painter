@@ -242,6 +242,16 @@ AFRAME.registerComponent('brush', {
       this.el.emit('color-changed', {color: this.color, x: evt.detail.axis[0], y: evt.detail.axis[1]});
     }.bind(this));
 
+    this.el.addEventListener('buttondown', function (evt) {
+      // Grip
+      if (evt.detail.id === 2) {
+        var brushesNames = Object.keys(AFRAME.APAINTER.brushes);
+        var index = brushesNames.indexOf(this.currentBrushName);
+        index = (index + 1) % brushesNames.length;
+        this.currentBrushName = brushesNames[index];
+      }
+    }.bind(this));
+
     this.el.addEventListener('buttonchanged', function (evt) {
       // Trigger
       if (evt.detail.id === 1) {
