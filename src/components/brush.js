@@ -111,6 +111,19 @@ AFRAME.registerSystem('brush', {
     }
     return dataViews;
   },
+  getPointerPosition: function () {
+    var pointerPosition = new THREE.Vector3();
+    var offset = new THREE.Vector3(0, 0.7, 1);
+    return function getPointerPosition (position, rotation) {
+      var pointer = offset
+        .clone()
+        .applyQuaternion(rotation)
+        .normalize()
+        .multiplyScalar(-0.03);
+      pointerPosition.copy(position).add(pointer);
+      return pointerPosition;
+    }
+  }(),
   loadBinary: function (url) {
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
@@ -148,17 +161,14 @@ AFRAME.registerSystem('brush', {
         document.querySelector('a-scene').appendChild(entity);
         entity.object3D.add(stroke.mesh);
 
-        var prev = new THREE.Vector3();
         for (var i = 0; i < numPoints; i++) {
-          var point = binaryManager.readVector3();
-          var quat = binaryManager.readQuaternion();
+          var position = binaryManager.readVector3();
+          var rotation = binaryManager.readQuaternion();
           var pressure = binaryManager.readFloat();
           var timestamp = binaryManager.readUint32();
-          if (point.equals(prev)) {
-            continue;
-          }
-          prev = point.clone();
-          stroke.addPoint(point, quat, pressure, timestamp);
+
+          var pointerPosition = this.getPointerPosition(position, rotation);
+          stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
         }
       }
     }.bind(this));
@@ -232,6 +242,16 @@ AFRAME.registerComponent('brush', {
       this.el.emit('color-changed', {color: this.color, x: evt.detail.axis[0], y: evt.detail.axis[1]});
     }.bind(this));
 
+    this.el.addEventListener('buttondown', function (evt) {
+      // Grip
+      if (evt.detail.id === 2) {
+        var brushesNames = Object.keys(AFRAME.APAINTER.brushes);
+        var index = brushesNames.indexOf(this.currentBrushName);
+        index = (index + 1) % brushesNames.length;
+        this.currentBrushName = brushesNames[index];
+      }
+    }.bind(this));
+
     this.el.addEventListener('buttonchanged', function (evt) {
       // Trigger
       if (evt.detail.id === 1) {
@@ -249,27 +269,21 @@ AFRAME.registerComponent('brush', {
       }
     }.bind(this));
   },
+  tick: function () {
+    var position = new THREE.Vector3();
+    var rotation = new THREE.Quaternion();
+    var scale = new THREE.Vector3();
 
-  tick: function (time, delta) {
-    if (this.currentLine && this.active) {
-      var rotation = new THREE.Quaternion();
-      var translation = new THREE.Vector3();
-      var scale = new THREE.Vector3();
-      this.obj.matrixWorld.decompose(translation, rotation, scale);
-      this.currentLine.addPoint(translation, rotation, this.brushSizeModifier, time);
+    return function tick (time, delta) {
+      if (this.currentLine && this.active) {
+        this.obj.matrixWorld.decompose(position, rotation, scale);
+        var pointerPosition = this.system.getPointerPosition(position, rotation);
+        this.currentLine.addPoint(position, rotation, pointerPosition, this.brushSizeModifier, time);
+      }
     }
-  },
-
+  }(),
   startNewLine: function () {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
-
-/*
-    var rotation = new THREE.Quaternion();
-    var translation = new THREE.Vector3();
-    var scale = new THREE.Vector3();
-    this.obj.matrixWorld.decompose(translation, rotation, scale);
-    this.currentLine.addPoint(translation, rotation, 0);
-*/
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
     entity.object3D.add(this.currentLine.mesh);

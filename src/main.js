@@ -21,10 +21,9 @@ AFRAME.APAINTER = {
     var BrushInterface = function () {};
 
     BrushInterface.prototype = {
-      addPoint: function (position, rotation, pressure, timestamp) {},
       reset: function () {},
       tick: function (timeoffset, delta) {},
-      addPoint: function (position, rotation, pressure, timestamp) {},
+      addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
       getBinary: function () {
         // Color = 3*4 = 12
         // NumPoints   =  4
@@ -67,7 +66,7 @@ AFRAME.APAINTER = {
     }
 
     function wrapAddPoint (addPointMethod) {
-      return function addPoint (position, rotation, pressure, timestamp) {
+      return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
         if (this.data.prevPoint && this.data.prevPoint.equals(position)) {
           return;
         }
@@ -80,7 +79,7 @@ AFRAME.APAINTER = {
           'pressure': pressure,
           'timestamp': timestamp
         });
-        addPointMethod.call(this, position, rotation, pressure, timestamp);
+        addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp);
       };
     }
 
