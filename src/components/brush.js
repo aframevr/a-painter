@@ -113,12 +113,14 @@ AFRAME.registerSystem('brush', {
   },
   getPointerPosition: function () {
     var pointerPosition = new THREE.Vector3();
-    var direction = new THREE.Vector3(0, 1.7, 1);
+    var offset = new THREE.Vector3(0, 0.7, 1);
     return function getPointerPosition (position, rotation) {
-      var direction2 = direction.clone();
-      direction2.applyQuaternion(rotation);
-      direction2.normalize();
-      pointerPosition.copy(position).add(direction2.multiplyScalar(-0.08));
+      var pointer = offset
+        .clone()
+        .applyQuaternion(rotation)
+        .normalize()
+        .multiplyScalar(-0.03);
+      pointerPosition.copy(position).add(pointer);
       return pointerPosition;
     }
   }(),
@@ -265,8 +267,8 @@ AFRAME.registerComponent('brush', {
     return function tick (time, delta) {
       if (this.currentLine && this.active) {
         this.obj.matrixWorld.decompose(position, rotation, scale);
-        var pointerPosition = this.getPointerPosition(position, rotation);
-        this.currentLine.addPoint(translation, rotation, pointerPosition, this.brushSizeModifier, time);
+        var pointerPosition = this.system.getPointerPosition(position, rotation);
+        this.currentLine.addPoint(position, rotation, pointerPosition, this.brushSizeModifier, time);
       }
     }
   }(),
