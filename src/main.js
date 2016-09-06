@@ -1,7 +1,7 @@
 AFRAME.APAINTER = {
   version: 1,
   brushes: {},
-  registerBrush: function (name, definition) {
+  registerBrush: function (name, definition, options) {
     var proto = {};
 
     // Format definition object to prototype object.
@@ -20,8 +20,12 @@ AFRAME.APAINTER = {
 
     var BrushInterface = function () {};
 
+    var defaultOptions = {
+      radiusThreshold: 0
+    };
+
     BrushInterface.prototype = {
-      radiusThreshold: 0,
+      options: Object.assign(defaultOptions, options),
       reset: function () {},
       tick: function (timeoffset, delta) {},
       addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
@@ -69,7 +73,7 @@ AFRAME.APAINTER = {
     function wrapAddPoint (addPointMethod) {
       return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
         if (this.data.prevPoint
-            && this.data.prevPoint.distanceTo(position) <= this.radiusThreshold) {
+            && this.data.prevPoint.distanceTo(position) <= this.options.radiusThreshold) {
           return;
         }
 
