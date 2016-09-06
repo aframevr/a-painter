@@ -58,6 +58,7 @@ AFRAME.APAINTER = {
 
     function wrapInit (initMethod) {
       return function init (color, brushSize) {
+        this.object3D = new THREE.Object3D();
         this.data = {
           points: [],
           size: brushSize,

@@ -13,11 +13,13 @@ var line = {
     this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
     this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
 
-    this.mesh = new THREE.Mesh(this.geometry, this.getMaterial());
-    this.mesh.drawMode = THREE.TriangleStripDrawMode;
+    var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
+    mesh.drawMode = THREE.TriangleStripDrawMode;
 
-    this.mesh.frustumCulled = false;
-    this.mesh.vertices = this.vertices;
+    mesh.frustumCulled = false;
+    mesh.vertices = this.vertices;
+
+    this.object3D.add(mesh);
   },
   getMaterial: function () {
     var textureSrc = this.materialOptions.textureSrc;

@@ -7,16 +7,17 @@ var spheres = {
       side: THREE.DoubleSide,
       shading: THREE.FlatShading
     });
-    this.mesh = new THREE.Group();
+    this.geometry = new THREE.IcosahedronGeometry(0.01, 0);
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-    var geometry = new THREE.IcosahedronGeometry(0.01 * pressure, 0);
-    var sphere = new THREE.Mesh(geometry, this.material);
+    var sphere = new THREE.Mesh(this.geometry, this.material);
 
+    var sca = 0.01 * pressure;
+    sphere.scale.set(sca,sca,sca);
     sphere.position.copy(pointerPosition);
     sphere.rotation.copy(rotation);
 
-    this.mesh.add(sphere);
+    this.object3D.add(sphere);
 
     return true;
   }
