@@ -287,6 +287,6 @@ AFRAME.registerComponent('brush', {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
-    entity.object3D.add(this.currentLine.mesh);
+    entity.object3D.add(this.currentLine.object3D);
   }
 });

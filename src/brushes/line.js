@@ -41,7 +41,7 @@ var line = {
       };
     }
 
-    if (this.materialOptions.type === 'shaded') {
+    if (type === 'shaded') {
       defaultOptions = {
         color: this.data.color,
         roughness: 0.5,
@@ -57,12 +57,11 @@ var line = {
     }
 
     var options = Object.assign(defaultOptions, defaultTextureOptions, this.materialOptions);
-    return new THREE.MeshBasicMaterial(options);
 
-    if (type === 'flat') {
-      return new THREE.MeshBasicMaterial(options);
-    } else {
+    if (type === 'shaded') {
       return new THREE.MeshStandardMaterial(options);
+    } else {
+      return new THREE.MeshBasicMaterial(options);
     }
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
