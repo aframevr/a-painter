@@ -7,7 +7,7 @@ var spheres = {
       side: THREE.DoubleSide,
       shading: THREE.FlatShading
     });
-    this.geometry = new THREE.IcosahedronGeometry(0.01, 0);
+    this.geometry = new THREE.IcosahedronGeometry(1, 0);
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
     var sphere = new THREE.Mesh(this.geometry, this.material);
