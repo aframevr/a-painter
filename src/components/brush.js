@@ -149,6 +149,7 @@ AFRAME.registerSystem('brush', {
       }
 
       var numStrokes = binaryManager.readUint32();
+
       for (var l = 0; l < numStrokes; l++) {
         var brushIndex = binaryManager.readUint8();
         var color = binaryManager.readColor();
@@ -159,7 +160,7 @@ AFRAME.registerSystem('brush', {
 
         var entity = document.createElement('a-entity');
         document.querySelector('a-scene').appendChild(entity);
-        entity.object3D.add(stroke.mesh);
+        entity.setObject3D('mesh', stroke.object3D);
 
         for (var i = 0; i < numPoints; i++) {
           var position = binaryManager.readVector3();

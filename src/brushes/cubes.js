@@ -1,29 +1,25 @@
 var cubes = {
   init: function(color, width) {
-    this.material = this.getMaterial();
-    this.mesh = new THREE.Group();
-  },
-  getMaterial: function() {
-    return new THREE.MeshStandardMaterial({
+    this.material = new THREE.MeshStandardMaterial({
       color: this.data.color,
       roughness: 0.5,
       metalness: 0.5,
       side: THREE.DoubleSide,
       shading: THREE.FlatShading
     });
+    this.geometry = new THREE.BoxGeometry(1,1,1);
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-    var geometry = new THREE.BoxGeometry(1,1,1);
-    var sphere = new THREE.Mesh(geometry, this.material);
+    var box = new THREE.Mesh(this.geometry, this.material);
 
     var sca = pressure * 0.02 * Math.random();
-    sphere.scale.set(sca,sca,sca);
-    sphere.position.copy(pointerPosition);
-    sphere.rotation.copy(rotation);
+    box.scale.set(sca,sca,sca);
+    box.position.copy(pointerPosition);
+    box.rotation.copy(rotation);
 
-    this.mesh.add(sphere);
+    this.object3D.add(box);
 
-    return true;    
+    return true;
   }
 };
 
