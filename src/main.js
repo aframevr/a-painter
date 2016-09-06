@@ -70,8 +70,6 @@ AFRAME.APAINTER = {
         if (this.data.prevPoint && this.data.prevPoint.equals(position)) {
           return;
         }
-        this.data.prevPoint = position.clone();
-
         this.data.numPoints++;
         this.data.points.push({
           'position': position,
@@ -80,6 +78,7 @@ AFRAME.APAINTER = {
           'timestamp': timestamp
         });
         addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp);
+        this.data.prevPoint = position.clone();
       };
     }
 
