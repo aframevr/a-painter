@@ -21,7 +21,7 @@ AFRAME.APAINTER = {
     var BrushInterface = function () {};
 
     var defaultOptions = {
-      radiusThreshold: 0
+      spacing: 0
     };
 
     BrushInterface.prototype = {
@@ -73,7 +73,7 @@ AFRAME.APAINTER = {
     function wrapAddPoint (addPointMethod) {
       return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
         if (this.data.prevPoint
-            && this.data.prevPoint.distanceTo(position) <= this.options.radiusThreshold) {
+            && this.data.prevPoint.distanceTo(position) <= this.options.spacing) {
           return;
         }
 
