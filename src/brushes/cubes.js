@@ -22,6 +22,8 @@ var cubes = {
     sphere.rotation.copy(rotation);
 
     this.mesh.add(sphere);
+
+    return true;    
   }
 };
 

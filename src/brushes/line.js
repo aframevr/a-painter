@@ -82,6 +82,8 @@ var line = {
     this.geometry.attributes.uv.needsUpdate = true;
 
     this.geometry.setDrawRange(0, this.data.numPoints * 2);
+
+    return true;
   },
   computeVertexNormals: function () {
     var vA, vB, vC,

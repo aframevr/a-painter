@@ -72,15 +72,18 @@ AFRAME.APAINTER = {
             && this.data.prevPoint.distanceTo(position) <= this.radiusThreshold) {
           return;
         }
-        this.data.numPoints++;
-        this.data.points.push({
-          'position': position,
-          'rotation': rotation,
-          'pressure': pressure,
-          'timestamp': timestamp
-        });
-        addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp);
-        this.data.prevPoint = position.clone();
+
+        if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
+          this.data.numPoints++;
+          this.data.points.push({
+            'position': position,
+            'rotation': rotation,
+            'pressure': pressure,
+            'timestamp': timestamp
+          });
+
+          this.data.prevPoint = position.clone();
+        }
       };
     }
 

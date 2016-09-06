@@ -17,6 +17,8 @@ var spheres = {
     sphere.rotation.copy(rotation);
 
     this.mesh.add(sphere);
+
+    return true;
   }
 };
 
