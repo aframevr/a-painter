@@ -23,4 +23,4 @@ var spheres = {
   }
 };
 
-AFRAME.APAINTER.registerBrush('spheres', spheres);
+AFRAME.APAINTER.registerBrush('spheres', spheres, {spacing: 0.01});
