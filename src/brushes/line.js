@@ -23,8 +23,6 @@ var line = {
   getMaterial: function () {
     var textureSrc = this.materialOptions.textureSrc;
     var type = this.materialOptions.type;
-    delete this.materialOptions.textureSrc;
-    delete this.materialOptions.type;
 
     var defaultOptions = {};
     var defaultTextureOptions = {};
@@ -56,6 +54,8 @@ var line = {
     }
 
     var options = Object.assign(defaultOptions, defaultTextureOptions, this.materialOptions);
+    delete options.textureSrc;
+    delete options.type;
 
     if (type === 'shaded') {
       return new THREE.MeshStandardMaterial(options);
@@ -81,8 +81,8 @@ var line = {
     var posA = pointerPosition.clone();
     var posB = pointerPosition.clone();
     var brushSize = this.data.size * pressure;
-    posA.add(direction.clone().multiplyScalar(brushSize));
-    posB.add(direction.clone().multiplyScalar(-brushSize));
+    posA.add(direction.clone().multiplyScalar(brushSize / 2));
+    posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
     this.vertices[ this.idx++ ] = posA.x;
     this.vertices[ this.idx++ ] = posA.y;
