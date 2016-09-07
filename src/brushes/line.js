@@ -1,11 +1,10 @@
 var line = {
-  init: function(color, brushSize) {
+  init: function (color, brushSize) {
     this.idx = 0;
     this.geometry = new THREE.BufferGeometry();
-    this.vertices = new Float32Array(this.data.maxPoints * 3 * 3);
-    this.normals = new Float32Array(this.data.maxPoints * 3 * 3);
-    this.uvs = new Float32Array(this.data.maxPoints * 2 * 2);
-
+    this.vertices = new Float32Array(this.options.maxPoints * 3 * 3);
+    this.normals = new Float32Array(this.options.maxPoints * 3 * 3);
+    this.uvs = new Float32Array(this.options.maxPoints * 2 * 2);
     this.texture = null;
 
     this.geometry.setDrawRange(0, 0);
@@ -253,5 +252,5 @@ var lines = [
 
 for (var i = 0; i < lines.length; i++) {
   var definition = lines[i];
-  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions }, {thumbnail: definition.thumbnail }));
+  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions }), {thumbnail: definition.thumbnail, maxPoints: 3000 });
 }
