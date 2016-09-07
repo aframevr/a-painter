@@ -31,13 +31,15 @@
         <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
         <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
         <img id="uinormal" src="https://cdn.aframe.io/a-painter/images/ui-normal.png">
-        <img id="apainterlogo" src="https://cdn.aframe.io/a-painter/images/apainter_logo.png">
+        <img id="apainterlogo" src="https://cdn.aframe.io/a-painter/images/logo.png">
         <a-asset-item id="logoobj" src="https://cdn.aframe.io/a-painter/models/logo.obj"></a-asset-item>
         <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
-      <a-entity id="logo" material="flatShading:true; shader:flat; transparent:true; color:#ffffff; fog:false; src:#apainterlogo" obj-model="obj: #logoobj"></a-entity>
+      <a-entity id="logo" material="flatShading:true; shader:flat; transparent:true; color:#ffffff; fog:false; src:#apainterlogo" obj-model="obj: #logoobj">
+        <a-animation begin="fadeout" attribute="material.opacity" fill="none" from="1" to="0" dur="3000"></a-animation>
+      </a-entity>
       <a-entity id="left-hand"
                 brush="color: #ff0; linewidth: 1"
                 paint-controls="hand: left"

@@ -235,7 +235,7 @@ AFRAME.registerComponent('brush', {
         this.brushSizeModifier = value * 2;
         if (value > 0.1) {
           if (!this.active) {
-            this.startNewLine();
+            this.startNewStroke();
             this.active = true;
           }
         } else {
@@ -261,12 +261,12 @@ AFRAME.registerComponent('brush', {
       }
     }
   }(),
-  startNewLine: function () {
+  startNewStroke: function () {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
     entity.setObject3D('mesh', this.currentLine.object3D);
-    AFRAME.APAINTER.strokeEntities.push(entity);
     this.strokeEntities.push(entity);
+    this.el.emit('stroke-started', {entity: this.el, stroke: this.currentLine});
   }
 });
