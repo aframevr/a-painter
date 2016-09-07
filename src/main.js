@@ -1,6 +1,21 @@
 AFRAME.APAINTER = {
   version: 1,
   brushes: {},
+  strokeEntities: [],
+  clear: function () {
+    // Remove all the stroke entities
+    for (var i = 0; i < this.strokeEntities.length; i++) {
+      var entity = this.strokeEntities[i];
+      entity.parentNode.removeChild(entity);
+    }
+
+    // Reset the used brushes
+    Object.keys(AFRAME.APAINTER.brushes).forEach(function (name) {
+      AFRAME.APAINTER.brushes[name].used = false;
+    });
+
+    this.strokeEntities = [];
+  },
   registerBrush: function (name, definition, options) {
     var proto = {};
 
