@@ -199,39 +199,6 @@ AFRAME.registerComponent('brush', {
     this.model = this.el.getObject3D('mesh');
     this.drawing = false;
 
-    function updateColor (color, x, y) {
-      function HSVtoRGB (h, s, v) {
-        var r, g, b, i, f, p, q, t;
-        if (arguments.length === 1) {
-          s = h.s; v = h.v; h = h.h;
-        }
-        i = Math.floor(h * 6);
-        f = h * 6 - i;
-        p = v * (1 - s);
-        q = v * (1 - f * s);
-        t = v * (1 - (1 - f) * s);
-        switch (i % 6) {
-          case 0: r = v; g = t; b = p; break;
-          case 1: r = q; g = v; b = p; break;
-          case 2: r = p; g = v; b = t; break;
-          case 3: r = p; g = q; b = v; break;
-          case 4: r = t; g = p; b = v; break;
-          case 5: r = v; g = p; b = q; break;
-        }
-        return {r: r, g: g, b: b};
-      }
-
-      // Use polar coordinates instead of cartesian
-      var angle = Math.atan2(x, y);
-      var radius = Math.sqrt(x * x + y * y);
-
-      // Map the angle (-PI to PI) to the Hue (from 0 to 1)
-      // and the Saturation to the radius
-      angle = angle / (Math.PI * 2) + 0.5;
-      var color2 = HSVtoRGB(angle, radius, 1.0);
-      color.setRGB(color2.r, color2.g, color2.b);
-    }
-
     this.el.addEventListener('stroke-changed', function (evt) {
       this.currentMap = evt.detail.strokeId;
       this.brushSize = evt.detail.brushSize * 0.05;
@@ -241,8 +208,7 @@ AFRAME.registerComponent('brush', {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      updateColor(this.color, evt.detail.axis[0], evt.detail.axis[1]);
-      this.el.emit('color-changed', {color: this.color, x: evt.detail.axis[0], y: evt.detail.axis[1]});
+      this.brushSize = 0.15 * (evt.detail.axis[1] + 1) / 2;
     }.bind(this));
 
     this.el.addEventListener('buttondown', function (evt) {
