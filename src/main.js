@@ -36,7 +36,8 @@ AFRAME.APAINTER = {
     var BrushInterface = function () {};
 
     var defaultOptions = {
-      spacing: 0
+      spacing: 0,
+      maxPoints: 0
     };
 
     BrushInterface.prototype = {
@@ -79,7 +80,6 @@ AFRAME.APAINTER = {
           size: brushSize,
           prevPoint: null,
           numPoints: 0,
-          maxPoints: 1000,
           color: color.clone()
         };
         initMethod.call(this, color, brushSize);
@@ -88,11 +88,11 @@ AFRAME.APAINTER = {
 
     function wrapAddPoint (addPointMethod) {
       return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
-        if (this.data.prevPoint
-            && this.data.prevPoint.distanceTo(position) <= this.options.spacing) {
+        if ((this.data.prevPoint
+            && this.data.prevPoint.distanceTo(position) <= this.options.spacing)
+            || this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints ) {
           return;
         }
-
         if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
           this.data.numPoints++;
           this.data.points.push({

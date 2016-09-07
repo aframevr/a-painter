@@ -161,6 +161,7 @@ AFRAME.registerSystem('brush', {
         var entity = document.createElement('a-entity');
         document.querySelector('a-scene').appendChild(entity);
         entity.setObject3D('mesh', stroke.object3D);
+
         AFRAME.APAINTER.strokeEntities.push(entity);
 
         for (var i = 0; i < numPoints; i++) {
@@ -288,7 +289,7 @@ AFRAME.registerComponent('brush', {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
-    entity.setObject3D(this.currentLine.object3D);
+    entity.setObject3D('mesh', this.currentLine.object3D);
     AFRAME.APAINTER.strokeEntities.push(entity);
   }
 });
