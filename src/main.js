@@ -2,6 +2,14 @@ AFRAME.APAINTER = {
   version: 1,
   brushes: {},
   strokeEntities: [],
+  init: function () {
+    document.addEventListener('stroke-removed', function (event) {
+      var index = this.strokeEntities.indexOf(event.detail.entity);
+      if (index > -1) {
+        this.strokeEntities.splice(index, 1);
+      }
+    }.bind(this));
+  },
   clear: function () {
     // Remove all the stroke entities
     for (var i = 0; i < this.strokeEntities.length; i++) {
@@ -127,3 +135,5 @@ AFRAME.APAINTER = {
     return this.brushes[name];
   }
 };
+
+AFRAME.APAINTER.init();

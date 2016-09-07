@@ -190,6 +190,7 @@ AFRAME.registerComponent('brush', {
     this.active = false;
     this.obj = this.el.object3D;
     this.currentLine = null;
+    this.strokeEntities = [];
     this.color = new THREE.Color(0xd03760);
     this.brushSize = 0.01;
     this.brushSizeModifier = 0.0;
@@ -219,10 +220,11 @@ AFRAME.registerComponent('brush', {
     this.el.addEventListener('buttondown', function (evt) {
       // Grip
       if (evt.detail.id === 2) {
-        var brushesNames = Object.keys(AFRAME.APAINTER.brushes);
-        var index = brushesNames.indexOf(this.currentBrushName);
-        index = (index + 1) % brushesNames.length;
-        this.currentBrushName = brushesNames[index];
+        var entity = this.strokeEntities.pop();
+        if (entity) {
+          entity.emit('stroke-removed', {entity: entity});
+          entity.parentNode.removeChild(entity);
+        }
       }
     }.bind(this));
 
@@ -237,8 +239,11 @@ AFRAME.registerComponent('brush', {
             this.active = true;
           }
         } else {
+          if (this.active) {
+            this.previousEntity = this.currentEntity;
+            this.currentLine = null;
+          }
           this.active = false;
-          this.currentLine = null;
         }
       }
     }.bind(this));
@@ -262,5 +267,6 @@ AFRAME.registerComponent('brush', {
     this.el.sceneEl.appendChild(entity);
     entity.setObject3D('mesh', this.currentLine.object3D);
     AFRAME.APAINTER.strokeEntities.push(entity);
+    this.strokeEntities.push(entity);
   }
 });
