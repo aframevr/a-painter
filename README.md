@@ -49,6 +49,7 @@ To register a new brush we should call `AFRAME.APAINTER.registerBrush` with thre
 * **brushDefinition** (*object*): The custom implementation of the previously defined `brushDefinition`.
 * **options** (*object* [Optional]):
   * **spacing** (*float*): Minimum distance, in meters, from the previous point needed to call `addPoint`.
+  * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reached that number of points.
 
 ```javascript
 AFRAME.APAINTER.registerBrush(brushName, brushDefinition, options);
