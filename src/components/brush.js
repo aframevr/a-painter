@@ -27,10 +27,11 @@ AFRAME.registerSystem('brush', {
         this.loadBinary('apainter.bin');
       }
       if (event.keyCode === 85) { // u
+        var baseUrl = 'http://a-painter.aframe.io/?url=';
+
         // Upload
         var dataviews = this.getBinary();
         var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-
         var uploader = 'uploadcare'; // or 'fileio'
         if (uploader === 'fileio') {
           // Using file.io
@@ -42,8 +43,8 @@ AFRAME.registerSystem('brush', {
             if (xhr.readyState == 4) {
               var response = JSON.parse(xhr.response);
               if (response.success) {
-                alert('Drawing uploaded correctly\nPlease use this link to share it:\n' + 'http://dev.fernandojsg.com/a-painter/?url=' + response.link);
-                console.log('Uploaded link: ' + 'http://dev.fernandojsg.com/a-painter/?url=' + response.link);
+                console.log('Uploaded link: ', baseUrl + response.link);
+                document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
               }
             } else {
               // alert('An error occurred while uploading the drawing, please try again');
@@ -53,8 +54,8 @@ AFRAME.registerSystem('brush', {
         } else {
           var file = uploadcare.fileFrom('object', blob);
           file.done(function(fileInfo) {
-            alert('Drawing uploaded correctly\nPlease use this link to share it:\n' + 'http://dev.fernandojsg.com/a-painter/?url=' + fileInfo.cdnUrl);
-            console.log('Uploaded link: ' + 'http://dev.fernandojsg.com/a-painter/?url=' + fileInfo.cdnUrl);
+            console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
+            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
           });
         }
       }
