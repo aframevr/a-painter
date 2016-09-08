@@ -12,9 +12,11 @@
     </script>
     <script src="//ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="vendor/saveas.js"></script>
+    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
     <!-- app -->
     <script src="src/binarymanager.js"></script>
     <script src="src/main.js"></script>
+    <script src="src/ui2d.js"></script>
     <!-- components -->
     <script src="src/components/brush.js"></script>
     <script src="src/components/json-model.js"></script>
@@ -24,6 +26,8 @@
     <script src="src/brushes/line.js"></script>
     <script src="src/brushes/spheres.js"></script>
     <script src="src/brushes/cubes.js"></script>
+    <!-- css -->
+    <link rel="stylesheet" href="css/main.css">
   </head>
   <body style="background-color: #030404">
     <a-scene antialias="true">
@@ -55,5 +59,12 @@
       </a-entity>
       <a-entity position="0 0 0" id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
     </a-scene>
+    http://a-painter.com/?url=
+    <div id="ui">
+      <div id="share" class="hide">
+        <input id="share-url" type="text" value="" readonly/>
+        <div id="copy-toclipboard" class="button">COPY SHARE URL</div>
+      </div>
+    </div>
   </body>
 </html>
