@@ -1,3 +1,4 @@
+/* globals THREE */
 var line = {
   init: function (color, brushSize) {
     this.idx = 0;

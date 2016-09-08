@@ -1,3 +1,4 @@
+/* global AFRAME THREE BinaryManager */
 AFRAME.APAINTER = {
   version: 1,
   brushes: {},
@@ -11,8 +12,8 @@ AFRAME.APAINTER = {
         self.strokeEntities.splice(index, 1);
       }
     });
-    
-    document.addEventListener('stroke-started', function(event) {
+
+    document.addEventListener('stroke-started', function (event) {
       self.strokeEntities.push(event.detail.entity);
       if (!self.startPainting) {
         document.getElementById('logo').emit('fadeout');
@@ -106,9 +107,8 @@ AFRAME.APAINTER = {
 
     function wrapAddPoint (addPointMethod) {
       return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
-        if ((this.data.prevPoint
-            && this.data.prevPoint.distanceTo(position) <= this.options.spacing)
-            || this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints ) {
+        if ((this.data.prevPoint && this.data.prevPoint.distanceTo(position) <= this.options.spacing) ||
+            this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints) {
           return;
         }
         if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
@@ -139,7 +139,7 @@ AFRAME.APAINTER = {
   },
   getUsedBrushes: function () {
     return Object.keys(AFRAME.APAINTER.brushes)
-      .filter(function (name){ return AFRAME.APAINTER.brushes[name].used; });
+      .filter(function (name) { return AFRAME.APAINTER.brushes[name].used; });
   },
   getBrushByName: function (name) {
     return this.brushes[name];

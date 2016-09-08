@@ -1,3 +1,4 @@
+/* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
   dependencies: ['tracked-controls'],
 
