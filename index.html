@@ -60,10 +60,16 @@
       <a-entity position="0 0 0" id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
     </a-scene>
     http://a-painter.com/?url=
-    <div id="ui">
+    <div id="apainter-ui">
       <div id="share" class="hide">
+        <div id="help">
+          <h1>Painting saved!</h1>
+          <p>Your painting was saved in the following URL.<br>You can use it to continue your work later or to share your masterpiece in social media.</p>
+        </div>
+        <div id="form">
         <input id="share-url" type="text" value="" readonly/>
-        <div id="copy-toclipboard" data-clipboard-target="#share-url" class="button copy">COPY SHARE URL</div>
+        <div id="copy-toclipboard" data-clipboard-target="#share-url" class="button copy">COPY URL</div>
+        </div>
       </div>
     </div>
   </body>
