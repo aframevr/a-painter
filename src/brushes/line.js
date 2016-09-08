@@ -41,8 +41,8 @@ var line = {
     if (type === 'shaded') {
       defaultOptions = {
         color: this.data.color,
-        roughness: 0.5,
-        metalness: 0.5,
+        roughness: 0.75,
+        metalness: 0.25,
         side: THREE.DoubleSide,
       };
     }
@@ -178,77 +178,117 @@ var line = {
 };
 
 var lines = [
-  {
-    name: 'flat',
+  { 
+    name: 'flat', 
     materialOptions: {
       type: 'flat'
-    },
-    thumbnail: ''
+    }, 
+    thumbnail: '' 
   },
-  {
-    name: 'shaded',
+  { 
+    name: 'smooth', 
     materialOptions: {
-      type: 'shaded'
-    },
-    thumbnail: ''
+      type: 'smooth'
+    }, 
+    thumbnail: '' 
   },
-  {
-    name: 'bristles',
+  { 
+    name: 'squared-textured', 
     materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/bristles0.png'
-    },
+      type: 'textured', 
+      textureSrc: 'brushes/squared_textured.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'line-gradient', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/line_gradient.png'
+    }, 
+    thumbnail: 'brushes/line_gradient.png' 
+  },
+  { 
+    name: 'silky-flat', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/silky_flat.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'silky-textured',
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/silky_textured.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'lines1', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/lines1.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'lines2', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/lines2.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'lines3', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/lines3.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'lines4', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/lines4.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'lines5', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/lines5.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'line-grunge1', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/line_grunge1.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'line-grunge2', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/line_grunge2.png'
+    }, 
+    thumbnail: 'brushes/thumb_bristles0.png' 
+  },
+  { 
+    name: 'line-grunge3', 
+    materialOptions: {
+      type: 'textured', 
+      textureSrc: 'brushes/line_grunge3.png'
+    }, 
     thumbnail: 'brushes/thumb_bristles0.png'
-  },
-  {
-    name: 'fur',
-    materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/fur0.png'
-    },
-    thumbnail: 'brushes/thumb_fur0.png'
-  },
-  {
-    name: 'fur 2',
-    materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/fur1.png'
-    },
-    thumbnail: 'brushes/thumb_fur1.png'
-  },
-  {
-    name: 'grunge',
-    materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/grunge0.png'
-    },
-    thumbnail: 'brushes/thumb_grunge0.png'
-  },
-  {
-    name: 'roundflat',
-    materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/roundflat.png'
-    },
-    thumbnail: 'brushes/thumb_roundflat.png'
-  },
-  {
-    name: 'roundsoft',
-    materialOptions: {
-      type: 'shaded',
-      textureSrc: 'brushes/roundsoft.png'
-    },
-    thumbnail: 'brushes/thumb_roundsoft.png'
-  },
-  {
-    name: 'smoke',
-    materialOptions: {
-      type: 'textured',
-      textureSrc: 'brushes/smoke0.png'
-    },
-    thumbnail: 'brushes/thumb_smoke0.png'
-  },
-]
+  }
+];
 
 for (var i = 0; i < lines.length; i++) {
   var definition = lines[i];
