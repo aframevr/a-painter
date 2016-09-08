@@ -22,8 +22,11 @@ AFRAME.registerComponent('paint-controls', {
     }
     el.addEventListener('brushsize-changed', function (event) {
       var scale = event.detail.brushSize * 10;
-      this.buttonMeshes.sizeHint.scale.set(scale,scale,scale);
-    }.bind(this));
+      self.buttonMeshes.sizeHint.scale.set(scale,scale,scale);
+    });
+    el.addEventListener('brushcolor-changed', function (event) {
+      self.buttonMeshes.colorTip.material.color.copy(event.detail.color);
+    });
   },
 
   // buttonId
@@ -89,6 +92,7 @@ AFRAME.registerComponent('paint-controls', {
     buttonMeshes.trackpad = controllerObject3D.getObjectByName('touchpad');
     buttonMeshes.trigger = controllerObject3D.getObjectByName('trigger');
     buttonMeshes.sizeHint = controllerObject3D.getObjectByName('sizehint');
+    buttonMeshes.colorTip = controllerObject3D.getObjectByName('tip');
   },
 
   onButtonEvent: function (id, evtName) {
