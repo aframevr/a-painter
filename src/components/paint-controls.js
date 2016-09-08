@@ -20,6 +20,10 @@ AFRAME.registerComponent('paint-controls', {
       material.map = texture;
       material.needsUpdate = true;
     }
+    el.addEventListener('brushsize-changed', function (event) {
+      var scale = event.detail.brushSize * 10;
+      this.buttonMeshes.sizeHint.scale.set(scale,scale,scale);
+    }.bind(this));
   },
 
   // buttonId
@@ -84,6 +88,7 @@ AFRAME.registerComponent('paint-controls', {
     buttonMeshes.system = controllerObject3D.getObjectByName('systembutton');
     buttonMeshes.trackpad = controllerObject3D.getObjectByName('touchpad');
     buttonMeshes.trigger = controllerObject3D.getObjectByName('trigger');
+    buttonMeshes.sizeHint = controllerObject3D.getObjectByName('sizehint');
   },
 
   onButtonEvent: function (id, evtName) {
