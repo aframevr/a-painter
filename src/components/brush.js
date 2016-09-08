@@ -208,7 +208,8 @@ AFRAME.registerComponent('brush', {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      this.brushSize = 0.15 * (evt.detail.axis[1] + 1) / 2;
+      this.brushSize = 0.1 * (evt.detail.axis[1] + 1) / 2;
+      this.el.emit('brushsize-changed', {brushSize: this.brushSize});
     }.bind(this));
 
     this.el.addEventListener('buttondown', function (evt) {
