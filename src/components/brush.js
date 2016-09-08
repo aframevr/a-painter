@@ -1,3 +1,4 @@
+/* globals AFRAME THREE BinaryManager saveAs Blob */
 AFRAME.registerSystem('brush', {
   schema: {},
   getUrlParams: function () {
@@ -62,9 +63,8 @@ AFRAME.registerSystem('brush', {
       if (event.keyCode === 86) { // v
         var dataviews = this.getBinary();
         var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-        // FileSaver.js defines `saveAs` for saving files out of the browser
-        var filename = "apainter.bin";
-        saveAs(blob, filename);
+        // saveAs.js defines `saveAs` for saving files out of the browser
+        saveAs(blob, 'apainter.bin');
       }
     }.bind(this));
   },
@@ -107,7 +107,7 @@ AFRAME.registerSystem('brush', {
     dataViews.push(binaryManager.getDataView());
 
     // Strokes
-    for (var i = 0; i < this.strokes.length; i++) {
+    for (i = 0; i < this.strokes.length; i++) {
       dataViews.push(this.strokes[i].getBinary());
     }
     return dataViews;
@@ -123,7 +123,7 @@ AFRAME.registerSystem('brush', {
         .multiplyScalar(-0.03);
       pointerPosition.copy(position).add(pointer);
       return pointerPosition;
-    }
+    };
   }(),
   loadBinary: function (url) {
     var loader = new THREE.XHRLoader(this.manager);
@@ -214,7 +214,7 @@ AFRAME.registerComponent('brush', {
       this.el.emit('brushsize-changed', {brushSize: this.brushSize});
 
       // @fixme This is just for testing purposes
-      this.color.setRGB(Math.random(),Math.random(),Math.random());
+      this.color.setRGB(Math.random(), Math.random(), Math.random());
       this.el.emit('brushcolor-changed', {color: this.color});
     }.bind(this));
 
@@ -260,7 +260,7 @@ AFRAME.registerComponent('brush', {
         var pointerPosition = this.system.getPointerPosition(position, rotation);
         this.currentLine.addPoint(position, rotation, pointerPosition, this.brushSizeModifier, time);
       }
-    }
+    };
   }(),
   startNewStroke: function () {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);

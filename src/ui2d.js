@@ -1,4 +1,5 @@
-window.onload = function(e){
+/* global Clipboard */
+window.onload = function (event) {
   var shareDiv = document.getElementById('share');
   var shareUrl = document.getElementById('share-url');
   document.addEventListener('drawing-uploaded', function (event) {
@@ -6,5 +7,5 @@ window.onload = function(e){
     shareUrl.value = event.detail.url;
   });
 
-  new Clipboard('.button.copy');
-}
+  var clipboard = new Clipboard('.button.copy');
+};

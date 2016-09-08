@@ -1,5 +1,6 @@
+/* globals AFRAME THREE */
 var spheres = {
-  init: function(color, width) {
+  init: function (color, width) {
     this.material = new THREE.MeshStandardMaterial({
       color: this.data.color,
       roughness: 0.5,
@@ -13,7 +14,7 @@ var spheres = {
     var sphere = new THREE.Mesh(this.geometry, this.material);
 
     var sca = 0.01 * pressure;
-    sphere.scale.set(sca,sca,sca);
+    sphere.scale.set(sca, sca, sca);
     sphere.position.copy(pointerPosition);
     sphere.rotation.copy(rotation);
 

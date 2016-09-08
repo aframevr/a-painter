@@ -1,8 +1,9 @@
+/* globals THREE */
 var BinaryManager = function (buffer) {
   this.dataview = new DataView(buffer);
   this.offset = 0;
   this.isLittleEndian = true;
-}
+};
 
 BinaryManager.prototype = {
   // READER
