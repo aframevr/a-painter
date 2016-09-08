@@ -210,6 +210,10 @@ AFRAME.registerComponent('brush', {
       }
       this.brushSize = 0.1 * (evt.detail.axis[1] + 1) / 2;
       this.el.emit('brushsize-changed', {brushSize: this.brushSize});
+
+      // @fixme This is just for testing purposes
+      this.color.setRGB(Math.random(),Math.random(),Math.random());
+      this.el.emit('brushcolor-changed', {color: this.color});
     }.bind(this));
 
     this.el.addEventListener('buttondown', function (evt) {
