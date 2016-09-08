@@ -1,36 +1,49 @@
-#ui {
+#apainter-ui {
   font-family: Helvetica, Arial, sans-serif;
   position: absolute;
   left: 20px;
   bottom: 20px;
+  line-height: 1.2em;
 }
 
-.button {
+#apainter-ui #help{
+  width: 600px;
+  color: #ccc;
+  font-size: 14px;
+  text-shadow: 0px 2px 1px #000;
+}
+#apainter-ui #help h1{
+  font-size: 22px;
+  font-weight: 100;
+  color: #e42b5a;
+}
+
+#apainter-ui .button {
   background-color: #ef2d5e;
   color: #fff;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   width: 130px;
   text-align: center;
   max-width: 115px;
-  padding: 10px;
+  padding: 6px;
 }
 
-.button:hover {
-  background-color: #e42b5a;
+#apainter-ui .button:hover {
+  background-color: #f43b6a;
 }
 
-#share {
+#apainter-ui #form {
   display: flex;
   align-content: center;
 }
 
-#share input {
+#apainter-ui #share input {
   width: 600px;
   color: #333;
   text-align: center;
 }
 
-.hide {
+#apainter-ui .hide {
   display: none !important;
 }
