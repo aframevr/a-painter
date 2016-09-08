@@ -3,12 +3,22 @@ AFRAME.APAINTER = {
   brushes: {},
   strokeEntities: [],
   init: function () {
+    this.startPainting = false;
+    var self = this;
     document.addEventListener('stroke-removed', function (event) {
       var index = this.strokeEntities.indexOf(event.detail.entity);
       if (index > -1) {
-        this.strokeEntities.splice(index, 1);
+        self.strokeEntities.splice(index, 1);
       }
-    }.bind(this));
+    });
+    
+    document.addEventListener('stroke-started', function(event) {
+      self.strokeEntities.push(event.detail.entity);
+      if (!self.startPainting) {
+        document.getElementById('logo').emit('fadeout');
+        self.startPainting = true;
+      }
+    });
   },
   clear: function () {
     // Remove all the stroke entities
