@@ -22,7 +22,7 @@ AFRAME.registerComponent('paint-controls', {
     }
     el.addEventListener('brushsize-changed', function (event) {
       var scale = event.detail.brushSize * 10;
-      self.buttonMeshes.sizeHint.scale.set(scale,scale,scale);
+      self.buttonMeshes.sizeHint.scale.set(scale, scale, 1);
     });
     el.addEventListener('brushcolor-changed', function (event) {
       self.buttonMeshes.colorTip.material.color.copy(event.detail.color);
