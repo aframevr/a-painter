@@ -3,12 +3,22 @@
   "version": "0.1.0",
   "description": "A-Painter",
   "scripts": {
-    "start": "live-server"
+    "start": "live-server",
+    "lint": "semistandard -v | snazzy"
   },
   "repository": "fernandojsg/a-painter",
   "license": "MIT",
+  "semistandard": {
+    "ignore": [
+      "**/vendor/**"
+    ]
+  },
   "dependencies": {
     "aframe": "^0.3.1",
     "live-server": "^1.1.0"
+  },
+  "devDependencies": {
+    "semistandard": "^9.0.0",
+    "snazzy": "^4.0.1"
   }
 }
