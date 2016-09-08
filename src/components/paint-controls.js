@@ -26,6 +26,7 @@ AFRAME.registerComponent('paint-controls', {
     });
     el.addEventListener('brushcolor-changed', function (event) {
       self.buttonMeshes.colorTip.material.color.copy(event.detail.color);
+      self.buttonMeshes.sizeHint.material.color.copy(event.detail.color);
     });
   },
 
