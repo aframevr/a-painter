@@ -10,7 +10,7 @@ for (var mi = 0; mi < MCGRIDSIZE; mi++) {
   for (var mj = 0; mj < MCGRIDSIZE; mj++) {
     MCGRID[mi][mj] = new Array(MCGRIDSIZE);
     for (var mk = 0; mk < MCGRIDSIZE; mk++) {
-      MCGRID[mi][mj][mk] = false; // instead of false, we should have the threejs mesh
+      MCGRID[mi][mj][mk] = null; // instead of false, we should have the threejs mesh
     }
   }
 }
@@ -54,38 +54,37 @@ var minecraft = {
     });
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-    var voxelx = Math.floor((position.x + MCROOMSIZE / 2) / 2 * MCGRIDSIZE);
-    var voxely = Math.floor(position.y * MCGRIDSIZE);
-    var voxelz = Math.floor((position.z + MCROOMSIZE / 2) / 2 * MCGRIDSIZE);
+    var posx= pointerPosition.x + MCVOXELSIZE / 2;
+    var posy= pointerPosition.y + MCVOXELSIZE / 2;
+    var posz= pointerPosition.z + MCVOXELSIZE / 2;
+
+    var voxelx = Math.floor((posx - MCVOXELSIZE + MCROOMSIZE / 2) / 2 * MCGRIDSIZE);
+    var voxely = Math.floor(posy / MCROOMSIZE * MCGRIDSIZE);
+    var voxelz = Math.floor((posz - MCVOXELSIZE + MCROOMSIZE / 2) / 2 * MCGRIDSIZE);
 
     // out of voxel cube
     if (voxelx < 0 || voxelx >= MCGRIDSIZE) return;
     if (voxely < 0 || voxely >= MCGRIDSIZE) return;
     if (voxelz < 0 || voxelz >= MCGRIDSIZE) return;
 
-    if (MCGRID[voxelx][voxely][voxelz]) return;
+    if (MCGRID[voxelx][voxely][voxelz]){
+      MCGRID[voxelx][voxely][voxelz].material= this.getMaterial()
+      return;
+    } 
 
-    MCGRID[voxelx][voxely][voxelz] = true;
     var geometry = new THREE.BoxGeometry(MCVOXELSIZE, MCVOXELSIZE, MCVOXELSIZE);
     var voxel = new THREE.Mesh(geometry, this.material);
 
     var voxelpos = new THREE.Vector3();
     voxelpos.set(
-      Math.floor(position.x / MCVOXELSIZE) * MCVOXELSIZE,
-      Math.floor(position.y / MCVOXELSIZE) * MCVOXELSIZE,
-      Math.floor(position.z / MCVOXELSIZE) * MCVOXELSIZE
+      Math.floor(posx / MCVOXELSIZE) * MCVOXELSIZE,
+      Math.floor(posy / MCVOXELSIZE) * MCVOXELSIZE,
+      Math.floor(posz / MCVOXELSIZE) * MCVOXELSIZE
       );
     voxel.position.copy(voxelpos);
 
+    MCGRID[voxelx][voxely][voxelz] = voxel;
     this.mesh.add(voxel);
-/*    this.numPoints++;
-
-    this.points.push({
-      'position': position,
-      'rotation': rotation,
-      'intensity': intensity
-    });
-*/
     return true;
   }
 };
