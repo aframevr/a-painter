@@ -3,147 +3,102 @@ AFRAME.APAINTER = {
   version: 1,
   brushes: {},
   strokeEntities: [],
+  sceneEl: null,
   init: function () {
+    this.sceneEl = document.querySelector('a-scene');
+    this.brushSystem = this.sceneEl.systems.brush;
+
+    function getUrlParams () {
+      var match;
+      var pl = /\+/g;  // Regex for replacing addition symbol with a space
+      var search = /([^&=]+)=?([^&]*)/g;
+      var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
+      var query = window.location.search.substring(1);
+      var urlParams = {};
+
+      while (match = search.exec(query)) {
+        urlParams[decode(match[1])] = decode(match[2]);
+      }
+      return urlParams;
+    }
+    var urlParams = getUrlParams();
+    if (urlParams.url) {
+      this.brushSystem.loadBinary(urlParams.url);
+    }
+
     this.startPainting = false;
     var self = this;
-    document.addEventListener('stroke-removed', function (event) {
-      var index = this.strokeEntities.indexOf(event.detail.entity);
-      if (index > -1) {
-        self.strokeEntities.splice(index, 1);
-      }
-    });
-
     document.addEventListener('stroke-started', function (event) {
-      self.strokeEntities.push(event.detail.entity);
       if (!self.startPainting) {
         document.getElementById('logo').emit('fadeout');
         self.startPainting = true;
       }
     });
-  },
-  clear: function () {
-    // Remove all the stroke entities
-    for (var i = 0; i < this.strokeEntities.length; i++) {
-      var entity = this.strokeEntities[i];
-      entity.parentNode.removeChild(entity);
-    }
 
-    // Reset the used brushes
-    Object.keys(AFRAME.APAINTER.brushes).forEach(function (name) {
-      AFRAME.APAINTER.brushes[name].used = false;
-    });
+    // @fixme This is just for debug until we'll get some UI
+    document.addEventListener('keyup', function (event) {
+      console.log(event.keyCode);
 
-    this.strokeEntities = [];
-  },
-  registerBrush: function (name, definition, options) {
-    var proto = {};
-
-    // Format definition object to prototype object.
-    Object.keys(definition).forEach(function (key) {
-      proto[key] = {
-        value: definition[key],
-        writable: true
-      };
-    });
-
-    if (this.brushes[name]) {
-      throw new Error('The brush `' + name + '` has been already registered. ' +
-                      'Check that you are not loading two versions of the same brush ' +
-                      'or two different brushes of the same name.');
-    }
-
-    var BrushInterface = function () {};
-
-    var defaultOptions = {
-      spacing: 0,
-      maxPoints: 0
-    };
-
-    BrushInterface.prototype = {
-      options: Object.assign(defaultOptions, options),
-      reset: function () {},
-      tick: function (timeoffset, delta) {},
-      addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
-      getBinary: function () {
-        // Color = 3*4 = 12
-        // NumPoints   =  4
-        // Brush index =  1
-        // ----------- = 21
-        // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
-        var bufferSize = 21 + (36 * this.data.points.length);
-        var binaryManager = new BinaryManager(new ArrayBuffer(bufferSize));
-        binaryManager.writeUint8(AFRAME.APAINTER.getUsedBrushes().indexOf(this.brushName));  // brush index
-        binaryManager.writeColor(this.data.color);    // color
-        binaryManager.writeFloat32(this.data.size);   // brush size
-
-        // Number of points
-        binaryManager.writeUint32(this.data.points.length);
-
-        // Points
-        for (var i = 0; i < this.data.points.length; i++) {
-          var point = this.data.points[i];
-          binaryManager.writeFloat32Array(point.position.toArray());
-          binaryManager.writeFloat32Array(point.rotation.toArray());
-          binaryManager.writeFloat32(point.pressure);
-          binaryManager.writeUint32(point.timestamp);
-        }
-        return binaryManager.getDataView();
+      if (event.keyCode === 8) {
+        // Undo (Backspace)
+        self.brushSystem.undo();
       }
-    };
+      if (event.keyCode === 67) {
+        // Clear (c)
+        self.brushSystem.clear();
+      }
+      if (event.keyCode === 82) {
+        // Random stroke (r)
+        self.brushSystem.generateRandomStrokes(1);
+      }
+      if (event.keyCode === 76) {
+        // load binary from file (u)
+        self.brushSystem.loadBinary('apainter.bin');
+      }
+      if (event.keyCode === 85) {
+        // Upload file (u)
+        var baseUrl = 'http://a-painter.aframe.io/?url=';
 
-    function wrapInit (initMethod) {
-      return function init (color, brushSize) {
-        this.object3D = new THREE.Object3D();
-        this.data = {
-          points: [],
-          size: brushSize,
-          prevPoint: null,
-          numPoints: 0,
-          color: color.clone()
-        };
-        initMethod.call(this, color, brushSize);
-      };
-    }
-
-    function wrapAddPoint (addPointMethod) {
-      return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
-        if ((this.data.prevPoint && this.data.prevPoint.distanceTo(position) <= this.options.spacing) ||
-            this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints) {
-          return;
-        }
-        if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
-          this.data.numPoints++;
-          this.data.points.push({
-            'position': position,
-            'rotation': rotation,
-            'pressure': pressure,
-            'timestamp': timestamp
+        // Upload
+        var dataviews = self.brushSystem.getBinary();
+        var blob = new Blob(dataviews, {type: 'application/octet-binary'});
+        var uploader = 'uploadcare'; // or 'fileio'
+        if (uploader === 'fileio') {
+          // Using file.io
+          var fd = new window.FormData();
+          fd.append('file', blob);
+          var xhr = new window.XMLHttpRequest();
+          xhr.open('POST', 'https://file.io'); // ?expires=1y
+          xhr.onreadystatechange = function (data) {
+            if (xhr.readyState === 4) {
+              var response = JSON.parse(xhr.response);
+              if (response.success) {
+                console.log('Uploaded link: ', baseUrl + response.link);
+                document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
+              }
+            } else {
+              // alert('An error occurred while uploading the drawing, please try again');
+            }
+          };
+          xhr.send(fd);
+        } else {
+          var file = uploadcare.fileFrom('object', blob);
+          file.done(function (fileInfo) {
+            console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
+            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
           });
-
-          this.data.prevPoint = position.clone();
         }
-      };
-    }
+      }
+      if (event.keyCode === 86) { // v
+        dataviews = self.brushSystem.getBinary();
+        blob = new Blob(dataviews, {type: 'application/octet-binary'});
+        // saveAs.js defines `saveAs` for saving files out of the browser
+        saveAs(blob, 'apainter.bin');
+      }
+    }.bind(this));
 
-    var NewBrush = function () {};
-    NewBrush.prototype = Object.create(BrushInterface.prototype, proto);
-    NewBrush.prototype.brushName = name;
-    NewBrush.prototype.constructor = NewBrush;
-    NewBrush.prototype.init = wrapInit(NewBrush.prototype.init);
-    NewBrush.prototype.addPoint = wrapAddPoint(NewBrush.prototype.addPoint);
-    this.brushes[name] = NewBrush;
-
-    console.log('New brush registered `' + name + '`');
-    NewBrush.used = false; // Used to know which brushes have been used on the drawing
-    return NewBrush;
+    console.info('A-PAINTER Version: ' + this.version);
   },
-  getUsedBrushes: function () {
-    return Object.keys(AFRAME.APAINTER.brushes)
-      .filter(function (name) { return AFRAME.APAINTER.brushes[name].used; });
-  },
-  getBrushByName: function (name) {
-    return this.brushes[name];
-  }
 };
 
 AFRAME.APAINTER.init();

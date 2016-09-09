@@ -288,5 +288,5 @@ var lines = [
 
 for (var i = 0; i < lines.length; i++) {
   var definition = lines[i];
-  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
+  AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
 }

@@ -343,7 +343,7 @@ var stamps = [
 
 for (var i = 0; i < stamps.length; i++) {
   var definition = stamps[i];
-  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, stamp, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, spacing: definition.spacing, maxPoints: 3000});
+  AFRAME.registerBrush(definition.name, Object.assign({}, stamp, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, spacing: definition.spacing, maxPoints: 3000});
 }
 
 /*
