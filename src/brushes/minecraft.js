@@ -54,9 +54,9 @@ var minecraft = {
     });
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-    var posx= pointerPosition.x + MCVOXELSIZE / 2;
-    var posy= pointerPosition.y + MCVOXELSIZE / 2;
-    var posz= pointerPosition.z + MCVOXELSIZE / 2;
+    var posx = pointerPosition.x + MCVOXELSIZE / 2;
+    var posy = pointerPosition.y + MCVOXELSIZE / 2;
+    var posz = pointerPosition.z + MCVOXELSIZE / 2;
 
     var voxelx = Math.floor((posx - MCVOXELSIZE + MCROOMSIZE / 2) / 2 * MCGRIDSIZE);
     var voxely = Math.floor(posy / MCROOMSIZE * MCGRIDSIZE);
@@ -67,13 +67,16 @@ var minecraft = {
     if (voxely < 0 || voxely >= MCGRIDSIZE) return;
     if (voxelz < 0 || voxelz >= MCGRIDSIZE) return;
 
-    if (MCGRID[voxelx][voxely][voxelz]){
-      MCGRID[voxelx][voxely][voxelz].material= this.getMaterial()
+    if (MCGRID[voxelx][voxely][voxelz]) {
+      MCGRID[voxelx][voxely][voxelz].material = this.getMaterial();
       return;
-    } 
+    }
 
     var geometry = new THREE.BoxGeometry(MCVOXELSIZE, MCVOXELSIZE, MCVOXELSIZE);
     var voxel = new THREE.Mesh(geometry, this.material);
+
+    voxel.startTime = timestamp;
+    voxel.scale.set(0.01, 0.01, 0.01);
 
     var voxelpos = new THREE.Vector3();
     voxelpos.set(
@@ -86,6 +89,23 @@ var minecraft = {
     MCGRID[voxelx][voxely][voxelz] = voxel;
     this.mesh.add(voxel);
     return true;
+  },
+  tick: function (time, delta) {
+    console.log('tick', time);
+    for (var mi = 0; mi < MCGRIDSIZE; mi++) {
+      MCGRID[mi] = new Array(MCGRIDSIZE);
+      for (var mj = 0; mj < MCGRIDSIZE; mj++) {
+        MCGRID[mi][mj] = new Array(MCGRIDSIZE);
+        for (var mk = 0; mk < MCGRIDSIZE; mk++) {
+          var voxelMesh = MCGRID[mi][mj][mk];
+          if (voxelMesh) {
+            console.log(voxelMesh.startTime, time);
+            var s = Math.max(0, Math.min(1, time - voxelMesh.startTime));
+            voxelMesh.scale.set(s, s, s);
+          }
+        }
+      }
+    }
   }
 };
 
