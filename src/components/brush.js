@@ -1,14 +1,14 @@
-/* globals AFRAME THREE BinaryManager saveAs Blob */
+/* globals AFRAME THREE BinaryManager saveAs Blob uploadcare */
 AFRAME.registerSystem('brush', {
   schema: {},
   getUrlParams: function () {
-    var match,
-        pl     = /\+/g,  // Regex for replacing addition symbol with a space
-        search = /([^&=]+)=?([^&]*)/g,
-        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
-        query  = window.location.search.substring(1);
+    var match;
+    var pl = /\+/g;  // Regex for replacing addition symbol with a space
+    var search = /([^&=]+)=?([^&]*)/g;
+    var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
+    var query = window.location.search.substring(1);
+    var urlParams = {};
 
-    urlParams = {};
     while (match = search.exec(query)) {
       urlParams[decode(match[1])] = decode(match[2]);
     }
@@ -23,7 +23,7 @@ AFRAME.registerSystem('brush', {
     }
 
     // @fixme This is just for debug until we'll get some UI
-    document.addEventListener('keyup', function(event){
+    document.addEventListener('keyup', function (event) {
       if (event.keyCode === 76) {
         this.loadBinary('apainter.bin');
       }
@@ -36,12 +36,12 @@ AFRAME.registerSystem('brush', {
         var uploader = 'uploadcare'; // or 'fileio'
         if (uploader === 'fileio') {
           // Using file.io
-          var fd = new FormData();
-          fd.append("file", blob);
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", 'https://file.io'); // ?expires=1y
+          var fd = new window.FormData();
+          fd.append('file', blob);
+          var xhr = new window.XMLHttpRequest();
+          xhr.open('POST', 'https://file.io'); // ?expires=1y
           xhr.onreadystatechange = function (data) {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
               var response = JSON.parse(xhr.response);
               if (response.success) {
                 console.log('Uploaded link: ', baseUrl + response.link);
@@ -54,15 +54,15 @@ AFRAME.registerSystem('brush', {
           xhr.send(fd);
         } else {
           var file = uploadcare.fileFrom('object', blob);
-          file.done(function(fileInfo) {
+          file.done(function (fileInfo) {
             console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
             document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
           });
         }
       }
       if (event.keyCode === 86) { // v
-        var dataviews = this.getBinary();
-        var blob = new Blob(dataviews, {type: 'application/octet-binary'});
+        dataviews = this.getBinary();
+        blob = new Blob(dataviews, {type: 'application/octet-binary'});
         // saveAs.js defines `saveAs` for saving files out of the browser
         saveAs(blob, 'apainter.bin');
       }
@@ -112,7 +112,7 @@ AFRAME.registerSystem('brush', {
     }
     return dataViews;
   },
-  getPointerPosition: function () {
+  getPointerPosition: (function () {
     var pointerPosition = new THREE.Vector3();
     var offset = new THREE.Vector3(0, 0.7, 1);
     return function getPointerPosition (position, rotation) {
@@ -124,7 +124,7 @@ AFRAME.registerSystem('brush', {
       pointerPosition.copy(position).add(pointer);
       return pointerPosition;
     };
-  }(),
+  })(),
   loadBinary: function (url) {
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
@@ -249,7 +249,7 @@ AFRAME.registerComponent('brush', {
       }
     }.bind(this));
   },
-  tick: function () {
+  tick: (function () {
     var position = new THREE.Vector3();
     var rotation = new THREE.Quaternion();
     var scale = new THREE.Vector3();
@@ -261,7 +261,7 @@ AFRAME.registerComponent('brush', {
         this.currentLine.addPoint(position, rotation, pointerPosition, this.brushSizeModifier, time);
       }
     };
-  }(),
+  })(),
   startNewStroke: function () {
     this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
     var entity = document.createElement('a-entity');

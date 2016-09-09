@@ -1,4 +1,4 @@
-/* globals THREE */
+/* globals AFRAME THREE */
 var line = {
   init: function (color, brushSize) {
     this.idx = 0;
@@ -44,10 +44,9 @@ var line = {
         color: this.data.color,
         roughness: 0.75,
         metalness: 0.25,
-        side: THREE.DoubleSide,
+        side: THREE.DoubleSide
       };
-    }
-    else {
+    } else {
       defaultOptions = {
         color: this.data.color,
         side: THREE.DoubleSide
@@ -74,7 +73,7 @@ var line = {
       this.uvs[ uv++ ] = 1;
     }
 
-    direction = new THREE.Vector3();
+    var direction = new THREE.Vector3();
     direction.set(1, 0, 0);
     direction.applyQuaternion(rotation);
     direction.normalize();
@@ -103,22 +102,18 @@ var line = {
     return true;
   },
   computeVertexNormals: function () {
-    var vA, vB, vC,
+    var pA = new THREE.Vector3();
+    var pB = new THREE.Vector3();
+    var pC = new THREE.Vector3();
+    var cb = new THREE.Vector3();
+    var ab = new THREE.Vector3();
 
-    pA = new THREE.Vector3(),
-    pB = new THREE.Vector3(),
-    pC = new THREE.Vector3(),
-
-    cb = new THREE.Vector3(),
-    ab = new THREE.Vector3();
-
-    for (var i = 0, il = this.idx; i < il; i ++) {
+    for (var i = 0, il = this.idx; i < il; i++) {
       this.normals[ i ] = 0;
     }
 
-    var n = 0;
     var pair = true;
-    for (var i = 0, il = this.idx; i < il; i += 3) {
+    for (i = 0, il = this.idx; i < il; i += 3) {
       if (pair) {
         pA.fromArray(this.vertices, i);
         pB.fromArray(this.vertices, i + 3);
@@ -135,7 +130,7 @@ var line = {
       cb.cross(ab);
       cb.normalize();
 
-      this.normals[ i ]     += cb.x;
+      this.normals[ i ] += cb.x;
       this.normals[ i + 1 ] += cb.y;
       this.normals[ i + 2 ] += cb.z;
 
@@ -161,7 +156,7 @@ var line = {
     */
 
     // Vertices that are shared across three triangles
-    for (var i = 2 * 3, il = this.idx - 2 * 3; i < il; i ++) {
+    for (i = 2 * 3, il = this.idx - 2 * 3; i < il; i++) {
       this.normals[ i ] = this.normals[ i ] / 3;
     }
 
@@ -170,128 +165,128 @@ var line = {
     this.normals[ 3 + 1 ] = this.normals[ 3 + 1 ] / 2;
     this.normals[ 3 + 2 ] = this.normals[ 3 * 1 + 2 ] / 2;
 
-    this.normals[ this.idx - 2 * 3] = this.normals[  this.idx - 2 * 3 ] / 2;
-    this.normals[ this.idx - 2 * 3 + 1 ] = this.normals[  this.idx - 2 * 3 + 1] / 2;
-    this.normals[ this.idx - 2 * 3 + 2] = this.normals[  this.idx - 2 * 3 + 2] / 2;
+    this.normals[ this.idx - 2 * 3 ] = this.normals[ this.idx - 2 * 3 ] / 2;
+    this.normals[ this.idx - 2 * 3 + 1 ] = this.normals[ this.idx - 2 * 3 + 1 ] / 2;
+    this.normals[ this.idx - 2 * 3 + 2 ] = this.normals[ this.idx - 2 * 3 + 2 ] / 2;
 
     this.geometry.normalizeNormals();
   }
 };
 
 var lines = [
-  { 
-    name: 'flat', 
+  {
+    name: 'flat',
     materialOptions: {
       type: 'flat'
-    }, 
-    thumbnail: '' 
+    },
+    thumbnail: ''
   },
-  { 
-    name: 'smooth', 
+  {
+    name: 'smooth',
     materialOptions: {
       type: 'smooth'
-    }, 
-    thumbnail: '' 
+    },
+    thumbnail: ''
   },
-  { 
-    name: 'squared-textured', 
+  {
+    name: 'squared-textured',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/squared_textured.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'line-gradient', 
+  {
+    name: 'line-gradient',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/line_gradient.png'
-    }, 
-    thumbnail: 'brushes/line_gradient.png' 
+    },
+    thumbnail: 'brushes/line_gradient.png'
   },
-  { 
-    name: 'silky-flat', 
+  {
+    name: 'silky-flat',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/silky_flat.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
+  {
     name: 'silky-textured',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/silky_textured.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'lines1', 
+  {
+    name: 'lines1',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/lines1.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'lines2', 
+  {
+    name: 'lines2',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/lines2.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'lines3', 
+  {
+    name: 'lines3',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/lines3.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'lines4', 
+  {
+    name: 'lines4',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/lines4.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'lines5', 
+  {
+    name: 'lines5',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/lines5.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'line-grunge1', 
+  {
+    name: 'line-grunge1',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/line_grunge1.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'line-grunge2', 
+  {
+    name: 'line-grunge2',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/line_grunge2.png'
-    }, 
-    thumbnail: 'brushes/thumb_bristles0.png' 
+    },
+    thumbnail: 'brushes/thumb_bristles0.png'
   },
-  { 
-    name: 'line-grunge3', 
+  {
+    name: 'line-grunge3',
     materialOptions: {
-      type: 'textured', 
+      type: 'textured',
       textureSrc: 'brushes/line_grunge3.png'
-    }, 
+    },
     thumbnail: 'brushes/thumb_bristles0.png'
   }
 ];
 
 for (var i = 0; i < lines.length; i++) {
   var definition = lines[i];
-  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions }), {thumbnail: definition.thumbnail, maxPoints: 3000 });
+  AFRAME.APAINTER.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
 }
