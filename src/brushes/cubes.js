@@ -24,4 +24,4 @@ var cubes = {
   }
 };
 
-AFRAME.APAINTER.registerBrush('cubes', cubes);
+AFRAME.registerBrush('cubes', cubes);

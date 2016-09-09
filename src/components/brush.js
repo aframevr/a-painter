@@ -1,75 +1,187 @@
 /* globals AFRAME THREE BinaryManager saveAs Blob uploadcare */
+AFRAME.BRUSHES = {};
+
+AFRAME.registerBrush = function (name, definition, options) {
+  var proto = {};
+
+  // Format definition object to prototype object.
+  Object.keys(definition).forEach(function (key) {
+    proto[key] = {
+      value: definition[key],
+      writable: true
+    };
+  });
+
+  if (AFRAME.BRUSHES[name]) {
+    throw new Error('The brush `' + name + '` has been already registered. ' +
+                    'Check that you are not loading two versions of the same brush ' +
+                    'or two different brushes of the same name.');
+  }
+
+  var BrushInterface = function () {};
+
+  var defaultOptions = {
+    spacing: 0,
+    maxPoints: 0
+  };
+  var self = this;
+
+  BrushInterface.prototype = {
+    options: Object.assign(defaultOptions, options),
+    reset: function () {},
+    tick: function (timeoffset, delta) {},
+    addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
+    getBinary: function (system) {
+      // Color = 3*4 = 12
+      // NumPoints   =  4
+      // Brush index =  1
+      // ----------- = 21
+      // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
+      var bufferSize = 21 + (36 * this.data.points.length);
+      var binaryManager = new BinaryManager(new ArrayBuffer(bufferSize));
+      binaryManager.writeUint8(self.getUsedBrushes().indexOf(this.brushName));  // brush index
+      binaryManager.writeColor(this.data.color);    // color
+      binaryManager.writeFloat32(this.data.size);   // brush size
+
+      // Number of points
+      binaryManager.writeUint32(this.data.points.length);
+
+      // Points
+      for (var i = 0; i < this.data.points.length; i++) {
+        var point = this.data.points[i];
+        binaryManager.writeFloat32Array(point.position.toArray());
+        binaryManager.writeFloat32Array(point.rotation.toArray());
+        binaryManager.writeFloat32(point.pressure);
+        binaryManager.writeUint32(point.timestamp);
+      }
+      return binaryManager.getDataView();
+    }
+  };
+
+  function wrapInit (initMethod) {
+    return function init (color, brushSize) {
+      this.object3D = new THREE.Object3D();
+      this.data = {
+        points: [],
+        size: brushSize,
+        prevPoint: null,
+        numPoints: 0,
+        color: color.clone()
+      };
+      initMethod.call(this, color, brushSize);
+    };
+  }
+
+  function wrapAddPoint (addPointMethod) {
+    return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
+      if ((this.data.prevPoint && this.data.prevPoint.distanceTo(position) <= this.options.spacing) ||
+          this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints) {
+        return;
+      }
+      if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
+        this.data.numPoints++;
+        this.data.points.push({
+          'position': position,
+          'rotation': rotation,
+          'pressure': pressure,
+          'timestamp': timestamp
+        });
+
+        this.data.prevPoint = position.clone();
+      }
+    };
+  }
+
+  var NewBrush = function () {};
+  NewBrush.prototype = Object.create(BrushInterface.prototype, proto);
+  NewBrush.prototype.brushName = name;
+  NewBrush.prototype.constructor = NewBrush;
+  NewBrush.prototype.init = wrapInit(NewBrush.prototype.init);
+  NewBrush.prototype.addPoint = wrapAddPoint(NewBrush.prototype.addPoint);
+  AFRAME.BRUSHES[name] = NewBrush;
+
+  console.log('New brush registered `' + name + '`');
+  NewBrush.used = false; // Used to know which brushes have been used on the drawing
+  return NewBrush;
+}
+
 AFRAME.registerSystem('brush', {
   schema: {},
-  getUrlParams: function () {
-    var match;
-    var pl = /\+/g;  // Regex for replacing addition symbol with a space
-    var search = /([^&=]+)=?([^&]*)/g;
-    var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
-    var query = window.location.search.substring(1);
-    var urlParams = {};
-
-    while (match = search.exec(query)) {
-      urlParams[decode(match[1])] = decode(match[2]);
+  brushes: {},
+  strokeEntities: [],
+  getUsedBrushes: function () {
+    return Object.keys(AFRAME.BRUSHES)
+      .filter(function (name) { return AFRAME.BRUSHES[name].used; });
+  },
+  getBrushByName: function (name) {
+    return AFRAME.BRUSHES[name];
+  },
+  undo: function() {
+    var entity = this.strokeEntities.pop();
+    if (entity) {
+      entity.emit('stroke-removed', {entity: entity});
+      entity.parentNode.removeChild(entity);
     }
-    return urlParams;
+  },
+  clear: function () {
+    // Remove all the stroke entities
+    for (var i = 0; i < this.strokeEntities.length; i++) {
+      var entity = this.strokeEntities[i];
+      entity.parentNode.removeChild(entity);
+    }
+
+    // Reset the used brushes
+    Object.keys(AFRAME.BRUSHES).forEach(function (name) {
+      AFRAME.BRUSHES[name].used = false;
+    });
+
+    this.strokeEntities = [];
+    this.strokes = [];
   },
   init: function () {
-    this.strokes = [];
+    this.clear();
+  },
+  generateRandomStrokes: function (numStrokes) {
+    for (var l = 0; l < numStrokes; l++) {
+      var brushName = 'flat';
+      var color = new THREE.Color(Math.random(), Math.random(), Math.random());
+      var size = Math.random() * 0.1;
+      var numPoints = parseInt(Math.random() * 500);
 
-    var urlParams = this.getUrlParams();
-    if (urlParams.url) {
-      this.loadBinary(urlParams.url);
+      var stroke = this.addNewStroke(brushName, color, size);
+
+      var entity = document.createElement('a-entity');
+      document.querySelector('a-scene').appendChild(entity);
+      entity.setObject3D('mesh', stroke.object3D);
+
+      this.strokeEntities.push(entity);
+
+      var rndX = Math.random();
+      var rndY = Math.random();
+      var rndZ = Math.random();
+      var position = new THREE.Vector3(rndX, rndY, rndZ);
+      var aux = new THREE.Vector3();
+      function randNeg() { return 2*Math.random()-1; }
+      var rotation = new THREE.Quaternion();
+
+      var pressure = 0.2;
+      for (var i = 0; i < numPoints; i++) {
+        var rndX = randNeg();
+        var rndY = randNeg();
+        var rndZ = randNeg();
+        aux.set(rndX,rndY,rndZ);
+        aux.multiplyScalar(randNeg()/20);
+        rotation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
+        position = position.add(aux);
+        var timestamp = 0;
+
+        var pointerPosition = this.getPointerPosition(position, rotation);
+        stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
+      }
     }
-
-    // @fixme This is just for debug until we'll get some UI
-    document.addEventListener('keyup', function (event) {
-      if (event.keyCode === 76) {
-        this.loadBinary('apainter.bin');
-      }
-      if (event.keyCode === 85) { // u
-        var baseUrl = 'http://a-painter.aframe.io/?url=';
-
-        // Upload
-        var dataviews = this.getBinary();
-        var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-        var uploader = 'uploadcare'; // or 'fileio'
-        if (uploader === 'fileio') {
-          // Using file.io
-          var fd = new window.FormData();
-          fd.append('file', blob);
-          var xhr = new window.XMLHttpRequest();
-          xhr.open('POST', 'https://file.io'); // ?expires=1y
-          xhr.onreadystatechange = function (data) {
-            if (xhr.readyState === 4) {
-              var response = JSON.parse(xhr.response);
-              if (response.success) {
-                console.log('Uploaded link: ', baseUrl + response.link);
-                document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
-              }
-            } else {
-              // alert('An error occurred while uploading the drawing, please try again');
-            }
-          };
-          xhr.send(fd);
-        } else {
-          var file = uploadcare.fileFrom('object', blob);
-          file.done(function (fileInfo) {
-            console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
-            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
-          });
-        }
-      }
-      if (event.keyCode === 86) { // v
-        dataviews = this.getBinary();
-        blob = new Blob(dataviews, {type: 'application/octet-binary'});
-        // saveAs.js defines `saveAs` for saving files out of the browser
-        saveAs(blob, 'apainter.bin');
-      }
-    }.bind(this));
   },
   addNewStroke: function (brushName, color, size) {
-    var Brush = AFRAME.APAINTER.getBrushByName(brushName);
+    var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       console.error('Invalid brush name: ', brushName);
       return;
@@ -87,7 +199,7 @@ AFRAME.registerSystem('brush', {
     var MAGIC = 'apainter';
 
     // Used brushes
-    var usedBrushes = AFRAME.APAINTER.getUsedBrushes();
+    var usedBrushes = this.getUsedBrushes();
 
     // MAGIC(8) + version (2) + usedBrushesNum(2) + usedBrushesStrings(*)
     var bufferSize = MAGIC.length + usedBrushes.join(' ').length + 9;
@@ -108,7 +220,7 @@ AFRAME.registerSystem('brush', {
 
     // Strokes
     for (i = 0; i < this.strokes.length; i++) {
-      dataViews.push(this.strokes[i].getBinary());
+      dataViews.push(this.strokes[i].getBinary(this));
     }
     return dataViews;
   },
@@ -163,7 +275,7 @@ AFRAME.registerSystem('brush', {
         document.querySelector('a-scene').appendChild(entity);
         entity.setObject3D('mesh', stroke.object3D);
 
-        AFRAME.APAINTER.strokeEntities.push(entity);
+        this.strokeEntities.push(entity);
 
         for (var i = 0; i < numPoints; i++) {
           var position = binaryManager.readVector3();
@@ -181,37 +293,35 @@ AFRAME.registerSystem('brush', {
 
 AFRAME.registerComponent('brush', {
   schema: {
-    color: { default: '' },
-    linewidth: { default: '' }
+    color: {type: 'color'},
+    size: {default: 0.01, min: 0.0, max: 1.0},
+    brush: {default: 'flat'},
   },
   init: function () {
-    this.idx = 0;
-    this.currentBrushName = 'flat';
+    var data = this.data;
+    this.color = new THREE.Color(data.color);
 
     this.active = false;
     this.obj = this.el.object3D;
-    this.currentLine = null;
+
+    this.currentStroke = null;
     this.strokeEntities = [];
-    this.color = new THREE.Color(0xd03760);
-    this.brushSize = 0.01;
-    this.brushSizeModifier = 0.0;
+
+    this.sizeModifier = 0.0;
     this.textures = {};
     this.currentMap = 0;
 
     this.model = this.el.getObject3D('mesh');
     this.drawing = false;
 
-    this.el.addEventListener('stroke-changed', function (evt) {
-      this.currentMap = evt.detail.strokeId;
-      this.brushSize = evt.detail.brushSize * 0.05;
-    }.bind(this));
+    var self = this;
 
     this.el.addEventListener('axismove', function (evt) {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      this.brushSize = 0.1 * (evt.detail.axis[1] + 1) / 2;
-      this.el.emit('brushsize-changed', {brushSize: this.brushSize});
+      this.data.size = 0.1 * (evt.detail.axis[1] + 1) / 2;
+      this.el.emit('brushsize-changed', {brushSize: this.data.size});
 
       // @fixme This is just for testing purposes
       this.color.setRGB(Math.random(), Math.random(), Math.random());
@@ -221,19 +331,15 @@ AFRAME.registerComponent('brush', {
     this.el.addEventListener('buttondown', function (evt) {
       // Grip
       if (evt.detail.id === 2) {
-        var entity = this.strokeEntities.pop();
-        if (entity) {
-          entity.emit('stroke-removed', {entity: entity});
-          entity.parentNode.removeChild(entity);
-        }
+        self.system.undo();
       }
-    }.bind(this));
+    });
 
     this.el.addEventListener('buttonchanged', function (evt) {
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;
-        this.brushSizeModifier = value * 2;
+        this.sizeModifier = value * 2;
         if (value > 0.1) {
           if (!this.active) {
             this.startNewStroke();
@@ -242,12 +348,16 @@ AFRAME.registerComponent('brush', {
         } else {
           if (this.active) {
             this.previousEntity = this.currentEntity;
-            this.currentLine = null;
+            this.currentStroke = null;
           }
           this.active = false;
         }
       }
     }.bind(this));
+  },
+  update: function (oldData) {
+    var data = this.data;
+    this.color.set(data.color);
   },
   tick: (function () {
     var position = new THREE.Vector3();
@@ -255,19 +365,19 @@ AFRAME.registerComponent('brush', {
     var scale = new THREE.Vector3();
 
     return function tick (time, delta) {
-      if (this.currentLine && this.active) {
+      if (this.currentStroke && this.active) {
         this.obj.matrixWorld.decompose(position, rotation, scale);
         var pointerPosition = this.system.getPointerPosition(position, rotation);
-        this.currentLine.addPoint(position, rotation, pointerPosition, this.brushSizeModifier, time);
+        this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
       }
     };
   })(),
   startNewStroke: function () {
-    this.currentLine = this.system.addNewStroke(this.currentBrushName, this.color, this.brushSize);
+    this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
-    entity.setObject3D('mesh', this.currentLine.object3D);
-    this.strokeEntities.push(entity);
-    this.el.emit('stroke-started', {entity: this.el, stroke: this.currentLine});
+    entity.setObject3D('mesh', this.currentStroke.object3D);
+    this.system.strokeEntities.push(entity);
+    this.el.emit('stroke-started', {entity: this.el, stroke: this.currentStroke});
   }
 });

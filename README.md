@@ -44,7 +44,7 @@ this.data = {
 * **color** (*color*): Base color to be used on the brush (It's defined when the stroke is created).
 
 ### Register a new brush
-To register a new brush we should call `AFRAME.APAINTER.registerBrush` with three parameters:
+To register a new brush we should call `AFRAME.registerBrush` with three parameters:
 * **brushName** (*string*): The unique brush name.
 * **brushDefinition** (*object*): The custom implementation of the previously defined `brushDefinition`.
 * **options** (*object* [Optional]):
@@ -52,7 +52,7 @@ To register a new brush we should call `AFRAME.APAINTER.registerBrush` with thre
   * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reached that number of points.
 
 ```javascript
-AFRAME.APAINTER.registerBrush(brushName, brushDefinition, options);
+AFRAME.registerBrush(brushName, brushDefinition, options);
 ```
 
 ## File format
