@@ -14,6 +14,11 @@ AFRAME.registerSystem('brush', {
     }
     return urlParams;
   },
+  tick: function (time, delta) {
+    for (var i = 0; i < this.strokes.length; i++) {
+      this.strokes[i].tick(time, delta);
+    }
+  },
   init: function () {
     this.strokes = [];
 
