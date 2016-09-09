@@ -1,4 +1,3 @@
-/* globals AFRAME */
 AFRAME.registerComponent('ui', {
   init: function () {
     var uiEl = this.uiEl = document.createElement('a-entity');
@@ -8,7 +7,7 @@ AFRAME.registerComponent('ui', {
       color: '#ffffff',
       flatShading: true,
       shader: 'flat',
-      transparent: true,
+      transparent:true,
       fog: false,
       src: '#uinormal',
       side: 'double'
@@ -39,19 +38,20 @@ AFRAME.registerComponent('ui', {
     }
   },
 
-  open: function () {
+  open: function() {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
     var tween = new AFRAME.TWEEN.Tween(coords)
         .to({ x: 1, y: 1, z: 1 }, 200)
-        .onUpdate(function () {
+        .onUpdate(function() {
           uiEl.setAttribute('scale', this);
         })
         .easing(AFRAME.TWEEN.Easing.Exponential.Out)
         .start();
+
   },
 
-  close: function () {
+  close: function() {
     var uiEl = this.uiEl;
     var coords = { x: 1, y: 1, z: 1 };
     var tween = new AFRAME.TWEEN.Tween(coords)
