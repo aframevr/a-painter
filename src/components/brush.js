@@ -1,4 +1,4 @@
-/* globals AFRAME THREE BinaryManager saveAs Blob uploadcare */
+/* globals AFRAME THREE BinaryManager */
 AFRAME.BRUSHES = {};
 
 AFRAME.registerBrush = function (name, definition, options) {
@@ -103,7 +103,7 @@ AFRAME.registerBrush = function (name, definition, options) {
   console.log('New brush registered `' + name + '`');
   NewBrush.used = false; // Used to know which brushes have been used on the drawing
   return NewBrush;
-}
+};
 
 AFRAME.registerSystem('brush', {
   schema: {},
@@ -116,7 +116,7 @@ AFRAME.registerSystem('brush', {
   getBrushByName: function (name) {
     return AFRAME.BRUSHES[name];
   },
-  undo: function() {
+  undo: function () {
     var entity = this.strokeEntities.pop();
     if (entity) {
       entity.emit('stroke-removed', {entity: entity});
@@ -142,6 +142,8 @@ AFRAME.registerSystem('brush', {
     this.clear();
   },
   generateRandomStrokes: function (numStrokes) {
+    function randNeg () { return 2 * Math.random() - 1; }
+
     for (var l = 0; l < numStrokes; l++) {
       var brushName = 'flat';
       var color = new THREE.Color(Math.random(), Math.random(), Math.random());
@@ -156,21 +158,14 @@ AFRAME.registerSystem('brush', {
 
       this.strokeEntities.push(entity);
 
-      var rndX = Math.random();
-      var rndY = Math.random();
-      var rndZ = Math.random();
-      var position = new THREE.Vector3(rndX, rndY, rndZ);
+      var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
-      function randNeg() { return 2*Math.random()-1; }
       var rotation = new THREE.Quaternion();
 
       var pressure = 0.2;
       for (var i = 0; i < numPoints; i++) {
-        var rndX = randNeg();
-        var rndY = randNeg();
-        var rndZ = randNeg();
-        aux.set(rndX,rndY,rndZ);
-        aux.multiplyScalar(randNeg()/20);
+        aux.set(randNeg(), randNeg(), randNeg());
+        aux.multiplyScalar(randNeg() / 20);
         rotation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
         position = position.add(aux);
         var timestamp = 0;
@@ -295,7 +290,7 @@ AFRAME.registerComponent('brush', {
   schema: {
     color: {type: 'color'},
     size: {default: 0.01, min: 0.0, max: 1.0},
-    brush: {default: 'flat'},
+    brush: {default: 'flat'}
   },
   init: function () {
     var data = this.data;

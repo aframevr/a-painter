@@ -1,4 +1,4 @@
-/* global AFRAME THREE BinaryManager */
+/* global AFRAME saveAs Blob uploadcare */
 AFRAME.APAINTER = {
   version: 1,
   brushes: {},
@@ -16,8 +16,10 @@ AFRAME.APAINTER = {
       var query = window.location.search.substring(1);
       var urlParams = {};
 
-      while (match = search.exec(query)) {
+      match = search.exec(query);
+      while (match) {
         urlParams[decode(match[1])] = decode(match[2]);
+        match = search.exec(query);
       }
       return urlParams;
     }
@@ -95,10 +97,10 @@ AFRAME.APAINTER = {
         // saveAs.js defines `saveAs` for saving files out of the browser
         saveAs(blob, 'apainter.bin');
       }
-    }.bind(this));
+    });
 
     console.info('A-PAINTER Version: ' + this.version);
-  },
+  }
 };
 
 AFRAME.APAINTER.init();
