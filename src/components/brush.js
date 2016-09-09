@@ -186,7 +186,7 @@ AFRAME.registerComponent('brush', {
   },
   init: function () {
     this.idx = 0;
-    this.currentBrushName = 'flat';
+    this.currentBrushName = 'minecraft';
 
     this.active = false;
     this.obj = this.el.object3D;
