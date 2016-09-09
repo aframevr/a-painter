@@ -27,6 +27,7 @@
     <script src="src/brushes/stamp.js"></script>
     <script src="src/brushes/spheres.js"></script>
     <script src="src/brushes/cubes.js"></script>
+
     <!-- css -->
     <link rel="stylesheet" href="css/main.css">
   </head>
@@ -41,6 +42,7 @@
         <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
+      <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="logo" material="flatShading:true; shader:flat; transparent:true; color:#ffffff; fog:false; src:#apainterlogo" obj-model="obj: #logoobj">
         <a-animation begin="fadeout" attribute="material.opacity" fill="none" from="1" to="0" dur="3000"></a-animation>
@@ -73,5 +75,7 @@
         </div>
       </div>
     </div>
+    <!-- dragndrop -->
+    <script src="src/dragndrop.js"></script>
   </body>
 </html>
