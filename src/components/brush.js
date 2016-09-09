@@ -136,10 +136,14 @@ AFRAME.registerSystem('brush', {
     });
 
     this.strokeEntities = [];
-    this.strokes = [];
   },
   init: function () {
     this.clear();
+  },
+  tick: function (time, delta) {
+    for (var i = 0; i < this.strokes.length; i++) {
+      this.strokes[i].tick(time, delta);
+    }
   },
   generateRandomStrokes: function (numStrokes) {
     function randNeg () { return 2 * Math.random() - 1; }
