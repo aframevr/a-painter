@@ -4,6 +4,7 @@
 var MCGRIDSIZE = 128;
 var MCROOMSIZE = 2.0; // 2x2x2m room size
 var MCGRID = new Array(MCGRIDSIZE);
+
 for (var mi = 0; mi < MCGRIDSIZE; mi++) {
   MCGRID[mi] = new Array(MCGRIDSIZE);
   for (var mj = 0; mj < MCGRIDSIZE; mj++) {
@@ -30,8 +31,9 @@ var minecraft = {
     this.material = this.getMaterial();
     this.mesh = new THREE.Group();
     this.object3D.add(this.mesh);
-    this.voxels= [];
-    this.animate= true;
+    this.voxels = [];
+    this.animate = true;
+
     /*
     if (mcGridHelper == null) {
       mcGridHelper= document.createElement('a-box');
@@ -77,7 +79,7 @@ var minecraft = {
     var voxel = new THREE.Mesh(geometry, this.material);
 
     voxel.startTime = timestamp;
-    voxel.animate= true;
+    voxel.animate = true;
     voxel.scale.set(0.01, 0.01, 0.01);
 
     var voxelpos = new THREE.Vector3();
@@ -95,14 +97,14 @@ var minecraft = {
   },
   tick: function (time, delta) {
     if (!this.animate) return;
-    var numvoxels= this.voxels.length;
+    var numvoxels = this.voxels.length;
     var voxelMesh;
     var stillAnimating = false;
-    for (var i = numvoxels- 1; i >= 0; i--) {
-      voxelMesh= this.voxels[i]
+    for (var i = numvoxels - 1; i >= 0; i--) {
+      voxelMesh = this.voxels[i];
       if (voxelMesh.animate) {
         stillAnimating = true;
-        var s = Math.max(0, Math.min(1, (time - voxelMesh.startTime) /100 ));
+        var s = Math.max(0, Math.min(1, (time - voxelMesh.startTime) / 100));
         if (s >= 1) voxelMesh.animate = false;
         voxelMesh.scale.set(s, s, s);
       }
