@@ -4,7 +4,6 @@
 var MCGRIDSIZE = 128;
 var MCROOMSIZE = 2.0; // 2x2x2m room size
 var MCGRID = new Array(MCGRIDSIZE);
-
 for (var mi = 0; mi < MCGRIDSIZE; mi++) {
   MCGRID[mi] = new Array(MCGRIDSIZE);
   for (var mj = 0; mj < MCGRIDSIZE; mj++) {
@@ -31,6 +30,8 @@ var minecraft = {
     this.material = this.getMaterial();
     this.mesh = new THREE.Group();
     this.object3D.add(this.mesh);
+    this.voxels= [];
+    this.animate= true;
     /*
     if (mcGridHelper == null) {
       mcGridHelper= document.createElement('a-box');
@@ -54,7 +55,6 @@ var minecraft = {
     });
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-    console.log('addPoint');
     var posx = pointerPosition.x + MCVOXELSIZE / 2;
     var posy = pointerPosition.y + MCVOXELSIZE / 2;
     var posz = pointerPosition.z + MCVOXELSIZE / 2;
@@ -69,7 +69,7 @@ var minecraft = {
     if (voxelz < 0 || voxelz >= MCGRIDSIZE) return;
 
     if (MCGRID[voxelx][voxely][voxelz]) {
-      MCGRID[voxelx][voxely][voxelz].material = this.getMaterial();
+      MCGRID[voxelx][voxely][voxelz].material = this.material;
       return;
     }
 
@@ -77,7 +77,8 @@ var minecraft = {
     var voxel = new THREE.Mesh(geometry, this.material);
 
     voxel.startTime = timestamp;
-    //voxel.scale.set(0.01, 0.01, 0.01);
+    voxel.animate= true;
+    voxel.scale.set(0.01, 0.01, 0.01);
 
     var voxelpos = new THREE.Vector3();
     voxelpos.set(
@@ -88,25 +89,25 @@ var minecraft = {
     voxel.position.copy(voxelpos);
 
     MCGRID[voxelx][voxely][voxelz] = voxel;
+    this.voxels.push(voxel);
     this.mesh.add(voxel);
     return true;
   },
   tick: function (time, delta) {
-    console.log('tick', time);
-    for (var mi = 0; mi < MCGRIDSIZE; mi++) {
-      MCGRID[mi] = new Array(MCGRIDSIZE);
-      for (var mj = 0; mj < MCGRIDSIZE; mj++) {
-        MCGRID[mi][mj] = new Array(MCGRIDSIZE);
-        for (var mk = 0; mk < MCGRIDSIZE; mk++) {
-          var voxelMesh = MCGRID[mi][mj][mk];
-          if (voxelMesh) {
-            console.log(voxelMesh.startTime, time);
-            var s = Math.max(0, Math.min(1, time - voxelMesh.startTime));
-            voxelMesh.scale.set(s, s, s);
-          }
-        }
+    if (!this.animate) return;
+    var numvoxels= this.voxels.length;
+    var voxelMesh;
+    var stillAnimating = false;
+    for (var i = numvoxels- 1; i >= 0; i--) {
+      voxelMesh= this.voxels[i]
+      if (voxelMesh.animate) {
+        stillAnimating = true;
+        var s = Math.max(0, Math.min(1, (time - voxelMesh.startTime) /100 ));
+        if (s >= 1) voxelMesh.animate = false;
+        voxelMesh.scale.set(s, s, s);
       }
     }
+    if (numvoxels && !stillAnimating) this.animate = false;
   }
 };
 
