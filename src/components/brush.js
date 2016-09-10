@@ -294,7 +294,7 @@ AFRAME.registerComponent('brush', {
   schema: {
     color: {type: 'color'},
     size: {default: 0.01, min: 0.0, max: 1.0},
-    brush: {default: 'flat'}
+    brush: {default: 'minecraft'}
   },
   init: function () {
     var data = this.data;

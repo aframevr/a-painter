@@ -1,4 +1,4 @@
-/* globals THREE, AFRAME */
+/* globals THREE AFRAME */
 
 // global state of the voxel cube
 var MCGRIDSIZE = 128;
@@ -54,6 +54,7 @@ var minecraft = {
     });
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
+    console.log('addPoint');
     var posx = pointerPosition.x + MCVOXELSIZE / 2;
     var posy = pointerPosition.y + MCVOXELSIZE / 2;
     var posz = pointerPosition.z + MCVOXELSIZE / 2;
@@ -76,7 +77,7 @@ var minecraft = {
     var voxel = new THREE.Mesh(geometry, this.material);
 
     voxel.startTime = timestamp;
-    voxel.scale.set(0.01, 0.01, 0.01);
+    //voxel.scale.set(0.01, 0.01, 0.01);
 
     var voxelpos = new THREE.Vector3();
     voxelpos.set(
@@ -109,4 +110,4 @@ var minecraft = {
   }
 };
 
-AFRAME.APAINTER.registerBrush('minecraft', minecraft, {thumbnail: '', spacing: MCVOXELSIZE / 2});
+AFRAME.registerBrush('minecraft', minecraft, {thumbnail: '', spacing: MCVOXELSIZE / 2});
