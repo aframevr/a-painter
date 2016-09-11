@@ -239,57 +239,61 @@ AFRAME.registerSystem('brush', {
       return pointerPosition;
     };
   })(),
-  loadBinary: function (url) {
+  loadBinary: function (buffer) {
+    var binaryManager = new BinaryManager(buffer);
+    var magic = binaryManager.readString();
+    if (magic !== 'apainter') {
+      console.error('Invalid `magic` header');
+      return;
+    }
+
+    var version = binaryManager.readUint16();
+    if (version !== AFRAME.APAINTER.version) {
+      console.error('Invalid version: ', version, '(Expected: ' + AFRAME.APAINTER.version + ')');
+    }
+
+    var numUsedBrushes = binaryManager.readUint8();
+    var usedBrushes = [];
+    for (var b = 0; b < numUsedBrushes; b++) {
+      usedBrushes.push(binaryManager.readString());
+    }
+
+    var numStrokes = binaryManager.readUint32();
+
+    for (var l = 0; l < numStrokes; l++) {
+      var brushIndex = binaryManager.readUint8();
+      var color = binaryManager.readColor();
+      var size = binaryManager.readFloat();
+      var numPoints = binaryManager.readUint32();
+
+      var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
+
+      var entity = document.createElement('a-entity');
+      document.querySelector('a-scene').appendChild(entity);
+      entity.setObject3D('mesh', stroke.object3D);
+
+      this.strokeEntities.push(entity);
+
+      for (var i = 0; i < numPoints; i++) {
+        var position = binaryManager.readVector3();
+        var rotation = binaryManager.readQuaternion();
+        var pressure = binaryManager.readFloat();
+        var timestamp = binaryManager.readUint32();
+
+        var pointerPosition = this.getPointerPosition(position, rotation);
+        stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
+      }
+    }
+  },
+  loadFromUrl: function (url) {
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
     loader.setResponseType('arraybuffer');
 
+    var self = this;
     loader.load(url, function (buffer) {
-      var binaryManager = new BinaryManager(buffer);
-      var magic = binaryManager.readString();
-      if (magic !== 'apainter') {
-        console.error('Invalid `magic` header');
-        return;
-      }
-
-      var version = binaryManager.readUint16();
-      if (version !== AFRAME.APAINTER.version) {
-        console.error('Invalid version: ', version, '(Expected: ' + AFRAME.APAINTER.version + ')');
-      }
-
-      var numUsedBrushes = binaryManager.readUint8();
-      var usedBrushes = [];
-      for (var b = 0; b < numUsedBrushes; b++) {
-        usedBrushes.push(binaryManager.readString());
-      }
-
-      var numStrokes = binaryManager.readUint32();
-
-      for (var l = 0; l < numStrokes; l++) {
-        var brushIndex = binaryManager.readUint8();
-        var color = binaryManager.readColor();
-        var size = binaryManager.readFloat();
-        var numPoints = binaryManager.readUint32();
-
-        var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
-
-        var entity = document.createElement('a-entity');
-        document.querySelector('a-scene').appendChild(entity);
-        entity.setObject3D('mesh', stroke.object3D);
-
-        this.strokeEntities.push(entity);
-
-        for (var i = 0; i < numPoints; i++) {
-          var position = binaryManager.readVector3();
-          var rotation = binaryManager.readQuaternion();
-          var pressure = binaryManager.readFloat();
-          var timestamp = binaryManager.readUint32();
-
-          var pointerPosition = this.getPointerPosition(position, rotation);
-          stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
-        }
-      }
-    }.bind(this));
+      self.loadBinary(buffer);
+    });
   }
 });
 

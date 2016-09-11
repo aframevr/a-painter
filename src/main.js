@@ -25,7 +25,7 @@ AFRAME.APAINTER = {
     }
     var urlParams = getUrlParams();
     if (urlParams.url) {
-      this.brushSystem.loadBinary(urlParams.url);
+      this.brushSystem.loadFromUrl(urlParams.url);
     }
 
     this.startPainting = false;
@@ -55,7 +55,7 @@ AFRAME.APAINTER = {
       }
       if (event.keyCode === 76) {
         // load binary from file (u)
-        self.brushSystem.loadBinary('apainter.bin');
+        self.brushSystem.loadFromUrl('demo.apa');
       }
       if (event.keyCode === 85) {
         // Upload file (u)
@@ -95,7 +95,7 @@ AFRAME.APAINTER = {
         dataviews = self.brushSystem.getBinary();
         blob = new Blob(dataviews, {type: 'application/octet-binary'});
         // saveAs.js defines `saveAs` for saving files out of the browser
-        saveAs(blob, 'apainter.bin');
+        saveAs(blob, 'demo.apa');
       }
     });
 

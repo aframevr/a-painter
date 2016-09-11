@@ -16,8 +16,17 @@ dropArea.addEventListener('drop', function (event) {
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
 
-    // OBJs
-    if (file.name.substr(file.name.length - 4).toLowerCase() === '.obj') {
+    if (file.name.substr(file.name.length - 4).toLowerCase() === '.apa') {
+      // a-painter binary
+      var reader = new FileReader();
+
+      // file read, parse obj and add to the scene
+      reader.onload = function (event) {
+        document.querySelector('a-scene').systems.brush.loadBinary(event.target.result);
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (file.name.substr(file.name.length - 4).toLowerCase() === '.obj') {
+      // OBJs
       var reader = new FileReader();
 
       // file read, parse obj and add to the scene
