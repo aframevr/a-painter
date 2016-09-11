@@ -1,6 +1,6 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
-  dependencies: ['tracked-controls'],
+  dependencies: ['tracked-controls', 'brush'],
 
   schema: {
     hand: {default: 'left'}
@@ -21,14 +21,18 @@ AFRAME.registerComponent('paint-controls', {
       material.map = texture;
       material.needsUpdate = true;
     }
-    el.addEventListener('brushsize-changed', function (event) {
-      var scale = event.detail.brushSize * 10;
-      self.buttonMeshes.sizeHint.scale.set(scale, scale, 1);
-    });
-    el.addEventListener('brushcolor-changed', function (event) {
-      self.buttonMeshes.colorTip.material.color.copy(event.detail.color);
-      self.buttonMeshes.sizeHint.material.color.copy(event.detail.color);
-    });
+    el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.brushSize); });
+    el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
+  },
+
+  changeBrushColor: function (color) {
+    this.buttonMeshes.colorTip.material.color.copy(color);
+    this.buttonMeshes.sizeHint.material.color.copy(color);
+  },
+
+  changeBrushSize: function (size) {
+    var scale = size * 10;
+    this.buttonMeshes.sizeHint.scale.set(scale, scale, 1);
   },
 
   // buttonId
@@ -95,6 +99,9 @@ AFRAME.registerComponent('paint-controls', {
     buttonMeshes.trigger = controllerObject3D.getObjectByName('trigger');
     buttonMeshes.sizeHint = controllerObject3D.getObjectByName('sizehint');
     buttonMeshes.colorTip = controllerObject3D.getObjectByName('tip');
+
+    this.changeBrushSize(this.el.components.brush.data.size);
+    this.changeBrushColor(this.el.components.brush.color);
   },
 
   onButtonEvent: function (id, evtName) {

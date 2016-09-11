@@ -109,6 +109,7 @@ AFRAME.registerSystem('brush', {
   schema: {},
   brushes: {},
   strokeEntities: [],
+  strokes: [],
   getUsedBrushes: function () {
     return Object.keys(AFRAME.BRUSHES)
       .filter(function (name) { return AFRAME.BRUSHES[name].used; });
@@ -141,6 +142,8 @@ AFRAME.registerSystem('brush', {
     this.clear();
   },
   tick: function (time, delta) {
+    if (!this.strokes.length) { return; }
+
     for (var i = 0; i < this.strokes.length; i++) {
       this.strokes[i].tick(time, delta);
     }
@@ -300,6 +303,9 @@ AFRAME.registerComponent('brush', {
     var data = this.data;
     this.color = new THREE.Color(data.color);
 
+    this.el.emit('brushcolor-changed', {color: this.color});
+    this.el.emit('brushsize-changed', {brushSize: data.size});
+
     this.active = false;
     this.obj = this.el.object3D;
 
@@ -319,13 +325,13 @@ AFRAME.registerComponent('brush', {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      this.data.size = 0.1 * (evt.detail.axis[1] + 1) / 2;
-      this.el.emit('brushsize-changed', {brushSize: this.data.size});
+      self.data.size = 0.1 * (evt.detail.axis[1] + 1) / 2;
+      self.el.emit('brushsize-changed', {brushSize: self.data.size});
 
       // @fixme This is just for testing purposes
-      this.color.setRGB(Math.random(), Math.random(), Math.random());
-      this.el.emit('brushcolor-changed', {color: this.color});
-    }.bind(this));
+      self.color.setRGB(Math.random(), Math.random(), Math.random());
+      self.el.emit('brushcolor-changed', {color: self.color});
+    });
 
     this.el.addEventListener('buttondown', function (evt) {
       // Grip
@@ -338,25 +344,28 @@ AFRAME.registerComponent('brush', {
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;
-        this.sizeModifier = value * 2;
+        self.sizeModifier = value * 2;
         if (value > 0.1) {
-          if (!this.active) {
-            this.startNewStroke();
-            this.active = true;
+          if (!self.active) {
+            self.startNewStroke();
+            self.active = true;
           }
         } else {
-          if (this.active) {
-            this.previousEntity = this.currentEntity;
-            this.currentStroke = null;
+          if (self.active) {
+            self.previousEntity = self.currentEntity;
+            self.currentStroke = null;
           }
-          this.active = false;
+          self.active = false;
         }
       }
-    }.bind(this));
+    });
   },
   update: function (oldData) {
     var data = this.data;
-    this.color.set(data.color);
+    if (oldData.color !== data.color) {
+      this.color.set(data.color);
+      this.el.emit('brushcolor-changed', {color: this.color});
+    }
   },
   tick: (function () {
     var position = new THREE.Vector3();
