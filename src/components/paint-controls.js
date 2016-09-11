@@ -21,7 +21,7 @@ AFRAME.registerComponent('paint-controls', {
       material.map = texture;
       material.needsUpdate = true;
     }
-    el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.brushSize); });
+    el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.size); });
     el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
   },
 

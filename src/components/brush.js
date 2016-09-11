@@ -326,7 +326,7 @@ AFRAME.registerComponent('brush', {
         return;
       }
       self.data.size = 0.1 * (evt.detail.axis[1] + 1) / 2;
-      self.el.emit('brushsize-changed', {brushSize: self.data.size});
+      self.el.emit('brushsize-changed', {size: self.data.size});
 
       // @fixme This is just for testing purposes
       self.color.setRGB(Math.random(), Math.random(), Math.random());
@@ -365,6 +365,9 @@ AFRAME.registerComponent('brush', {
     if (oldData.color !== data.color) {
       this.color.set(data.color);
       this.el.emit('brushcolor-changed', {color: this.color});
+    }
+    if (oldData.size !== data.size) {
+      this.el.emit('brushsize-changed', {size: data.size});
     }
   },
   tick: (function () {
