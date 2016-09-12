@@ -37,9 +37,10 @@ AFRAME.registerBrush = function (name, definition, options) {
       // Brush index =  1
       // ----------- = 21
       // [Point] = vector3 + quat + pressure + timestamp = (3+4+1+1)*4 = 36
+
       var bufferSize = 21 + (36 * this.data.points.length);
       var binaryManager = new BinaryManager(new ArrayBuffer(bufferSize));
-      binaryManager.writeUint8(self.getUsedBrushes().indexOf(this.brushName));  // brush index
+      binaryManager.writeUint8(system.getUsedBrushes().indexOf(this.brushName));  // brush index
       binaryManager.writeColor(this.data.color);    // color
       binaryManager.writeFloat32(this.data.size);   // brush size
 
@@ -81,8 +82,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
         this.data.numPoints++;
         this.data.points.push({
-          'position': position,
-          'rotation': rotation,
+          'position': position.clone(),
+          'rotation': rotation.clone(),
           'pressure': pressure,
           'timestamp': timestamp
         });
@@ -115,7 +116,6 @@ AFRAME.registerSystem('brush', {
       .filter(function (name) { return AFRAME.BRUSHES[name].used; });
   },
   getBrushByName: function (name) {
-    console.info(">>>",name, AFRAME.BRUSHES);
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
