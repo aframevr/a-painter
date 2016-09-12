@@ -366,7 +366,6 @@ AFRAME.registerComponent('brush', {
   },
   update: function (oldData) {
     var data = this.data;
-    console.log(data, oldData);
     if (oldData.color !== data.color) {
       this.color.set(data.color);
       this.el.emit('brushcolor-changed', {color: this.color});
@@ -389,8 +388,6 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
-    console.log(this.data);
-
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);
