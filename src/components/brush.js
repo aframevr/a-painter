@@ -330,12 +330,11 @@ AFRAME.registerComponent('brush', {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      self.data.size = 0.1 * (evt.detail.axis[1] + 1) / 2;
-      self.el.emit('brushsize-changed', {size: self.data.size});
+      var size = 0.1 * (evt.detail.axis[1] + 1) / 2;
+      self.el.setAttribute('brush', 'size', size);
 
       // @fixme This is just for testing purposes
-      self.color.setRGB(Math.random(), Math.random(), Math.random());
-      self.el.emit('brushcolor-changed', {color: self.color});
+      self.el.setAttribute('brush', 'color', '#' + Math.floor(Math.random() * 16777215).toString(16));
     });
 
     this.el.addEventListener('buttondown', function (evt) {
@@ -367,6 +366,7 @@ AFRAME.registerComponent('brush', {
   },
   update: function (oldData) {
     var data = this.data;
+    console.log(data, oldData);
     if (oldData.color !== data.color) {
       this.color.set(data.color);
       this.el.emit('brushcolor-changed', {color: this.color});
@@ -389,7 +389,7 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
-    console.log(this.data.brush, this.color, this.data.size);
+    console.log(this.data);
 
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     var entity = document.createElement('a-entity');

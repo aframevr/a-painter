@@ -55,8 +55,9 @@ AFRAME.APAINTER = {
         var brushesNames = Object.keys(AFRAME.BRUSHES);
         var index = brushesNames.indexOf(hands[0].components.brush.data.brush);
         index = (index + 1) % brushesNames.length;
-        hands[0].setAttribute('brush', 'brush', brushesNames[index]);
-        hands[1].setAttribute('brush', 'brush', brushesNames[index]);
+        [].forEach.call(hands, function(hand) {
+          hand.setAttribute('brush', 'brush', brushesNames[index]);
+        });
       }
       if (event.keyCode === 82) {
         // Random stroke (r)
