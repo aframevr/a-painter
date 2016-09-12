@@ -115,6 +115,7 @@ AFRAME.registerSystem('brush', {
       .filter(function (name) { return AFRAME.BRUSHES[name].used; });
   },
   getBrushByName: function (name) {
+    console.info(">>>",name, AFRAME.BRUSHES);
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
@@ -388,6 +389,8 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
+    console.log(this.data.brush, this.color, this.data.size);
+
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     var entity = document.createElement('a-entity');
     this.el.sceneEl.appendChild(entity);

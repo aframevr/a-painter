@@ -184,7 +184,7 @@ var lines = [
   {
     name: 'smooth',
     materialOptions: {
-      type: 'smooth'
+      type: 'shaded'
     },
     thumbnail: ''
   },
