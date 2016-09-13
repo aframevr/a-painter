@@ -194,7 +194,7 @@ var stamps = [
       subTextures: 2,
       textureSrc: 'brushes/stamp_gear1.png'
     },
-    thumbnail: 'brushes/stamp_gear1.png',
+    thumbnail: 'brushes/thumb_stamp_gear1.png',
     spacing: 0.01
   },
   {
@@ -317,7 +317,7 @@ var stamps = [
       subTextures: 2,
       textureSrc: 'brushes/stamp_bush1.png'
     },
-    thumbnail: 'brushes/stamp_bush1.png',
+    thumbnail: 'brushes/thumb_stamp_bush1.png',
     spacing: 0.01
   },
   {
