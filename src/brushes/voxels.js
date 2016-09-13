@@ -99,4 +99,4 @@ var voxels = {
   }
 };
 
-AFRAME.registerBrush('voxels', voxels, {thumbnail: '', spacing: VOXELS.mcvoxelsize / 2});
+AFRAME.registerBrush('voxels', voxels, {thumbnail: 'brushes/thumb_voxels.png', spacing: VOXELS.mcvoxelsize / 2});
