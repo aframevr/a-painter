@@ -179,14 +179,14 @@ var lines = [
     materialOptions: {
       type: 'flat'
     },
-    thumbnail: ''
+    thumbnail: 'brushes/thumb_flat.png'
   },
   {
     name: 'smooth',
     materialOptions: {
       type: 'shaded'
     },
-    thumbnail: ''
+    thumbnail: 'brushes/thumb_smooth.png'
   },
   {
     name: 'squared-textured',
@@ -194,7 +194,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/squared_textured.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_squared_textured.png'
   },
   {
     name: 'line-gradient',
@@ -202,7 +202,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/line_gradient.png'
     },
-    thumbnail: 'brushes/line_gradient.png'
+    thumbnail: 'brushes/thumb_line_gradient.png'
   },
   {
     name: 'silky-flat',
@@ -210,7 +210,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/silky_flat.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_silky_flat.png'
   },
   {
     name: 'silky-textured',
@@ -218,7 +218,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/silky_textured.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_silky_textured.png'
   },
   {
     name: 'lines1',
@@ -226,7 +226,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/lines1.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_lines1.png'
   },
   {
     name: 'lines2',
@@ -234,7 +234,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/lines2.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_lines2.png'
   },
   {
     name: 'lines3',
@@ -242,7 +242,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/lines3.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_lines3.png'
   },
   {
     name: 'lines4',
@@ -250,7 +250,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/lines4.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_lines4.png'
   },
   {
     name: 'lines5',
@@ -258,7 +258,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/lines5.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_lines5.png'
   },
   {
     name: 'line-grunge1',
@@ -266,7 +266,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/line_grunge1.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_line_grunge1.png'
   },
   {
     name: 'line-grunge2',
@@ -274,7 +274,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/line_grunge2.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_line_grunge2.png'
   },
   {
     name: 'line-grunge3',
@@ -282,7 +282,7 @@ var lines = [
       type: 'textured',
       textureSrc: 'brushes/line_grunge3.png'
     },
-    thumbnail: 'brushes/thumb_bristles0.png'
+    thumbnail: 'brushes/thumb_line_grunge3.png'
   }
 ];
 
