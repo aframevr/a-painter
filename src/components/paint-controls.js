@@ -28,10 +28,12 @@ AFRAME.registerComponent('paint-controls', {
 
     var self = this;
     document.addEventListener('stroke-started', function (event) {
+      if (event.detail.entity.components['paint-controls'] !== self) { return; }
+
       self.numberStrokes++;
 
       // 3 Strokes to hide
-      if (self.numberStrokes === 3 && event.detail.entity.components['paint-controls'] === self) {
+      if (self.numberStrokes === 3) {
         var object = { alpha: 1.0 };
         var tween = new AFRAME.TWEEN.Tween(object)
           .to({alpha: 0.0}, 4000)
@@ -55,7 +57,7 @@ AFRAME.registerComponent('paint-controls', {
   },
 
   changeBrushSize: function (size) {
-    var scale = size * 10;
+    var scale = size / 2 * 10;
     this.buttonMeshes.sizeHint.scale.set(scale, scale, 1);
   },
 

@@ -301,7 +301,7 @@ AFRAME.registerSystem('brush', {
 AFRAME.registerComponent('brush', {
   schema: {
     color: {type: 'color'},
-    size: {default: 0.01, min: 0.0, max: 1.0},
+    size: {default: 0.01, min: 0.0, max: 0.3},
     brush: {default: 'flat'}
   },
   init: function () {
@@ -330,7 +330,7 @@ AFRAME.registerComponent('brush', {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
       }
-      var size = 0.1 * (evt.detail.axis[1] + 1) / 2;
+      var size = (evt.detail.axis[1] + 1) / 2 * self.schema.size.max;
       self.el.setAttribute('brush', 'size', size);
 
       // @fixme This is just for testing purposes
@@ -348,7 +348,7 @@ AFRAME.registerComponent('brush', {
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;
-        self.sizeModifier = value * 2;
+        self.sizeModifier = value;
         if (value > 0.1) {
           if (!self.active) {
             self.startNewStroke();

@@ -13,7 +13,7 @@ var cubes = {
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
     var box = new THREE.Mesh(this.geometry, this.material);
 
-    var sca = pressure * 0.02 * Math.random();
+    var sca = pressure * this.data.size * Math.random();
     box.scale.set(sca, sca, sca);
     box.position.copy(pointerPosition);
     box.rotation.copy(rotation);

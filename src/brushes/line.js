@@ -80,7 +80,7 @@ var line = {
 
     var posA = pointerPosition.clone();
     var posB = pointerPosition.clone();
-    var brushSize = this.data.size * pressure;
+    var brushSize = this.data.size  * pressure;
     posA.add(direction.clone().multiplyScalar(brushSize / 2));
     posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
