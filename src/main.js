@@ -64,52 +64,58 @@ AFRAME.APAINTER = {
         self.brushSystem.generateRandomStrokes(1);
       }
       if (event.keyCode === 76) {
-        // load binary from file (u)
+        // load binary from file (l)
         self.brushSystem.loadFromUrl('demo.apa');
       }
-      if (event.keyCode === 85) {
-        // Upload file (u)
-        var baseUrl = 'http://a-painter.aframe.io/?url=';
-
-        // Upload
-        var dataviews = self.brushSystem.getBinary();
-        var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-        var uploader = 'uploadcare'; // or 'fileio'
-        if (uploader === 'fileio') {
-          // Using file.io
-          var fd = new window.FormData();
-          fd.append('file', blob);
-          var xhr = new window.XMLHttpRequest();
-          xhr.open('POST', 'https://file.io'); // ?expires=1y
-          xhr.onreadystatechange = function (data) {
-            if (xhr.readyState === 4) {
-              var response = JSON.parse(xhr.response);
-              if (response.success) {
-                console.log('Uploaded link: ', baseUrl + response.link);
-                document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
-              }
-            } else {
-              // alert('An error occurred while uploading the drawing, please try again');
-            }
-          };
-          xhr.send(fd);
-        } else {
-          var file = uploadcare.fileFrom('object', blob);
-          file.done(function (fileInfo) {
-            console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
-            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
-          });
-        }
+      if (event.keyCode === 85) { // u - upload
+        self.upload();
       }
-      if (event.keyCode === 86) { // v
-        dataviews = self.brushSystem.getBinary();
-        blob = new Blob(dataviews, {type: 'application/octet-binary'});
-        // saveAs.js defines `saveAs` for saving files out of the browser
-        saveAs(blob, 'demo.apa');
+      if (event.keyCode === 86) { // v - save
+        self.save();
       }
     });
 
     console.info('A-PAINTER Version: ' + this.version);
+  },
+  save: function () {
+    dataviews = this.brushSystem.getBinary();
+    blob = new Blob(dataviews, {type: 'application/octet-binary'});
+    // saveAs.js defines `saveAs` for saving files out of the browser
+    saveAs(blob, 'demo.apa');
+  },
+  upload: function () {
+    // Upload file (u)
+    var baseUrl = 'http://a-painter.aframe.io/?url=';
+
+    // Upload
+    var dataviews = this.brushSystem.getBinary();
+    var blob = new Blob(dataviews, {type: 'application/octet-binary'});
+    var uploader = 'uploadcare'; // or 'fileio'
+    if (uploader === 'fileio') {
+      // Using file.io
+      var fd = new window.FormData();
+      fd.append('file', blob);
+      var xhr = new window.XMLHttpRequest();
+      xhr.open('POST', 'https://file.io'); // ?expires=1y
+      xhr.onreadystatechange = function (data) {
+        if (xhr.readyState === 4) {
+          var response = JSON.parse(xhr.response);
+          if (response.success) {
+            console.log('Uploaded link: ', baseUrl + response.link);
+            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
+          }
+        } else {
+          // alert('An error occurred while uploading the drawing, please try again');
+        }
+      };
+      xhr.send(fd);
+    } else {
+      var file = uploadcare.fileFrom('object', blob);
+      file.done(function (fileInfo) {
+        console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
+        document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
+      });
+    }
   }
 };
 

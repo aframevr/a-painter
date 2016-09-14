@@ -19,7 +19,6 @@ var spheres = {
     sphere.rotation.copy(rotation);
 
     this.object3D.add(sphere);
-    console.log(this.object3D);
     return true;
   },
   tick: function (time, delta) {
