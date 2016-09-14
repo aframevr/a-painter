@@ -23,6 +23,30 @@ AFRAME.registerComponent('paint-controls', {
     }
     el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.size); });
     el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
+
+    this.numberStrokes = 0;
+
+    var self = this;
+    document.addEventListener('stroke-started', function (event) {
+      self.numberStrokes++;
+
+      // 3 Strokes to hide
+      if (self.numberStrokes === 3 && event.detail.entity.components['paint-controls'] === self) {
+        var object = { alpha: 1.0 };
+        var tween = new AFRAME.TWEEN.Tween(object)
+          .to({alpha: 0.0}, 4000)
+          .onComplete(function () {
+            self.buttonMeshes.tooltips.forEach(function (tooltip) {
+              tooltip.visible = false;
+            })
+          })
+          .delay(2000)
+          .onUpdate(function () {
+            self.buttonMeshes.tooltips[0].material.opacity = object.alpha;
+          })
+          .start();
+      }
+    });
   },
 
   changeBrushColor: function (color) {
@@ -99,7 +123,13 @@ AFRAME.registerComponent('paint-controls', {
     buttonMeshes.trigger = controllerObject3D.getObjectByName('trigger');
     buttonMeshes.sizeHint = controllerObject3D.getObjectByName('sizehint');
     buttonMeshes.colorTip = controllerObject3D.getObjectByName('tip');
-
+    buttonMeshes.tooltips = [
+      controllerObject3D.getObjectByName('msg_leftgrip'),
+      controllerObject3D.getObjectByName('msg_rightgrip'),
+      controllerObject3D.getObjectByName('msg_menu'),
+      controllerObject3D.getObjectByName('msg_touchpad'),
+      controllerObject3D.getObjectByName('msg_trigger')
+    ];
     this.changeBrushSize(this.el.components.brush.data.size);
     this.changeBrushColor(this.el.components.brush.color);
   },
