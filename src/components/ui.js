@@ -152,12 +152,14 @@ AFRAME.registerComponent('ui', {
       case name === 'clear': {
         if (!this.pressedObjects[name]) {
           this.el.sceneEl.systems.brush.clear();
+          this.playSound('ui_click1');
         }
         break;
       }
       case name === 'copy': {
         if (!this.pressedObjects[name]) {
           this.copyBrush();
+          this.playSound('ui_click1');
         }
         break;
       }
@@ -168,6 +170,7 @@ AFRAME.registerComponent('ui', {
       case name === 'save': {
         if (!this.pressedObjects[name]) {
           AFRAME.APAINTER.upload();
+          this.playSound('ui_click1');
         }
         break;
       }
@@ -230,6 +233,7 @@ AFRAME.registerComponent('ui', {
   onColorHistoryButtonDown: function (object) {
     var color = object.material.color.getHexString();
     this.handEl.setAttribute('brush', 'color', '#' + color);
+    this.playSound('ui_click0', object.name);
   },
 
   onBrushDown: function (name) {
@@ -252,6 +256,7 @@ AFRAME.registerComponent('ui', {
     }
     selectedObjects[object.name] = object;
     this.selectedBrush = object;
+    this.playSound('ui_click1', brushName);
   },
 
   onHueDown: function (position) {
@@ -270,6 +275,7 @@ AFRAME.registerComponent('ui', {
     this.hsv.h = angle / 360;
     this.hsv.s = polarPosition.r / radius;
     this.updateColor();
+    this.playSound('ui_click0', 'hue');
   },
 
   updateColor: function () {
@@ -337,6 +343,7 @@ AFRAME.registerComponent('ui', {
     this.objects.brightnessCursor.rotation.y = brightness * 1.5 - 1.5;
     this.hsv.v = brightness;
     this.updateColor();
+    this.playSound('ui_click0', 'brightness');
   },
 
   onBrushSizeBackgroundDown: function (position) {
@@ -348,6 +355,7 @@ AFRAME.registerComponent('ui', {
     var brushSize = (position.x - sliderBoundingBox.min.x) / sliderWidth;
     brushSize = brushSize * AFRAME.components.brush.schema.size.max;
     this.handEl.setAttribute('brush', 'size', brushSize);
+    this.playSound('ui_click0', 'sizebg');
   },
 
   handleHover: function () {
@@ -615,12 +623,14 @@ AFRAME.registerComponent('ui', {
     if (this.brushesPage >= this.brushesPagesNum - 1) { return; }
     this.brushesPage++;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
+    this.playSound('ui_click1');
   },
 
   previousPage: function () {
     if (this.brushesPage === 0) { return; }
     this.brushesPage--;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
+    this.playSound('ui_click1')
   },
 
   initHighlightMaterial: function (object) {
@@ -672,6 +682,8 @@ AFRAME.registerComponent('ui', {
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
+    this.playSound('ui_menu');
+
   },
 
   updateIntersections: (function () {
@@ -845,5 +857,12 @@ AFRAME.registerComponent('ui', {
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
+    this.playSound('ui_menu');
+  },
+
+  playSound: function (sound, objName) {
+    if (objName === undefined || !this.pressedObjects[objName]) {
+      document.getElementById(sound).play();
+    }
   }
 });
