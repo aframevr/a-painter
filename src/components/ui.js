@@ -1,10 +1,4 @@
 AFRAME.registerComponent('ui', {
-  schema: {
-    color: {type: 'color'},
-    size: {default: 0.01, min: 0.0, max: 0.3},
-    brush: {default: ''}
-  },
-
   dependencies: ['raycaster'],
 
   init: function () {
@@ -12,7 +6,9 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
+    this.colorStack = ['gray', 'gray', 'gray', 'gray', 'gray', 'gray'];
     this.bindMethods();
+    this.colorHasChanged = true;
     this.highlightMaterials = {};
     this.intersectedObjects = [];
     this.hoveredOffObjects = [];
@@ -21,6 +17,8 @@ AFRAME.registerComponent('ui', {
     this.selectedObjects = {};
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
+    this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
+    this.colorHistoryRegexp = /^colorhistory[0-9]+$/
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -105,6 +103,7 @@ AFRAME.registerComponent('ui', {
     this.onIntersectionCleared = this.onIntersectionCleared.bind(this);
     this.onIntersectedCleared = this.onIntersectedCleared.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
+    this.onStrokeStarted = this.onStrokeStarted.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
   },
 
@@ -119,13 +118,11 @@ AFRAME.registerComponent('ui', {
     }
   },
 
-  update: function() {
-    this.syncUI();
-  },
-
   onTriggerChanged: function(evt) {
     var self = this;
-    if (evt.detail.value === 1.0) {
+    var triggerValue = evt.detail.value;
+    this.lastTriggerValue = triggerValue;
+    if (evt.detail.value >= 0.25) {
       this.triggeredPressed = true;
     } else {
       this.triggeredPressed = false;
@@ -137,12 +134,15 @@ AFRAME.registerComponent('ui', {
     var name = object.name;
     this.pressedObjects[name] = object;
     switch (true) {
-      case name === 'copy': {
-        this.copyBrush();
+      case name === 'colorsbg': {
         break;
       }
       case name === 'clear': {
         this.el.sceneEl.systems.brush.clear();
+        break;
+      }
+      case name === 'copy': {
+        this.copyBrush();
         break;
       }
       case name === 'hue': {
@@ -153,16 +153,16 @@ AFRAME.registerComponent('ui', {
         AFRAME.APAINTER.upload();
         break;
       }
-      case name === 'size': {
-        this.onBrushSizeDown();
-        break;
-      }
       case name === 'sizebg': {
         this.onBrushSizeBackgroundDown(position);
         break;
       }
-      case /^(?!.*(fg|bg)$)brush/.test(name): {
+      case this.brushRegexp.test(name): {
         this.onBrushDown(name);
+        break;
+      }
+      case this.colorHistoryRegexp.test(name): {
+        this.onColorHistoryButtonDown(object);
         break;
       }
       default: {
@@ -177,6 +177,7 @@ AFRAME.registerComponent('ui', {
     this.handEl.setAttribute('brush', 'brush', brush.brush);
     this.handEl.setAttribute('brush', 'color', brush.color);
     this.handEl.setAttribute('brush', 'size', brush.size);
+    this.colorHasChanged = true;
   },
 
   handleButtonUp: function () {
@@ -207,6 +208,11 @@ AFRAME.registerComponent('ui', {
     });
   },
 
+  onColorHistoryButtonDown: function (object) {
+    var color = object.material.color.getHexString();
+    this.handEl.setAttribute('brush', 'color', '#' + color);
+  },
+
   onBrushDown: function(name) {
     var brushName = this.brushButtonsMapping[name];
     this.selectBrushButton(name);
@@ -221,7 +227,7 @@ AFRAME.registerComponent('ui', {
       if (!this.highlightMaterials[selectedBrush.name]) {
         this.initHighlightMaterial(object);
       }
-      selectedBrush.material = this.highlightMaterials[selectedBrush.name].normal;
+      selectedBrush.material = this.highlightMaterials[selectedBrush.name].pressed;
       delete selectedObjects[selectedBrush.name];
     }
     selectedObjects[object.name] = object;
@@ -249,6 +255,7 @@ AFRAME.registerComponent('ui', {
     color = 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')';
     this.objects.hueCursor.position.copy(position);
     this.handEl.setAttribute('brush', 'color', color);
+    this.colorHasChanged = true;
   },
 
   hsv2rgb: function (h, s, v) {
@@ -306,9 +313,6 @@ AFRAME.registerComponent('ui', {
     this.handEl.setAttribute('brush', 'size', brushSize);
   },
 
-  onBrushSizeDown: function (position) {
-  },
-
   handleHover: function () {
     this.updateHoverObjects();
     this.updateMaterials();
@@ -338,6 +342,7 @@ AFRAME.registerComponent('ui', {
     // Add highlight to newly intersected objects
     this.hoveredOnObjects.forEach(function (obj) {
       var object = obj.object;
+      //if (self.colorHistoryRegexp.test(object.name)) { debugger; }
       if (!self.highlightMaterials[object.name]) {
         self.initHighlightMaterial(object);
       }
@@ -378,8 +383,7 @@ AFRAME.registerComponent('ui', {
     el.addEventListener('raycaster-intersected', this.onIntersected);
     el.addEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
     if (!handEl) { return; }
-    handEl.addEventListener('componentchanged', this.onComponentChanged);
-    handEl.addEventListener('triggerchanged', this.onTriggerChanged);
+    this.addHandListeners();
   },
 
   pause: function () {
@@ -391,8 +395,7 @@ AFRAME.registerComponent('ui', {
     el.removeEventListener('raycaster-intersected', this.onIntersected);
     el.removeEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
     if (!handEl) { return; }
-    handEl.removeEventListener('componentchanged', this.onComponentChanged);
-    handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
+    this.removeHandListeners();
   },
 
   onModelLoaded: function (evt) {
@@ -406,7 +409,11 @@ AFRAME.registerComponent('ui', {
     this.objects.hueWheel = model.getObjectByName('hue');
     this.objects.sizeCursor = model.getObjectByName('size');
     this.objects.sizeCursor.position.copy(this.cursorOffset);
-
+    this.objects.colorHistory = [];
+    for (var i = 0; i < 6; i++) {
+      this.objects.colorHistory[i] = model.getObjectByName('colorhistory' + i);
+    }
+    this.objects.currentColor = model.getObjectByName('currentcolor');
     this.objects.sizeSlider = model.getObjectByName('sizebg');
     this.objects.sizeSlider.geometry.computeBoundingBox();
     // Hide bounding box
@@ -418,6 +425,7 @@ AFRAME.registerComponent('ui', {
     model.getObjectByName('brightness').visible = false;
     model.getObjectByName('brightnesscursor').visible = false;
     this.initColorWheel();
+    this.initColorHistory();
     this.setCursorTransparency();
     this.loadBrushes();
   },
@@ -474,20 +482,22 @@ AFRAME.registerComponent('ui', {
 
   initHighlightMaterial: function (object) {
     var buttonName = object.name;
-    var isBrushButton = /^(?!.*(fg|bg)$)brush/.test(buttonName);
-    var isCursor = buttonName === 'size' || buttonName.indexOf('cursor') !== -1;
+    var isBrushButton = this.brushRegexp.test(buttonName);
+    var isHistory = buttonName.indexOf('history') !== -1;
     var materials = {
       normal: object.material,
       hover: object.material,
       pressed: object.material,
       selected: object.material
     };
-    if (!isBrushButton && !isCursor) {
+    if (!isBrushButton && !isHistory) {
       materials.normal = object.material;
       materials.hover = object.material.clone();
       materials.hover.map = this.system.hoverTexture;
       materials.selected = object.material.clone();
       materials.selected.map = this.system.pressedTexture;
+      materials.pressed = object.material.clone();
+      materials.pressed.map = this.system.pressedTexture;
     }
     this.highlightMaterials[buttonName] = materials;
   },
@@ -538,16 +548,27 @@ AFRAME.registerComponent('ui', {
 
   onIntersected: function (evt) {
     var handEl = evt.detail.el;
-    if (this.handEl) {
-      handEl.removeEventListener('componentchanged', this.onComponentChanged);
-      handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
-    }
+    // Remove listeners of previous hand
+    if (this.handEl) { this.removeHandListeners(); }
     this.handEl = handEl;
     this.handRayEl = this.handEl.components.ui.rayEl;
     this.menuEls = this.uiEl.object3D.children;
     this.syncUI();
+    this.addHandListeners();
+  },
+
+  addHandListeners: function () {
+    var handEl = this.handEl;
     handEl.addEventListener('componentchanged', this.onComponentChanged);
+    handEl.addEventListener('stroke-started', this.onStrokeStarted);
     handEl.addEventListener('triggerchanged', this.onTriggerChanged);
+  },
+
+  removeHandListeners: function () {
+    var handEl = this.handEl;
+    handEl.removeEventListener('componentchanged', this.onComponentChanged);
+    handEl.removeEventListener('stroke-started', this.onStrokeStarted);
+    handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
   },
 
   onComponentChanged: function(evt) {
@@ -556,11 +577,35 @@ AFRAME.registerComponent('ui', {
 
   syncUI: function () {
     var brush;
-    if (!this.handEl) { return; }
+    if (!this.handEl || !this.objects) { return; }
     brush = this.handEl.getComputedAttribute('brush');
     this.updateSizeSlider(brush.size);
     this.updateColorWheel(brush.color);
+    this.updateColorHistory();
     // this.updateBrushSelector(brush.brush);
+  },
+
+  initColorHistory: function () {
+    var colorStack = this.colorStack;
+    var colorHistoryObject;
+    var currentColor = this.objects.currentColor;
+    for (var i = 0; i < this.objects.colorHistory.length; i++) {
+      colorHistoryObject = this.objects.colorHistory[i];
+      colorHistoryObject.material = colorHistoryObject.material.clone();
+      colorHistoryObject.material.map = this.system.selectedTexture;
+    }
+    currentColor.material = currentColor.material.clone();
+    currentColor.material.map = this.system.selectedTexture;
+  },
+
+  updateColorHistory: function () {
+    var color = this.handEl.getComputedAttribute('brush').color;
+    var colorStack = this.colorStack;
+    this.objects.currentColor.material.color.set(color);
+    for (var i = 0; i < colorStack.length; i++) {
+      color = colorStack[colorStack.length - i];
+      this.objects.colorHistory[i].material.color.set(color);
+    }
   },
 
   updateSizeSlider: function (size) {
@@ -606,6 +651,17 @@ AFRAME.registerComponent('ui', {
   onIntersectedCleared: function (evt) {
     if (!this.handEl) { return; }
     this.handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
+  },
+
+  onStrokeStarted: function () {
+    var color;
+    var colorStack = this.colorStack;
+    if (!this.colorHasChanged) { return; }
+    color = this.handEl.getComputedAttribute('brush').color;
+    this.colorHasChanged = false;
+    colorStack.push(color);
+    if (colorStack.length > 6) { colorStack.shift(); }
+    this.syncUI();
   },
 
   updateRaycaster: (function () {
