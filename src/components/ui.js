@@ -24,7 +24,7 @@ AFRAME.registerComponent('ui', {
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
-    this.cursorOffset = new THREE.Vector3(-0.06409, 0.01419, -0.10242);
+    this.cursorOffset = new THREE.Vector3(0.06409, 0.01419, -0.10242);
 
     // UI entity setup
     uiEl.setAttribute('material', {
@@ -126,10 +126,12 @@ AFRAME.registerComponent('ui', {
   onTriggerChanged: function(evt) {
     var self = this;
     if (evt.detail.value === 1.0) {
+      this.triggeredPressed = true;
       this.hoveredOnObjects.forEach(function triggerAction(button) {
         self.handleButtonDown(button.object, button.point);
       });
     } else {
+      this.triggeredPressed = false;
       this.handleButtonUp();
     }
   },
