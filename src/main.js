@@ -83,7 +83,7 @@ AFRAME.APAINTER = {
     // saveAs.js defines `saveAs` for saving files out of the browser
     saveAs(blob, 'demo.apa');
   },
-  upload: function () {
+  upload: function (success, error) {
     // Upload file (u)
     var baseUrl = 'http://a-painter.aframe.io/?url=';
 
@@ -103,9 +103,10 @@ AFRAME.APAINTER = {
           if (response.success) {
             console.log('Uploaded link: ', baseUrl + response.link);
             document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
+            if (success) { success(); }
           }
         } else {
-          // alert('An error occurred while uploading the drawing, please try again');
+          if (error) { error(); }
         }
       };
       xhr.send(fd);
@@ -114,6 +115,9 @@ AFRAME.APAINTER = {
       file.done(function (fileInfo) {
         console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
         document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
+        if (success) { success(); }
+      }).fail(function(errorInfo, fileInfo) {
+        if (error) { error(errorInfo); }
       });
     }
   }
