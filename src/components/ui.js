@@ -22,6 +22,10 @@ AFRAME.registerComponent('ui', {
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
 
+    // The cursor is centered in 0,0 to allow scale it easily
+    // This is the offset to put it back in its original position on the slider
+    this.cursorOffset = new THREE.Vector3(-0.06409, 0.01419, -0.10242);
+
     // UI entity setup
     uiEl.setAttribute('material', {
       color: '#ffffff',
@@ -289,15 +293,12 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrushSizeBackgroundDown: function (position) {
-    var brushSize;
     var slider = this.objects.sizeSlider;
     var sliderBoundingBox = slider.geometry.boundingBox;
-    var cursor = this.objects.sizeCursor;
     var sliderWidth = sliderBoundingBox.max.x - sliderBoundingBox.min.x;
     slider.updateMatrixWorld();
     slider.worldToLocal(position);
-    cursor.position.setX(position.x - sliderBoundingBox.min.x);
-    brushSize = (position.x - sliderBoundingBox.min.x) / sliderWidth;
+    var brushSize = (position.x - sliderBoundingBox.min.x) / sliderWidth;
     brushSize = brushSize * AFRAME.components.brush.schema.size.max;
     this.handEl.setAttribute('brush', 'size', brushSize);
   },
@@ -400,6 +401,8 @@ AFRAME.registerComponent('ui', {
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
     this.objects.sizeCursor = model.getObjectByName('size');
+    this.objects.sizeCursor.position.copy(this.cursorOffset);
+
     this.objects.sizeSlider = model.getObjectByName('sizebg');
     this.objects.sizeSlider.geometry.computeBoundingBox();
     // Hide bounding box
@@ -563,7 +566,10 @@ AFRAME.registerComponent('ui', {
     var sliderWidth = sliderBoundingBox.max.x - sliderBoundingBox.min.x;
     var normalizedSize = size / AFRAME.components.brush.schema.size.max;
     var positionX = normalizedSize * sliderWidth;
-    cursor.position.setX(positionX);
+    cursor.position.setX(positionX - this.cursorOffset.x);
+
+    var scale = normalizedSize + 0.3;
+    cursor.scale.set(scale, 1, scale);
   },
 
   updateColorWheel: function (color) {
