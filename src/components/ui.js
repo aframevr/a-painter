@@ -49,18 +49,49 @@ AFRAME.registerComponent('ui', {
   },
 
   initColorWheel: function () {
-    var canvas = document.createElement('canvas');
     var colorWheel = this.objects.hueWheel;
-    var texture = new THREE.Texture(canvas);
-    var material = new THREE.MeshBasicMaterial();
-    var context = canvas.getContext('2d');
-    canvas.width = 512;
-    canvas.height = 512;
-    context.fillStyle = 'red';
-    context.fillRect(0, 0, 512, 512);
-    material.map = texture;
-    //colorWheel.material = material;
-  },
+
+    this.uniforms = {
+      brightness: { value: 1.0 }
+    };
+
+    var vertexShader = '\
+      varying vec2 vUv;\
+      void main() {\
+        vUv = uv;\
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\
+        gl_Position = projectionMatrix * mvPosition;\
+      }\
+      ';
+
+    var fragmentShader = '\
+      #define M_PI2 6.28318530718\n \
+      uniform float brightness;\
+      varying vec2 vUv;\
+      vec3 hsb2rgb(in vec3 c){\
+          vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, \
+                           0.0, \
+                           1.0 );\
+          rgb = rgb * rgb * (3.0 - 2.0 * rgb);\
+          return c.z * mix( vec3(1.0), rgb, c.y);\
+      }\
+      \
+      void main() {\
+        vec2 toCenter = vec2(0.5) - vUv;\
+        float angle = atan(toCenter.y, toCenter.x);\
+        float radius = length(toCenter) * 2.0;\
+        vec3 color = hsb2rgb(vec3((angle / M_PI2) + 0.5, radius, brightness));\
+        gl_FragColor = vec4(color, 1.0);\
+      }\
+      ';
+
+    var material = new THREE.ShaderMaterial({
+      uniforms: this.uniforms,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader
+    });
+    colorWheel.material = material;
+},
 
   bindMethods: function() {
     this.onComponentChanged = this.onComponentChanged.bind(this);
