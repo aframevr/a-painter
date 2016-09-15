@@ -127,9 +127,6 @@ AFRAME.registerComponent('ui', {
     var self = this;
     if (evt.detail.value === 1.0) {
       this.triggeredPressed = true;
-      this.hoveredOnObjects.forEach(function triggerAction(button) {
-        self.handleButtonDown(button.object, button.point);
-      });
     } else {
       this.triggeredPressed = false;
       this.handleButtonUp();
@@ -202,8 +199,12 @@ AFRAME.registerComponent('ui', {
     });
   },
 
-  handlePressedButtons: function() {
-
+  handlePressedButtons: function () {
+    var self = this;
+    if (!this.triggeredPressed) { return; }
+    this.hoveredOnObjects.forEach(function triggerAction(button) {
+      self.handleButtonDown(button.object, button.point);
+    });
   },
 
   onBrushDown: function(name) {
@@ -362,6 +363,7 @@ AFRAME.registerComponent('ui', {
     Object.keys(selectedObjects).forEach(function (key) {
       var object = selectedObjects[key];
       var materials = self.highlightMaterials[object.name];
+      if (!materials) { return; }
       object.material = materials.selected;
     });
   },
