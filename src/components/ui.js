@@ -6,7 +6,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
-    this.colorStack = ['gray', 'gray', 'gray', 'gray', 'gray', 'gray'];
+    this.colorStack = ["#272727", "#727272", "#FFFFFF", "#24CAFF", "#249F90", "#F2E646", "#EF2D5E"];
     this.bindMethods();
     this.colorHasChanged = true;
     this.highlightMaterials = {};
@@ -18,7 +18,7 @@ AFRAME.registerComponent('ui', {
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
-    this.colorHistoryRegexp = /^colorhistory[0-9]+$/
+    this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
 
     // The cursor is centered in 0,0 to allow scale it easily
@@ -432,7 +432,7 @@ AFRAME.registerComponent('ui', {
     this.objects.sizeCursor = model.getObjectByName('size');
     this.objects.sizeCursor.position.copy(this.cursorOffset);
     this.objects.colorHistory = [];
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 7; i++) {
       this.objects.colorHistory[i] = model.getObjectByName('colorhistory' + i);
     }
     this.objects.currentColor = model.getObjectByName('currentcolor');
@@ -617,14 +617,16 @@ AFRAME.registerComponent('ui', {
     }
     currentColor.material = currentColor.material.clone();
     currentColor.material.map = this.system.selectedTexture;
+    this.updateColorHistory();
   },
 
   updateColorHistory: function () {
-    var color = this.handEl.getComputedAttribute('brush').color;
+    var color = this.handEl && this.handEl.getComputedAttribute('brush').color;
     var colorStack = this.colorStack;
+    if (!color) { color = this.el.components.brush.schema.color.default; }
     this.objects.currentColor.material.color.set(color);
     for (var i = 0; i < colorStack.length; i++) {
-      color = colorStack[colorStack.length - i];
+      color = colorStack[colorStack.length - i - 1];
       this.objects.colorHistory[i].material.color.set(color);
     }
   },
@@ -680,8 +682,8 @@ AFRAME.registerComponent('ui', {
     if (!this.colorHasChanged) { return; }
     color = this.handEl.getComputedAttribute('brush').color;
     this.colorHasChanged = false;
+    if (colorStack.length === 7) { colorStack.shift(); }
     colorStack.push(color);
-    if (colorStack.length > 6) { colorStack.shift(); }
     this.syncUI();
   },
 
