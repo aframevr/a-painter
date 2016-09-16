@@ -19,6 +19,7 @@ AFRAME.registerComponent('ui', {
     this.brushButtonsMapping = {};
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
     this.colorHistoryRegexp = /^colorhistory[0-9]+$/
+    this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -53,10 +54,6 @@ AFRAME.registerComponent('ui', {
   initColorWheel: function () {
     var colorWheel = this.objects.hueWheel;
 
-    this.uniforms = {
-      brightness: { value: 1.0 }
-    };
-
     var vertexShader = '\
       varying vec2 vUv;\
       void main() {\
@@ -88,7 +85,7 @@ AFRAME.registerComponent('ui', {
       ';
 
     var material = new THREE.ShaderMaterial({
-      uniforms: this.uniforms,
+      uniforms: { brightness: { type: 'f', value: this.hsv.v } },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader
     });
@@ -247,26 +244,29 @@ AFRAME.registerComponent('ui', {
     var radius = 0.04;
     hueWheel.updateMatrixWorld();
     hueWheel.worldToLocal(position);
+    this.objects.hueCursor.position.copy(position);
+
     polarPosition = {
       r: Math.sqrt(position.x * position.x + position.z * position.z),
       theta: Math.PI + Math.atan2(-position.z, position.x)
     };
-    // console.log("x: " + position.x + ' y:' + -position.z);
     var angle = ((polarPosition.theta * (180 / Math.PI)) + 180) % 360;
-    // console.log("radius: " + polarPosition.r + ' theta:' + angle);
-    rgb = this.hsv2rgb(angle / 360  , polarPosition.r / 0.04, 1.0);
+    this.hsv.h = angle / 360;
+    this.hsv.s = polarPosition.r / 0.04;
+    this.updateColor();
+  },
 
+  updateColor: function () {
+    rgb = this.hsv2rgb(this.hsv);
     color = 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')';
-    this.objects.hueCursor.position.copy(position);
     this.handEl.setAttribute('brush', 'color', color);
     this.colorHasChanged = true;
   },
 
-  hsv2rgb: function (h, s, v) {
-    var r, g, b, i, f, p, q, t;
-    if (arguments.length === 1) {
-      s = h.s, v = h.v, h = h.h;
-    }
+  hsv2rgb: function (hsv) {
+    var r, g, b, i, f, p, q, t, h, s, v;
+    s = hsv.s, v = hsv.v, h = hsv.h;
+
     i = Math.floor(h * 6);
     f = h * 6 - i;
     p = v * (1 - s);
@@ -306,8 +306,19 @@ AFRAME.registerComponent('ui', {
     return {h: h, s: s, v: v};
   },
 
-  onBrightnessDown: function(position) {
-    // TO DO
+  onBrightnessDown: function (position) {
+    var slider = this.objects.brightnessSlider;
+    var sliderBoundingBox = slider.geometry.boundingBox;
+    var sliderHeight = sliderBoundingBox.max.z - sliderBoundingBox.min.z;
+    slider.updateMatrixWorld();
+    slider.worldToLocal(position);
+    var brightness = 1.0 - (position.z - sliderBoundingBox.min.z) / sliderHeight;
+    // remove object border padding
+    brightness = THREE.Math.clamp(brightness * 1.29 - 0.12, 0.0, 1.0);
+    this.objects.hueWheel.material.uniforms['brightness'].value = brightness;
+    this.objects.brightnessCursor.rotation.y = brightness * 1.5 - 1.5;
+    this.hsv.v = brightness;
+    this.updateColor();
   },
 
   onBrushSizeBackgroundDown: function (position) {
@@ -413,6 +424,9 @@ AFRAME.registerComponent('ui', {
     if (evt.detail.format !== 'json') { return;}
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
+    this.objects.brightnessSlider = model.getObjectByName('brightness');
+    this.objects.brightnessSlider.geometry.computeBoundingBox();
+
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
     this.objects.sizeCursor = model.getObjectByName('size');
@@ -490,13 +504,14 @@ AFRAME.registerComponent('ui', {
     var buttonName = object.name;
     var isBrushButton = this.brushRegexp.test(buttonName);
     var isHistory = buttonName.indexOf('history') !== -1;
+    var isHue = buttonName === 'hue' || buttonName === 'huecursor';
     var materials = {
       normal: object.material,
       hover: object.material,
       pressed: object.material,
       selected: object.material
     };
-    if (!isBrushButton && !isHistory) {
+    if (!isBrushButton && !isHistory && !isHue) {
       materials.normal = object.material;
       materials.hover = object.material.clone();
       materials.hover.map = this.system.hoverTexture;
