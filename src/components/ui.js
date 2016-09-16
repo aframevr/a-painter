@@ -134,6 +134,9 @@ AFRAME.registerComponent('ui', {
     var name = object.name;
     this.pressedObjects[name] = object;
     switch (true) {
+      case name === 'brightness': {
+        break;
+      }
       case name === 'colorsbg': {
         break;
       }
@@ -422,8 +425,6 @@ AFRAME.registerComponent('ui', {
     // Hide objects
     model.getObjectByName('msg_save').visible = false;
     model.getObjectByName('msg_error').visible = false;
-    model.getObjectByName('brightness').visible = false;
-    model.getObjectByName('brightnesscursor').visible = false;
     this.initColorWheel();
     this.initColorHistory();
     this.setCursorTransparency();
