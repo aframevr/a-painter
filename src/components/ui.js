@@ -135,6 +135,7 @@ AFRAME.registerComponent('ui', {
     this.pressedObjects[name] = object;
     switch (true) {
       case name === 'brightness': {
+        this.onBrightnessDown(position);
         break;
       }
       case name === 'colorsbg': {
@@ -303,6 +304,10 @@ AFRAME.registerComponent('ui', {
         case b: h = (r - g) + d * 4; h /= 6 * d; break;
     }
     return {h: h, s: s, v: v};
+  },
+
+  onBrightnessDown: function(position) {
+    // TO DO
   },
 
   onBrushSizeBackgroundDown: function (position) {
