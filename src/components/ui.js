@@ -129,7 +129,6 @@ AFRAME.registerComponent('ui', {
 
   handleButtonDown: function(object, position) {
     var name = object.name;
-    this.pressedObjects[name] = object;
     switch (true) {
       case name === 'brightness': {
         this.onBrightnessDown(position);
@@ -139,11 +138,16 @@ AFRAME.registerComponent('ui', {
         break;
       }
       case name === 'clear': {
-        this.el.sceneEl.systems.brush.clear();
+        if (!this.pressedObjects[name]) {
+          console.log("CLEAR!!!!");
+          this.el.sceneEl.systems.brush.clear();
+        }
         break;
       }
       case name === 'copy': {
-        this.copyBrush();
+        if (!this.pressedObjects[name]) {
+          this.copyBrush();
+        }
         break;
       }
       case name === 'hue': {
@@ -151,7 +155,9 @@ AFRAME.registerComponent('ui', {
         break;
       }
       case name === 'save': {
-        AFRAME.APAINTER.upload();
+        if (!this.pressedObjects[name]) {
+          AFRAME.APAINTER.upload();
+        }
         break;
       }
       case name === 'sizebg': {
@@ -167,10 +173,10 @@ AFRAME.registerComponent('ui', {
         break;
       }
       default: {
-        delete this.pressedObjects[name];
         console.log("Unkown button down " + name);
       }
     }
+    this.pressedObjects[name] = object;
   },
 
   copyBrush: function () {
