@@ -230,7 +230,7 @@ AFRAME.registerComponent('ui', {
       if (!this.highlightMaterials[selectedBrush.name]) {
         this.initHighlightMaterial(object);
       }
-      selectedBrush.material = this.highlightMaterials[selectedBrush.name].pressed;
+      selectedBrush.material = this.highlightMaterials[selectedBrush.name].normal;
       delete selectedObjects[selectedBrush.name];
     }
     selectedObjects[object.name] = object;
