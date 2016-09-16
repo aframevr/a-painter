@@ -241,7 +241,7 @@ AFRAME.registerComponent('ui', {
     var polarPosition;
     var rgb;
     var bb = hueWheel
-    var radius = 0.04;
+    var radius = this.colorWheelSize;
     hueWheel.updateMatrixWorld();
     hueWheel.worldToLocal(position);
     this.objects.hueCursor.position.copy(position);
@@ -252,7 +252,7 @@ AFRAME.registerComponent('ui', {
     };
     var angle = ((polarPosition.theta * (180 / Math.PI)) + 180) % 360;
     this.hsv.h = angle / 360;
-    this.hsv.s = polarPosition.r / 0.04;
+    this.hsv.s = polarPosition.r / radius;
     this.updateColor();
   },
 
@@ -264,8 +264,10 @@ AFRAME.registerComponent('ui', {
   },
 
   hsv2rgb: function (hsv) {
-    var r, g, b, i, f, p, q, t, h, s, v;
-    s = hsv.s, v = hsv.v, h = hsv.h;
+    var r, g, b, i, f, p, q, t;
+    var h = THREE.Math.clamp(hsv.h, 0, 1);
+    var s = THREE.Math.clamp(hsv.s, 0, 1);
+    var v = hsv.v;
 
     i = Math.floor(h * 6);
     f = h * 6 - i;
@@ -429,6 +431,9 @@ AFRAME.registerComponent('ui', {
 
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
+    this.objects.hueWheel.geometry.computeBoundingSphere();
+    this.colorWheelSize = this.objects.hueWheel.geometry.boundingSphere.radius;
+
     this.objects.sizeCursor = model.getObjectByName('size');
     this.objects.sizeCursor.position.copy(this.cursorOffset);
     this.objects.colorHistory = [];
@@ -646,7 +651,7 @@ AFRAME.registerComponent('ui', {
     var colorRGB = new THREE.Color(color);
     var hsv = this.rgb2hsv(colorRGB.r, colorRGB.g, colorRGB.b);
     var angle = hsv.h * 2 * Math.PI;
-    var radius = hsv.s * 0.04;
+    var radius = hsv.s * this.colorWheelSize;
     var x = radius * Math.cos(angle);
     var y = radius * Math.sin(angle);
     this.objects.hueCursor.position.setX(x);
