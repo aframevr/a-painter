@@ -178,8 +178,9 @@ AFRAME.registerSystem('brush', {
   addNewStroke: function (brushName, color, size) {
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
-      console.error('Invalid brush name: ', brushName);
-      return;
+      var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
+      Brush = AFRAME.BRUSHES[newBrushName];
+      console.warn('Invalid brush name: `' +  brushName + '` using `' + newBrushName + '`');
     }
 
     Brush.used = true;
