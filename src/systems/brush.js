@@ -100,7 +100,7 @@ AFRAME.registerBrush = function (name, definition, options) {
   NewBrush.prototype.addPoint = wrapAddPoint(NewBrush.prototype.addPoint);
   AFRAME.BRUSHES[name] = NewBrush;
 
-  console.log('New brush registered `' + name + '`');
+  // console.log('New brush registered `' + name + '`');
   NewBrush.used = false; // Used to know which brushes have been used on the drawing
   return NewBrush;
 };
