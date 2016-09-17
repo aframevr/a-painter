@@ -463,8 +463,54 @@ AFRAME.registerComponent('ui', {
     model.getObjectByName('bb').material = new THREE.MeshBasicMaterial(
       { color: 0x248f24, alphaTest: 0, visible: false });
     // Hide objects
-    model.getObjectByName('msg_save').visible = false;
-    model.getObjectByName('msg_error').visible = false;
+    var self = this;
+
+    this.messagesMaterial = new THREE.MeshBasicMaterial({ map: null, transparent: true, opacity: 0.0 });
+    this.objects.messageSave = model.getObjectByName('msg_save');
+    this.objects.messageSave.material = this.messagesMaterial;
+    this.objects.messageSave.visible = false
+    this.objects.messageError = model.getObjectByName('msg_error');
+    this.objects.messageError.visible = false;
+    this.objects.messageError.material = this.messagesMaterial;
+
+    var messagesImageUrl = 'url(https://cdn.aframe.io/a-painter/images/messages.png)';
+
+    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
+      var material = self.messagesMaterial;
+      material.map = texture;
+      material.needsUpdate = true;
+    });
+
+    function showMessage (msgObject) {
+      msgObject.visible = true;
+      var object = { opacity: 0.0 };
+      var tween = new AFRAME.TWEEN.Tween(object)
+        .to({opacity: 1.0}, 500)
+        .onUpdate(function () {
+          self.messagesMaterial.opacity = object.opacity;
+        })
+        .chain(
+          new AFRAME.TWEEN.Tween(object)
+            .to({opacity: 0.0}, 500)
+            .delay(3000)
+            .onComplete(function () {
+              msgObject.visible = false;
+            })
+            .onUpdate(function () {
+              self.messagesMaterial.opacity = object.opacity;
+            })
+          );
+
+      tween.start();
+    }
+
+    this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
+      showMessage(self.objects.messageSave);
+    });
+    this.el.sceneEl.addEventListener('drawing-upload-error', function (event) {
+      showMessage(self.objects.messageError);
+    });
+
     this.initColorWheel();
     this.initColorHistory();
     this.initBrushesMenu();

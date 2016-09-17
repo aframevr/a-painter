@@ -102,10 +102,11 @@ AFRAME.APAINTER = {
           var response = JSON.parse(xhr.response);
           if (response.success) {
             console.log('Uploaded link: ', baseUrl + response.link);
-            self.sceneEl.emit('drawing-uploaded-completed', {url: baseUrl + response.link});
+            self.sceneEl.emit('drawing-upload-completed', {url: baseUrl + response.link});
             if (success) { success(); }
           }
         } else {
+          self.sceneEl.emit('drawing-upload-error', {errorInfo: null, fileInfo: null});
           if (error) { error(); }
         }
       };
@@ -114,9 +115,10 @@ AFRAME.APAINTER = {
       var file = uploadcare.fileFrom('object', blob);
       file.done(function (fileInfo) {
         console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
-        self.sceneEl.emit('drawing-uploaded-completed', {url: baseUrl + fileInfo.cdnUrl});
+        self.sceneEl.emit('drawing-upload-completed', {url: baseUrl + fileInfo.cdnUrl});
         if (success) { success(); }
       }).fail(function (errorInfo, fileInfo) {
+        self.sceneEl.emit('drawing-upload-error', {errorInfo: errorInfo, fileInfo: fileInfo});
         if (error) { error(errorInfo); }
       }).progress(function (uploadInfo) {
         self.sceneEl.emit('drawing-upload-progress', {progress: uploadInfo.progress});
