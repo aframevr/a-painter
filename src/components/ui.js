@@ -1,4 +1,5 @@
 AFRAME.registerComponent('ui', {
+  schema: {brightness: { default: 1.0, max: 1.0, min: 0.0}},
   dependencies: ['raycaster'],
 
   init: function () {
@@ -129,17 +130,27 @@ AFRAME.registerComponent('ui', {
 
   handleButtonDown: function(object, position) {
     var name = object.name;
+    if (this.activeWidget && this.activeWidget !== name) { return; }
+    this.activeWidget = name;
     switch (true) {
       case name === 'brightness': {
         this.onBrightnessDown(position);
         break;
       }
-      case name === 'colorsbg': {
+      case name === 'brushnext': {
+        if (!this.pressedObjects[name]) {
+          this.nextPage();
+        }
+        break;
+      }
+      case name === 'brushprev': {
+        if (!this.pressedObjects[name]) {
+          this.previousPage();
+        }
         break;
       }
       case name === 'clear': {
         if (!this.pressedObjects[name]) {
-          console.log("CLEAR!!!!");
           this.el.sceneEl.systems.brush.clear();
         }
         break;
@@ -173,6 +184,7 @@ AFRAME.registerComponent('ui', {
         break;
       }
       default: {
+        this.activeWidget = undefined;
         console.log("Unkown button down " + name);
       }
     }
@@ -191,6 +203,7 @@ AFRAME.registerComponent('ui', {
     var pressedObjects = this.pressedObjects;
     var unpressedObjects = this.unpressedObjects;
     var self = this;
+    this.activeWidget = undefined;
     Object.keys(pressedObjects).forEach(function (key) {
       var buttonName = pressedObjects[key].name;
       switch (true) {
@@ -222,6 +235,7 @@ AFRAME.registerComponent('ui', {
 
   onBrushDown: function(name) {
     var brushName = this.brushButtonsMapping[name];
+    if (!brushName) { return; }
     this.selectBrushButton(name);
     this.handEl.setAttribute('brush', 'brush', brushName.toLowerCase());
   },
@@ -434,6 +448,8 @@ AFRAME.registerComponent('ui', {
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
     this.objects.brightnessSlider = model.getObjectByName('brightness');
     this.objects.brightnessSlider.geometry.computeBoundingBox();
+    this.objects.previousPage = model.getObjectByName('brushprev');
+    this.objects.nextPage = model.getObjectByName('brushnext');
 
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
@@ -457,8 +473,22 @@ AFRAME.registerComponent('ui', {
     model.getObjectByName('msg_error').visible = false;
     this.initColorWheel();
     this.initColorHistory();
+    this.initBrushesMenu();
     this.setCursorTransparency();
-    this.loadBrushes();
+  },
+
+  initBrushesMenu: function () {
+    var previousPage = this.objects.previousPage;
+    var nextPage = this.objects.nextPage;
+    var brushes = Object.keys(AFRAME.BRUSHES);
+    this.initHighlightMaterial(nextPage);
+    this.initHighlightMaterial(previousPage);
+    previousPage.visible = false;
+    nextPage.visible = false;
+    this.brushesPerPage = 15;
+    this.brushesPagesNum = Math.ceil(brushes.length / this.brushesPerPage);
+    this.brushesPage = 0;
+    this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
 
   setCursorTransparency: function () {
@@ -478,37 +508,81 @@ AFRAME.registerComponent('ui', {
     brightnessCursor.material.transparent = true;
   },
 
-  loadBrushes: function () {
-    var brushNum = 0;
-    var uiEl = this.uiEl.getObject3D('mesh');
-    var brushes = Object.keys(AFRAME.BRUSHES);
-    var self = this;
-    brushes.forEach(function (key) {
-      var thumbnail = AFRAME.BRUSHES[key].prototype.options.thumbnail;
-      loadBrush(key, brushNum, thumbnail);
-      brushNum+=1;
-    });
-    function loadBrush(name, id, thumbnailUrl) {
-      var onLoadThumbnail = function(texture) {
-        var button = uiEl.getObjectByName('brush' + id);
-        var buttonForeground = uiEl.getObjectByName('brush' + id + 'fg');
-        var buttonBackground = uiEl.getObjectByName('brush' + id + 'bg');
-        var brushName = name.charAt(0).toUpperCase() + name.slice(1);
-        if (!button) { return; }
-        self.brushButtonsMapping['brush' + id] = brushName.toLowerCase();
-        setBrushThumbnail(texture, button);
-      };
-      if (!thumbnailUrl) { return; }
-      thumbnailUrl = 'url(' + thumbnailUrl + ')';
-      self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
+  loadBrushes: (function () {
+    var brushesMaterials = {};
+    return function (page, pageSize) {
+      var brush;
+      var brushNum = 0;
+      var uiEl = this.uiEl.getObject3D('mesh');
+      var brushes = Object.keys(AFRAME.BRUSHES);
+      var thumbnail;
+      var brushIndex;
+      var self = this;
+      var i;
+      if (page < 0 || page >= this.brushesPagesNum) { return; }
+      if (page === 0) {
+        this.objects.previousPage.visible = false;
+      } else {
+        this.objects.previousPage.visible = true;
+      }
+      if (page === this.brushesPagesNum - 1) {
+        this.objects.nextPage.visible = false;
+      } else {
+        this.objects.nextPage.visible = true;
+      }
+      for (i = 0; i < pageSize; i++) {
+        brushIndex = page * pageSize + i;
+        brush = brushes[brushIndex];
+        thumbnail = brush && AFRAME.BRUSHES[brush].prototype.options.thumbnail;
+        loadBrush(brush, brushNum, thumbnail);
+        brushNum+=1;
+      }
+      function loadBrush(name, id, thumbnailUrl) {
+        var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
+        if (thumbnailUrl && !brushesMaterials[brushName]) {
+          thumbnailUrl = 'url(' + thumbnailUrl + ')';
+          self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
+          return;
+        }
+        onLoadThumbnail();
+        function onLoadThumbnail(texture) {
+          var button = uiEl.getObjectByName('brush' + id);
+          self.brushButtonsMapping['brush' + id] = brushName;
+          setBrushThumbnail(texture, button);
+        };
+      }
+      function setBrushThumbnail (texture, button) {
+        var brushName = self.brushButtonsMapping[button.name];
+        var material = brushesMaterials[brushName] || new THREE.MeshBasicMaterial();
+        if (texture) {
+          material.map = texture;
+          material.alphaTest = 0.5;
+          material.transparent = true;
+        } else if (!brushesMaterials[brushName]){
+          material.visible = false;
+        }
+        brushesMaterials[brushName] = material;
+        self.highlightMaterials[button.name] =  {
+          normal: material,
+          hover: material,
+          pressed: material,
+          selected: material
+        };
+        button.material = material;
+      }
     }
-    function setBrushThumbnail (texture, button) {
-      var material = new THREE.MeshBasicMaterial();
-      material.map = texture;
-      material.alphaTest = 0.5;
-      material.transparent = true;
-      button.material = material;
-    }
+  })(),
+
+  nextPage: function () {
+    if (this.brushesPage >= this.brushesPagesNum - 1) { return; }
+    this.brushesPage++;
+    this.loadBrushes(this.brushesPage, this.brushesPerPage);
+  },
+
+  previousPage: function () {
+    if (this.brushesPage === 0) { return; }
+    this.brushesPage--;
+    this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
 
   initHighlightMaterial: function (object) {
@@ -714,6 +788,7 @@ AFRAME.registerComponent('ui', {
       object3D.matrixWorld.decompose(originVec3, directionHelper, scaleDummy);
       // Apply rotation to a 0, 0, -1 vector.
       direction.set(0, 0, -1);
+      //direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), 30 / 2 * Math.PI);
       direction.applyQuaternion(directionHelper);
 
       raycaster.set(originVec3, direction);
