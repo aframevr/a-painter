@@ -84,6 +84,8 @@ AFRAME.APAINTER = {
   },
   upload: function (success, error) {
     this.sceneEl.emit('drawing-upload-started');
+    this.sceneEl.emit('drawing-uploaded-completed', {url: 'asdf'});
+    return;
     var self = this;
 
     var baseUrl = 'http://a-painter.aframe.io/?url=';

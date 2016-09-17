@@ -463,8 +463,41 @@ AFRAME.registerComponent('ui', {
     model.getObjectByName('bb').material = new THREE.MeshBasicMaterial(
       { color: 0x248f24, alphaTest: 0, visible: false });
     // Hide objects
-    model.getObjectByName('msg_save').visible = false;
-    model.getObjectByName('msg_error').visible = false;
+    var self = this;
+
+    this.messagesMaterial = new THREE.MeshBasicMaterial({ map: null, transparent: true, opacity: 0.0 });
+    this.objects.messageSave = model.getObjectByName('msg_save');
+    this.objects.messageSave.material = this.messagesMaterial;
+    this.objects.messageSave.visible = false
+    this.objects.messageError = model.getObjectByName('msg_error');
+    this.objects.messageError.visible = false;
+    this.objects.messageError.material = this.messagesMaterial;
+
+    var messagesImageUrl = 'url(https://cdn.aframe.io/a-painter/images/messages.png)';
+
+    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
+      var material = self.messagesMaterial;
+      material.map = texture;
+      material.needsUpdate = true;
+    });
+
+    this.el.sceneEl.addEventListener('drawing-uploaded-completed', function (event) {
+      self.objects.messageSave.visible = true;
+      var object = { opacity: 0.0 };
+      var tween = new AFRAME.TWEEN.Tween(object)
+        .repeat(1)
+        .to({opacity: 1.0}, 500)
+        .delay(1000)
+        .yoyo(true)
+        .onComplete(function () {
+          self.objects.messageSave.visible = false;
+        })
+        .onUpdate(function () {
+            self.messagesMaterial.opacity = object.opacity;
+        });
+      tween.start();
+    });
+
     this.initColorWheel();
     this.initColorHistory();
     this.initBrushesMenu();
