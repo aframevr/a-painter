@@ -84,10 +84,11 @@ AFRAME.APAINTER = {
     saveAs(blob, 'demo.apa');
   },
   upload: function (success, error) {
-    // Upload file (u)
+    this.sceneEl.emit('drawing-upload-started');
+    var self = this;
+
     var baseUrl = 'http://a-painter.aframe.io/?url=';
 
-    // Upload
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
     var uploader = 'uploadcare'; // or 'fileio'
@@ -102,7 +103,7 @@ AFRAME.APAINTER = {
           var response = JSON.parse(xhr.response);
           if (response.success) {
             console.log('Uploaded link: ', baseUrl + response.link);
-            document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + response.link});
+            self.sceneEl.emit('drawing-uploaded-completed', {url: baseUrl + response.link});
             if (success) { success(); }
           }
         } else {
@@ -114,10 +115,12 @@ AFRAME.APAINTER = {
       var file = uploadcare.fileFrom('object', blob);
       file.done(function (fileInfo) {
         console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
-        document.querySelector('a-scene').emit('drawing-uploaded', {url: baseUrl + fileInfo.cdnUrl});
+        self.sceneEl.emit('drawing-uploaded-completed', {url: baseUrl + fileInfo.cdnUrl});
         if (success) { success(); }
       }).fail(function(errorInfo, fileInfo) {
         if (error) { error(errorInfo); }
+      }).progress(function(uploadInfo) {
+        self.sceneEl.emit('drawing-upload-progress', {progress: uploadInfo.progress});
       });
     }
   }
