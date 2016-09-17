@@ -24,4 +24,4 @@ var cubes = {
   }
 };
 
-AFRAME.registerBrush('cubes', cubes, {thumbnail: 'brushes/thumb_cubes.png', spacing: 0.01});
+AFRAME.registerBrush('cubes', cubes, {thumbnail: 'brushes/thumb_cubes.gif', spacing: 0.01});

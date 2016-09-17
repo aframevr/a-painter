@@ -164,7 +164,7 @@ var stamps = [
       type: 'shaded',
       textureSrc: 'brushes/stamp_dots.png'
     },
-    thumbnail: 'brushes/stamp_dots.png',
+    thumbnail: 'brushes/thumb_stamp_dots.gif',
     spacing: 0.01
   },
   {
@@ -173,7 +173,7 @@ var stamps = [
       type: 'shaded',
       textureSrc: 'brushes/stamp_squares.png'
     },
-    thumbnail: 'brushes/stamp_squares.png',
+    thumbnail: 'brushes/thumb_stamp_squares.gif',
     spacing: 0.01
   },
   {
@@ -181,9 +181,9 @@ var stamps = [
     materialOptions: {
       type: 'shaded',
       autoRotate: true,
-      textureSrc: 'brushes/stamp_column1.png'
+      textureSrc: 'brushes/stamp_column.png'
     },
-    thumbnail: 'brushes/stamp_column1.png',
+    thumbnail: 'brushes/thumb_stamp_column.gif',
     spacing: 0.01
   },
   {
@@ -192,10 +192,10 @@ var stamps = [
       type: 'shaded',
       angleJitter: Math.PI * 2,
       subTextures: 2,
-      textureSrc: 'brushes/stamp_gear1.png'
+      textureSrc: 'brushes/stamp_gear.png'
     },
-    thumbnail: 'brushes/thumb_stamp_gear1.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_gear.gif',
+    spacing: 0.05
   },
   {
     name: 'grunge1',
@@ -205,7 +205,7 @@ var stamps = [
       textureSrc: 'brushes/stamp_grunge1.png'
     },
     thumbnail: 'brushes/stamp_grunge1.png',
-    spacing: 0.01
+    spacing: 0.02
   },
   {
     name: 'grunge2',
@@ -215,7 +215,7 @@ var stamps = [
       textureSrc: 'brushes/stamp_grunge2.png'
     },
     thumbnail: 'brushes/stamp_grunge2.png',
-    spacing: 0.01
+    spacing: 0.02
   },
   {
     name: 'grunge3',
@@ -225,7 +225,7 @@ var stamps = [
       textureSrc: 'brushes/stamp_grunge3.png'
     },
     thumbnail: 'brushes/stamp_grunge3.png',
-    spacing: 0.01
+    spacing: 0.02
   },
   {
     name: 'grunge4',
@@ -235,7 +235,7 @@ var stamps = [
       textureSrc: 'brushes/stamp_grunge4.png'
     },
     thumbnail: 'brushes/stamp_grunge4.png',
-    spacing: 0.01
+    spacing: 0.02
   },
   {
     name: 'grunge5',
@@ -244,8 +244,8 @@ var stamps = [
       angleJitter: Math.PI * 2,
       textureSrc: 'brushes/stamp_grunge5.png'
     },
-    thumbnail: 'brushes/stamp_grunge5.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_grunge5.gif',
+    spacing: 0.02
   },
   {
     name: 'leaf1',
@@ -255,7 +255,7 @@ var stamps = [
       textureSrc: 'brushes/stamp_leaf1.png'
     },
     thumbnail: 'brushes/stamp_leaf1.png',
-    spacing: 0.01
+    spacing: 0.03
   },
   {
     name: 'leaf2',
@@ -264,8 +264,8 @@ var stamps = [
       angleJitter: 60 * Math.PI / 180.0,
       textureSrc: 'brushes/stamp_leaf2.png'
     },
-    thumbnail: 'brushes/stamp_leaf2.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_leaf2.gif',
+    spacing: 0.03
   },
   {
     name: 'leaf3',
@@ -274,8 +274,8 @@ var stamps = [
       angleJitter: 60 * Math.PI / 180.0,
       textureSrc: 'brushes/stamp_leaf3.png'
     },
-    thumbnail: 'brushes/stamp_leaf3.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_leaf3.gif',
+    spacing: 0.03
   },
   {
     name: 'fur1',
@@ -300,44 +300,44 @@ var stamps = [
     spacing: 0.01
   },
   {
-    name: 'grass1',
+    name: 'grass',
     materialOptions: {
       type: 'shaded',
       angleJitter: 10 * Math.PI / 180.0,
       subTextures: 3,
-      textureSrc: 'brushes/stamp_grass1.png'
+      textureSrc: 'brushes/stamp_grass.png'
     },
-    thumbnail: 'brushes/stamp_grass1.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_grass.png',
+    spacing: 0.03
   },
   {
-    name: 'bush1',
+    name: 'bush',
     materialOptions: {
       type: 'shaded',
       subTextures: 2,
-      textureSrc: 'brushes/stamp_bush1.png'
+      textureSrc: 'brushes/stamp_bush.png'
     },
-    thumbnail: 'brushes/thumb_stamp_bush1.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_bush.gif',
+    spacing: 0.04
   },
   {
-    name: 'star1',
+    name: 'star',
     materialOptions: {
       type: 'shaded',
-      textureSrc: 'brushes/stamp_star1.png'
+      textureSrc: 'brushes/stamp_star.png'
     },
-    thumbnail: 'brushes/stamp_star1.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_star.png',
+    spacing: 0.06
   },
   {
-    name: 'snow1',
+    name: 'snow',
     materialOptions: {
       type: 'shaded',
       angleJitter: Math.PI * 2,
-      textureSrc: 'brushes/stamp_snow1.png'
+      textureSrc: 'brushes/stamp_snow.png'
     },
-    thumbnail: 'brushes/stamp_snow1.png',
-    spacing: 0.01
+    thumbnail: 'brushes/thumb_stamp_snow.png',
+    spacing: 0.06
   }
 ];
 
