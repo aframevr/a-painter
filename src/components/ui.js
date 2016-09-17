@@ -481,21 +481,34 @@ AFRAME.registerComponent('ui', {
       material.needsUpdate = true;
     });
 
-    this.el.sceneEl.addEventListener('drawing-uploaded-completed', function (event) {
-      self.objects.messageSave.visible = true;
+    function showMessage (msgObject) {
+      msgObject.visible = true;
       var object = { opacity: 0.0 };
       var tween = new AFRAME.TWEEN.Tween(object)
-        .repeat(1)
         .to({opacity: 1.0}, 500)
-        .delay(1000)
-        .yoyo(true)
-        .onComplete(function () {
-          self.objects.messageSave.visible = false;
-        })
         .onUpdate(function () {
-            self.messagesMaterial.opacity = object.opacity;
-        });
+          self.messagesMaterial.opacity = object.opacity;
+        })
+        .chain(
+          new AFRAME.TWEEN.Tween(object)
+            .to({opacity: 0.0}, 500)
+            .delay(3000)
+            .onComplete(function () {
+              msgObject.visible = false;
+            })
+            .onUpdate(function () {
+              self.messagesMaterial.opacity = object.opacity;
+            })
+          );
+
       tween.start();
+    }
+
+    this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
+      showMessage(self.objects.messageSave);
+    });
+    this.el.sceneEl.addEventListener('drawing-upload-error', function (event) {
+      showMessage(self.objects.messageError);
     });
 
     this.initColorWheel();
