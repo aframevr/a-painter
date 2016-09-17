@@ -89,10 +89,6 @@ AFRAME.registerComponent('brush', {
   })(),
   startNewStroke: function () {
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
-    var entity = document.createElement('a-entity');
-    this.el.sceneEl.appendChild(entity);
-    entity.setObject3D('mesh', this.currentStroke.object3D);
-    this.system.strokeEntities.push(entity);
     this.el.emit('stroke-started', {entity: this.el, stroke: this.currentStroke});
   }
 });
