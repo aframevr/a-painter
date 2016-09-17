@@ -2,7 +2,6 @@
 AFRAME.APAINTER = {
   version: 1,
   brushes: {},
-  strokeEntities: [],
   sceneEl: null,
   init: function () {
     this.sceneEl = document.querySelector('a-scene');

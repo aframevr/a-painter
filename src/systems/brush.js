@@ -109,7 +109,6 @@ AFRAME.registerBrush = function (name, definition, options) {
 AFRAME.registerSystem('brush', {
   schema: {},
   brushes: {},
-  strokeEntities: [],
   strokes: [],
   getUsedBrushes: function () {
     return Object.keys(AFRAME.BRUSHES)
@@ -119,16 +118,17 @@ AFRAME.registerSystem('brush', {
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
-    var entity = this.strokeEntities.pop();
-    if (entity) {
+    var stroke = this.strokes.pop();
+    if (stroke) {
+      var entity = stroke.entity;
       entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
     }
   },
   clear: function () {
     // Remove all the stroke entities
-    for (var i = 0; i < this.strokeEntities.length; i++) {
-      var entity = this.strokeEntities[i];
+    for (var i = 0; i < this.strokes.length; i++) {
+      var entity = this.strokes[i].entity;
       entity.parentNode.removeChild(entity);
     }
 
@@ -137,14 +137,13 @@ AFRAME.registerSystem('brush', {
       AFRAME.BRUSHES[name].used = false;
     });
 
-    this.strokeEntities = [];
+    this.strokes = [];
   },
   init: function () {
     this.clear();
   },
   tick: function (time, delta) {
     if (!this.strokes.length) { return; }
-
     for (var i = 0; i < this.strokes.length; i++) {
       this.strokes[i].tick(time, delta);
     }
@@ -159,12 +158,6 @@ AFRAME.registerSystem('brush', {
       var numPoints = parseInt(Math.random() * 500);
 
       var stroke = this.addNewStroke(brushName, color, size);
-
-      var entity = document.createElement('a-entity');
-      document.querySelector('a-scene').appendChild(entity);
-      entity.setObject3D('mesh', stroke.object3D);
-
-      this.strokeEntities.push(entity);
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
@@ -195,6 +188,12 @@ AFRAME.registerSystem('brush', {
     stroke.brush = Brush;
     stroke.init(color, size);
     this.strokes.push(stroke);
+
+    var entity = document.createElement('a-entity');
+    document.querySelector('a-scene').appendChild(entity);
+    entity.setObject3D('mesh', stroke.object3D);
+    stroke.entity = entity;
+
     return stroke;
   },
   getBinary: function () {
@@ -268,12 +267,6 @@ AFRAME.registerSystem('brush', {
       var numPoints = binaryManager.readUint32();
 
       var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
-
-      var entity = document.createElement('a-entity');
-      document.querySelector('a-scene').appendChild(entity);
-      entity.setObject3D('mesh', stroke.object3D);
-
-      this.strokeEntities.push(entity);
 
       for (var i = 0; i < numPoints; i++) {
         var position = binaryManager.readVector3();
