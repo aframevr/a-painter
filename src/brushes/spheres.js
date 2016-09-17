@@ -12,7 +12,7 @@ var spheres = {
   },
   addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
     var sphere = new THREE.Mesh(this.geometry, this.material);
-    var sca = this.data.size / 2  * pressure;
+    var sca = this.data.size / 2 * pressure;
     sphere.scale.set(sca, sca, sca);
     sphere.initialScale = new THREE.Vector3(sca, sca, sca);
     sphere.position.copy(pointerPosition);
@@ -22,9 +22,9 @@ var spheres = {
     return true;
   },
   tick: function (time, delta) {
-    for (var i = 0; i < this.object3D.children.length; i++ ) {
+    for (var i = 0; i < this.object3D.children.length; i++) {
       var sphere = this.object3D.children[i];
-      var sin = (Math.sin(i + time/500.0) + 1) / 2 + 0.1;
+      var sin = (Math.sin(i + time / 500.0) + 1) / 2 + 0.1;
       sphere.scale.copy(sphere.initialScale).multiplyScalar(sin);
     }
   }

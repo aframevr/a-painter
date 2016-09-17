@@ -1,3 +1,4 @@
+/* globals AFRAME THREE */
 AFRAME.registerComponent('brush', {
   schema: {
     color: {type: 'color', default: '#ef2d5e'},

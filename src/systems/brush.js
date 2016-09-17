@@ -24,7 +24,6 @@ AFRAME.registerBrush = function (name, definition, options) {
     spacing: 0,
     maxPoints: 0
   };
-  var self = this;
 
   BrushInterface.prototype = {
     options: Object.assign(defaultOptions, options),

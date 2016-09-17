@@ -27,7 +27,7 @@ dropArea.addEventListener('drop', function (event) {
       reader.readAsArrayBuffer(file);
     } else if (file.name.substr(file.name.length - 4).toLowerCase() === '.obj') {
       // OBJs
-      var reader = new FileReader();
+      reader = new FileReader();
 
       // file read, parse obj and add to the scene
       reader.onload = function (event) {

@@ -1,3 +1,4 @@
+/* globals AFRAME */
 AFRAME.registerSystem('ui', {
   init: function () {
     this.initTextures();

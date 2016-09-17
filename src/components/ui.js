@@ -1,5 +1,6 @@
+/* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
-  schema: {brightness: { default: 1.0, max: 1.0, min: 0.0}},
+  schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 } },
   dependencies: ['raycaster'],
 
   init: function () {
@@ -7,7 +8,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
-    this.colorStack = ["#272727", "#727272", "#FFFFFF", "#24CAFF", "#249F90", "#F2E646", "#EF2D5E"];
+    this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
     this.highlightMaterials = {};
@@ -19,7 +20,7 @@ AFRAME.registerComponent('ui', {
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
-    this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/
+    this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
 
     // The cursor is centered in 0,0 to allow scale it easily
@@ -31,9 +32,9 @@ AFRAME.registerComponent('ui', {
       color: '#ffffff',
       flatShading: true,
       shader: 'flat',
-      transparent:true,
+      transparent: true,
       fog: false,
-      src: '#uinormal',
+      src: '#uinormal'
     });
     uiEl.setAttribute('obj-model', 'obj:#uiobj');
     uiEl.setAttribute('position', '0 0.04 -0.15');
@@ -48,7 +49,7 @@ AFRAME.registerComponent('ui', {
     el.appendChild(rayEl);
 
     // Raycaster setup
-    el.setAttribute('raycaster', 'far', .5);
+    el.setAttribute('raycaster', 'far', 0.5);
     el.setAttribute('raycaster', 'objects', '.apainter-ui');
   },
 
@@ -91,9 +92,9 @@ AFRAME.registerComponent('ui', {
       fragmentShader: fragmentShader
     });
     colorWheel.material = material;
-},
+  },
 
-  bindMethods: function() {
+  bindMethods: function () {
     this.onComponentChanged = this.onComponentChanged.bind(this);
     this.onTriggerChanged = this.onTriggerChanged.bind(this);
     this.onIntersection = this.onIntersection.bind(this);
@@ -105,7 +106,7 @@ AFRAME.registerComponent('ui', {
     this.toggleMenu = this.toggleMenu.bind(this);
   },
 
-  tick: function() {
+  tick: function () {
     // Hack until https://github.com/aframevr/aframe/issues/1886
     // is fixed.
     this.el.components.raycaster.refreshObjects();
@@ -116,8 +117,7 @@ AFRAME.registerComponent('ui', {
     }
   },
 
-  onTriggerChanged: function(evt) {
-    var self = this;
+  onTriggerChanged: function (evt) {
     var triggerValue = evt.detail.value;
     this.lastTriggerValue = triggerValue;
     if (evt.detail.value >= 0.25) {
@@ -128,7 +128,7 @@ AFRAME.registerComponent('ui', {
     }
   },
 
-  handleButtonDown: function(object, position) {
+  handleButtonDown: function (object, position) {
     var name = object.name;
     if (this.activeWidget && this.activeWidget !== name) { return; }
     this.activeWidget = name;
@@ -185,7 +185,7 @@ AFRAME.registerComponent('ui', {
       }
       default: {
         this.activeWidget = undefined;
-        console.log("Unkown button down " + name);
+        console.log('Unkown button down ' + name);
       }
     }
     this.pressedObjects[name] = object;
@@ -202,13 +202,12 @@ AFRAME.registerComponent('ui', {
   handleButtonUp: function () {
     var pressedObjects = this.pressedObjects;
     var unpressedObjects = this.unpressedObjects;
-    var self = this;
     this.activeWidget = undefined;
     Object.keys(pressedObjects).forEach(function (key) {
       var buttonName = pressedObjects[key].name;
       switch (true) {
         case buttonName === 'size': {
-          //self.onBrushSizeUp();
+          // self.onBrushSizeUp();
           break;
         }
         default: {
@@ -223,7 +222,7 @@ AFRAME.registerComponent('ui', {
   handlePressedButtons: function () {
     var self = this;
     if (!this.triggeredPressed) { return; }
-    this.hoveredOnObjects.forEach(function triggerAction(button) {
+    this.hoveredOnObjects.forEach(function triggerAction (button) {
       self.handleButtonDown(button.object, button.point);
     });
   },
@@ -233,14 +232,14 @@ AFRAME.registerComponent('ui', {
     this.handEl.setAttribute('brush', 'color', '#' + color);
   },
 
-  onBrushDown: function(name) {
+  onBrushDown: function (name) {
     var brushName = this.brushButtonsMapping[name];
     if (!brushName) { return; }
     this.selectBrushButton(name);
     this.handEl.setAttribute('brush', 'brush', brushName.toLowerCase());
   },
 
-  selectBrushButton: function(brushName) {
+  selectBrushButton: function (brushName) {
     var object = this.uiEl.getObject3D('mesh').getObjectByName(brushName + 'bg');
     var selectedObjects = this.selectedObjects;
     var selectedBrush = this.selectedBrush;
@@ -256,11 +255,8 @@ AFRAME.registerComponent('ui', {
   },
 
   onHueDown: function (position) {
-    var color;
     var hueWheel = this.objects.hueWheel;
     var polarPosition;
-    var rgb;
-    var bb = hueWheel
     var radius = this.colorWheelSize;
     hueWheel.updateMatrixWorld();
     hueWheel.worldToLocal(position);
@@ -277,8 +273,8 @@ AFRAME.registerComponent('ui', {
   },
 
   updateColor: function () {
-    rgb = this.hsv2rgb(this.hsv);
-    color = 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')';
+    var rgb = this.hsv2rgb(this.hsv);
+    var color = 'rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')';
     this.handEl.setAttribute('brush', 'color', color);
     this.colorHasChanged = true;
   },
@@ -295,12 +291,12 @@ AFRAME.registerComponent('ui', {
     q = v * (1 - f * s);
     t = v * (1 - (1 - f) * s);
     switch (i % 6) {
-      case 0: r = v, g = t, b = p; break;
-      case 1: r = q, g = v, b = p; break;
-      case 2: r = p, g = v, b = t; break;
-      case 3: r = p, g = q, b = v; break;
-      case 4: r = t, g = p, b = v; break;
-      case 5: r = v, g = p, b = q; break;
+      case 0: r = v; g = t; b = p; break;
+      case 1: r = q; g = v; b = p; break;
+      case 2: r = p; g = v; b = t; break;
+      case 3: r = p; g = q; b = v; break;
+      case 4: r = t; g = p; b = v; break;
+      case 5: r = v; g = p; b = q; break;
     }
     return {
       r: Math.round(r * 255),
@@ -317,13 +313,13 @@ AFRAME.registerComponent('ui', {
     var s = (max === 0 ? 0 : d / max);
     var v = max / 255;
 
-    if (arguments.length === 1) { g = r.g, b = r.b, r = r.r; }
+    if (arguments.length === 1) { g = r.g; b = r.b; r = r.r; }
 
     switch (max) {
       case min: h = 0; break;
-        case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
-        case g: h = (b - r) + d * 2; h /= 6 * d; break;
-        case b: h = (r - g) + d * 4; h /= 6 * d; break;
+      case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
+      case g: h = (b - r) + d * 2; h /= 6 * d; break;
+      case b: h = (r - g) + d * 4; h /= 6 * d; break;
     }
     return {h: h, s: s, v: v};
   },
@@ -383,7 +379,6 @@ AFRAME.registerComponent('ui', {
     // Add highlight to newly intersected objects
     this.hoveredOnObjects.forEach(function (obj) {
       var object = obj.object;
-      //if (self.colorHistoryRegexp.test(object.name)) { debugger; }
       if (!self.highlightMaterials[object.name]) {
         self.initHighlightMaterial(object);
       }
@@ -440,10 +435,9 @@ AFRAME.registerComponent('ui', {
   },
 
   onModelLoaded: function (evt) {
-    var el = this.el;
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
-    if (evt.detail.format !== 'json') { return;}
+    if (evt.detail.format !== 'json') { return; }
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
     this.objects.brightnessSlider = model.getObjectByName('brightness');
@@ -467,7 +461,7 @@ AFRAME.registerComponent('ui', {
     this.objects.sizeSlider.geometry.computeBoundingBox();
     // Hide bounding box
     model.getObjectByName('bb').material = new THREE.MeshBasicMaterial(
-      {color: 0x248f24, alphaTest: 0, visible: false });
+      { color: 0x248f24, alphaTest: 0, visible: false });
     // Hide objects
     model.getObjectByName('msg_save').visible = false;
     model.getObjectByName('msg_error').visible = false;
@@ -492,8 +486,6 @@ AFRAME.registerComponent('ui', {
   },
 
   setCursorTransparency: function () {
-    var alphaTest = 0.5;
-    var transparent = true;
     var hueCursor = this.objects.hueCursor;
     var brightnessCursor = this.objects.brightnessCursor;
     var sizeCursor = this.objects.sizeCursor;
@@ -535,9 +527,9 @@ AFRAME.registerComponent('ui', {
         brush = brushes[brushIndex];
         thumbnail = brush && AFRAME.BRUSHES[brush].prototype.options.thumbnail;
         loadBrush(brush, brushNum, thumbnail);
-        brushNum+=1;
+        brushNum += 1;
       }
-      function loadBrush(name, id, thumbnailUrl) {
+      function loadBrush (name, id, thumbnailUrl) {
         var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
         if (thumbnailUrl && !brushesMaterials[brushName]) {
           thumbnailUrl = 'url(' + thumbnailUrl + ')';
@@ -545,11 +537,11 @@ AFRAME.registerComponent('ui', {
           return;
         }
         onLoadThumbnail();
-        function onLoadThumbnail(texture) {
+        function onLoadThumbnail (texture) {
           var button = uiEl.getObjectByName('brush' + id);
           self.brushButtonsMapping['brush' + id] = brushName;
           setBrushThumbnail(texture, button);
-        };
+        }
       }
       function setBrushThumbnail (texture, button) {
         var brushName = self.brushButtonsMapping[button.name];
@@ -558,11 +550,11 @@ AFRAME.registerComponent('ui', {
           material.map = texture;
           material.alphaTest = 0.5;
           material.transparent = true;
-        } else if (!brushesMaterials[brushName]){
+        } else if (!brushesMaterials[brushName]) {
           material.visible = false;
         }
         brushesMaterials[brushName] = material;
-        self.highlightMaterials[button.name] =  {
+        self.highlightMaterials[button.name] = {
           normal: material,
           hover: material,
           pressed: material,
@@ -570,7 +562,7 @@ AFRAME.registerComponent('ui', {
         };
         button.material = material;
       }
-    }
+    };
   })(),
 
   nextPage: function () {
@@ -619,18 +611,18 @@ AFRAME.registerComponent('ui', {
     }
   },
 
-  open: function() {
+  open: function () {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
     var tween;
     if (!this.closed) { return; }
     tween = new AFRAME.TWEEN.Tween(coords)
         .to({ x: 1, y: 1, z: 1 }, 100)
-        .onUpdate(function() {
+        .onUpdate(function () {
           uiEl.setAttribute('scale', this);
         })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out)
-        .start();
+        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+    tween.start();
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
@@ -641,11 +633,10 @@ AFRAME.registerComponent('ui', {
     return function (evt) {
       this.updateRaycaster(raycaster);
       this.intersectedObjects = raycaster.intersectObjects(this.menuEls, true);
-    }
+    };
   })(),
 
   onIntersection: function (evt) {
-    var intersectedEl = evt.detail.els[0];
     var visible = this.closed && this.system.opened;
     if (this.el.components.brush.active) { return; }
     this.rayEl.setAttribute('visible', !!visible);
@@ -677,7 +668,7 @@ AFRAME.registerComponent('ui', {
     handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
   },
 
-  onComponentChanged: function(evt) {
+  onComponentChanged: function (evt) {
     if (evt.detail.name === 'brush') { this.syncUI(); }
   },
 
@@ -692,7 +683,6 @@ AFRAME.registerComponent('ui', {
   },
 
   initColorHistory: function () {
-    var colorStack = this.colorStack;
     var colorHistoryObject;
     var currentColor = this.objects.currentColor;
     for (var i = 0; i < this.objects.colorHistory.length; i++) {
@@ -788,7 +778,7 @@ AFRAME.registerComponent('ui', {
       object3D.matrixWorld.decompose(originVec3, directionHelper, scaleDummy);
       // Apply rotation to a 0, 0, -1 vector.
       direction.set(0, 0, -1);
-      //direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), 30 / 2 * Math.PI);
+      // direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), 30 / 2 * Math.PI);
       direction.applyQuaternion(directionHelper);
 
       raycaster.set(originVec3, direction);
@@ -805,8 +795,8 @@ AFRAME.registerComponent('ui', {
         .onUpdate(function () {
           uiEl.setAttribute('scale', this);
         })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out)
-        .start();
+        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+    tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
   }

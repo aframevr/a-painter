@@ -54,7 +54,7 @@ AFRAME.APAINTER = {
         var brushesNames = Object.keys(AFRAME.BRUSHES);
         var index = brushesNames.indexOf(hands[0].components.brush.data.brush);
         index = (index + 1) % brushesNames.length;
-        [].forEach.call(hands, function(hand) {
+        [].forEach.call(hands, function (hand) {
           hand.setAttribute('brush', 'brush', brushesNames[index]);
         });
       }
@@ -77,8 +77,8 @@ AFRAME.APAINTER = {
     console.info('A-PAINTER Version: ' + this.version);
   },
   save: function () {
-    dataviews = this.brushSystem.getBinary();
-    blob = new Blob(dataviews, {type: 'application/octet-binary'});
+    var dataviews = this.brushSystem.getBinary();
+    var blob = new Blob(dataviews, {type: 'application/octet-binary'});
     // saveAs.js defines `saveAs` for saving files out of the browser
     saveAs(blob, 'demo.apa');
   },
@@ -116,9 +116,9 @@ AFRAME.APAINTER = {
         console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
         self.sceneEl.emit('drawing-uploaded-completed', {url: baseUrl + fileInfo.cdnUrl});
         if (success) { success(); }
-      }).fail(function(errorInfo, fileInfo) {
+      }).fail(function (errorInfo, fileInfo) {
         if (error) { error(errorInfo); }
-      }).progress(function(uploadInfo) {
+      }).progress(function (uploadInfo) {
         self.sceneEl.emit('drawing-upload-progress', {progress: uploadInfo.progress});
       });
     }

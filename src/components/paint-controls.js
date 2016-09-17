@@ -26,7 +26,6 @@ AFRAME.registerComponent('paint-controls', {
 
     this.numberStrokes = 0;
 
-    var self = this;
     document.addEventListener('stroke-started', function (event) {
       if (event.detail.entity.components['paint-controls'] !== self) { return; }
 
@@ -40,13 +39,13 @@ AFRAME.registerComponent('paint-controls', {
           .onComplete(function () {
             self.buttonMeshes.tooltips.forEach(function (tooltip) {
               tooltip.visible = false;
-            })
+            });
           })
           .delay(2000)
           .onUpdate(function () {
             self.buttonMeshes.tooltips[0].material.opacity = object.alpha;
-          })
-          .start();
+          });
+        tween.start();
       }
     });
   },
@@ -108,7 +107,7 @@ AFRAME.registerComponent('paint-controls', {
     if (button !== 'trigger') { return; }
     value = evt.detail.state.value;
     this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
-    this.el.emit(button + 'changed', {value: value})
+    this.el.emit(button + 'changed', {value: value});
   },
 
   onModelLoaded: function (evt) {
