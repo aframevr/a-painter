@@ -30,4 +30,4 @@ var spheres = {
   }
 };
 
-AFRAME.registerBrush('spheres', spheres, {thumbnail: 'brushes/thumb_spheres.png', spacing: 0.01});
+AFRAME.registerBrush('spheres', spheres, {thumbnail: 'brushes/thumb_spheres.gif', spacing: 0.01});
