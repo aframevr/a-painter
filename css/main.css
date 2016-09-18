@@ -1,21 +1,27 @@
-#apainter-ui {
+#apainter-ui{
   font-family: Helvetica, Arial, sans-serif;
   position: absolute;
   left: 20px;
   bottom: 20px;
   line-height: 1.2em;
+  background-color: rgba(10,10,10,0.8);
+  border-radius: 6px;
+  padding: 1.7em 2em;
+  display: none;
 }
 
-#apainter-ui #help{
+#apainter-ui .help{
   width: 600px;
   color: #ccc;
   font-size: 14px;
   text-shadow: 0px 2px 1px #000;
 }
-#apainter-ui #help h1{
+
+#apainter-ui .help h1{
   font-size: 22px;
   font-weight: 100;
   color: #e42b5a;
+  margin-top: 0;
 }
 
 #apainter-ui .button {
@@ -33,12 +39,12 @@
   background-color: #f43b6a;
 }
 
-#apainter-ui #form {
+#apainter-ui .form {
   display: flex;
   align-content: center;
 }
 
-#apainter-ui #share input {
+#apainter-ui .share input {
   width: 600px;
   color: #333;
   text-align: center;
@@ -46,4 +52,19 @@
 
 #apainter-ui .hide {
   display: none !important;
+}
+
+#apainter-ui .progress{
+  font-size: 22px;
+  font-weight: 100;
+  color: #e42b5a;
+  border-bottom: 1px solid #e42b5a;
+  text-shadow: 0px 2px 1px #000;
+}
+
+#apainter-ui .bar{
+  width: 0%;
+  height: 3px;
+  margin-top: 13px;
+  background-color: #e42b5a;
 }
