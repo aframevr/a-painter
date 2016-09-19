@@ -38,8 +38,6 @@ AFRAME.APAINTER = {
 
     // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function (event) {
-      console.log(event.keyCode);
-
       if (event.keyCode === 8) {
         // Undo (Backspace)
         self.brushSystem.undo();
