@@ -7,14 +7,14 @@ To create a new brush the following interface need to be implemented:
 
 ```javascript
 BrushInterface.prototype = {
-  addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
+  addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
   tick: function (timeoffset, delta) {}
 }
 ```
 
-* **addPoint** (*Mandatory*): It will be called every time the brush should add a new point to the stroke.
+* **addPoint** (*Mandatory*): It will be called every time the brush should add a new point to the stroke. You should return `true` if you've added something to the scene, `false` otherwise. To add some mesh to the scene every brush has an injected `object3D` attribute that can be used to add children to the scene.
   * **position** (*vector3*): Controller position.
-  * **rotation** (*quaternion*): Controller rotation.
+  * **orientation** (*quaternion*): Controller orientation.
   * **pointerPosition** (*vector3*): Position of the pointer where the brush should start painting.
   * **pressure** (*float[0..1]*): Trigger pressure.
   * **timestamp** (*int*): Elapsed milliseconds since the starting of a-painter.
@@ -44,16 +44,18 @@ this.data = {
 * **color** (*color*): Base color to be used on the brush (It's defined when the stroke is created).
 
 ### Register a new brush
-To register a new brush we should call `AFRAME.registerBrush` with three parameters:
+
+To register a new brush we should call `AFRAME.registerBrush`:
+```javascript
+AFRAME.registerBrush(brushName, brushDefinition, options);
+```
+
+Register brush needs three parameters:
 * **brushName** (*string*): The unique brush name.
 * **brushDefinition** (*object*): The custom implementation of the previously defined `brushDefinition`.
 * **options** (*object* [Optional]):
   * **spacing** (*float*): Minimum distance, in meters, from the previous point needed to call `addPoint`.
   * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reached that number of points.
-
-```javascript
-AFRAME.registerBrush(brushName, brushDefinition, options);
-```
 
 ## File format
 
