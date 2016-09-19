@@ -311,7 +311,7 @@ AFRAME.registerComponent('ui', {
     var d = max - min;
     var h;
     var s = (max === 0 ? 0 : d / max);
-    var v = max / 255;
+    var v = max;
 
     if (arguments.length === 1) { g = r.g; b = r.b; r = r.r; }
 
@@ -723,7 +723,7 @@ AFRAME.registerComponent('ui', {
     if (!this.handEl || !this.objects) { return; }
     brush = this.handEl.getComputedAttribute('brush');
     this.updateSizeSlider(brush.size);
-    this.updateColorWheel(brush.color);
+    this.updateColorUI(brush.color);
     this.updateColorHistory();
     // this.updateBrushSelector(brush.brush);
   },
@@ -765,15 +765,20 @@ AFRAME.registerComponent('ui', {
     cursor.scale.set(scale, 1, scale);
   },
 
-  updateColorWheel: function (color) {
+  updateColorUI: function (color) {
     var colorRGB = new THREE.Color(color);
-    var hsv = this.rgb2hsv(colorRGB.r, colorRGB.g, colorRGB.b);
+    var hsv = this.hsv = this.rgb2hsv(colorRGB.r, colorRGB.g, colorRGB.b);
+    // Update color wheel
     var angle = hsv.h * 2 * Math.PI;
     var radius = hsv.s * this.colorWheelSize;
     var x = radius * Math.cos(angle);
     var y = radius * Math.sin(angle);
     this.objects.hueCursor.position.setX(x);
     this.objects.hueCursor.position.setZ(-y);
+
+    // Update color brightness
+    this.objects.hueWheel.material.uniforms['brightness'].value = this.hsv.v;
+    this.objects.brightnessCursor.rotation.y = this.hsv.v * 1.5 - 1.5;
   },
 
   updateBrushSelector: function (brush) {
