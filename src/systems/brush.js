@@ -29,7 +29,7 @@ AFRAME.registerBrush = function (name, definition, options) {
     options: Object.assign(defaultOptions, options),
     reset: function () {},
     tick: function (timeoffset, delta) {},
-    addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {},
+    addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
     getBinary: function (system) {
       // Color = 3*4 = 12
       // NumPoints   =  4
@@ -50,7 +50,7 @@ AFRAME.registerBrush = function (name, definition, options) {
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
         binaryManager.writeFloat32Array(point.position.toArray());
-        binaryManager.writeFloat32Array(point.rotation.toArray());
+        binaryManager.writeFloat32Array(point.orientation.toArray());
         binaryManager.writeFloat32(point.pressure);
         binaryManager.writeUint32(point.timestamp);
       }
@@ -73,16 +73,16 @@ AFRAME.registerBrush = function (name, definition, options) {
   }
 
   function wrapAddPoint (addPointMethod) {
-    return function addPoint (position, rotation, pointerPosition, pressure, timestamp) {
+    return function addPoint (position, orientation, pointerPosition, pressure, timestamp) {
       if ((this.data.prevPoint && this.data.prevPoint.distanceTo(position) <= this.options.spacing) ||
           this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints) {
         return;
       }
-      if (addPointMethod.call(this, position, rotation, pointerPosition, pressure, timestamp)) {
+      if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
         this.data.numPoints++;
         this.data.points.push({
           'position': position.clone(),
-          'rotation': rotation.clone(),
+          'orientation': orientation.clone(),
           'pressure': pressure,
           'timestamp': timestamp
         });
@@ -160,18 +160,18 @@ AFRAME.registerSystem('brush', {
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
-      var rotation = new THREE.Quaternion();
+      var orientation = new THREE.Quaternion();
 
       var pressure = 0.2;
       for (var i = 0; i < numPoints; i++) {
         aux.set(randNeg(), randNeg(), randNeg());
         aux.multiplyScalar(randNeg() / 20);
-        rotation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
+        orientation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
         position = position.add(aux);
         var timestamp = 0;
 
-        var pointerPosition = this.getPointerPosition(position, rotation);
-        stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
+        var pointerPosition = this.getPointerPosition(position, orientation);
+        stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
   },
@@ -229,10 +229,10 @@ AFRAME.registerSystem('brush', {
   getPointerPosition: (function () {
     var pointerPosition = new THREE.Vector3();
     var offset = new THREE.Vector3(0, 0.7, 1);
-    return function getPointerPosition (position, rotation) {
+    return function getPointerPosition (position, orientation) {
       var pointer = offset
         .clone()
-        .applyQuaternion(rotation)
+        .applyQuaternion(orientation)
         .normalize()
         .multiplyScalar(-0.03);
       pointerPosition.copy(position).add(pointer);
@@ -270,12 +270,12 @@ AFRAME.registerSystem('brush', {
 
       for (var i = 0; i < numPoints; i++) {
         var position = binaryManager.readVector3();
-        var rotation = binaryManager.readQuaternion();
+        var orientation = binaryManager.readQuaternion();
         var pressure = binaryManager.readFloat();
         var timestamp = binaryManager.readUint32();
 
-        var pointerPosition = this.getPointerPosition(position, rotation);
-        stroke.addPoint(position, rotation, pointerPosition, pressure, timestamp);
+        var pointerPosition = this.getPointerPosition(position, orientation);
+        stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
   },

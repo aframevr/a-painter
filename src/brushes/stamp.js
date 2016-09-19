@@ -58,18 +58,18 @@ var stamp = {
       alphaTest: 0.5
     });
   },
-  addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
+  addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
     // brush side
     var pi2 = Math.PI / 2;
     var dir = new THREE.Vector3();
     dir.set(1, 0, 0);
-    dir.applyQuaternion(rotation);
+    dir.applyQuaternion(orientation);
     dir.normalize();
 
     // brush normal
     var axis = new THREE.Vector3();
     axis.set(0, 1, 0);
-    axis.applyQuaternion(rotation);
+    axis.applyQuaternion(orientation);
     axis.normalize();
 
     var brushSize = this.data.size * pressure / 2;

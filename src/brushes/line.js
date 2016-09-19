@@ -63,7 +63,7 @@ var line = {
       return new THREE.MeshBasicMaterial(options);
     }
   },
-  addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
+  addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
     var uv = 0;
     for (i = 0; i < this.data.numPoints; i++) {
       this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
@@ -75,7 +75,7 @@ var line = {
 
     var direction = new THREE.Vector3();
     direction.set(1, 0, 0);
-    direction.applyQuaternion(rotation);
+    direction.applyQuaternion(orientation);
     direction.normalize();
 
     var posA = pointerPosition.clone();
