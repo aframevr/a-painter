@@ -9,7 +9,7 @@ AFRAME.registerComponent('paint-controls', {
   init: function () {
     var el = this.el;
     var self = this;
-    var highLightTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/controller-pressed.jpg)';
+    var highLightTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/controller-pressed.png)';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
     el.setAttribute('json-model', {src: 'url(https://cdn.aframe.io/a-painter/models/controller.json)'});
     this.onButtonChanged = this.onButtonChanged.bind(this);
