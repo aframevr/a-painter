@@ -15,6 +15,8 @@ AFRAME.registerComponent('paint-controls', {
     this.onButtonChanged = this.onButtonChanged.bind(this);
     this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
     this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
+    this.onTouchStart = function (evt) { self.updateModel('trackpad', 'down'); };
+    this.onTouchEnd = function (evt) { self.updateModel('trackpad', 'up'); };
     this.onModelLoaded = this.onModelLoaded.bind(this);
     function createTexture (texture) {
       var material = self.highLightMaterial = new THREE.MeshBasicMaterial();
@@ -90,6 +92,8 @@ AFRAME.registerComponent('paint-controls', {
     el.addEventListener('buttonchanged', this.onButtonChanged);
     el.addEventListener('buttondown', this.onButtonDown);
     el.addEventListener('buttonup', this.onButtonUp);
+    el.addEventListener('touchstart', this.onTouchStart);
+    el.addEventListener('touchend', this.onTouchEnd);
     el.addEventListener('model-loaded', this.onModelLoaded);
   },
 
@@ -98,6 +102,8 @@ AFRAME.registerComponent('paint-controls', {
     el.removeEventListener('buttonchanged', this.onButtonChanged);
     el.removeEventListener('buttondown', this.onButtonDown);
     el.removeEventListener('buttonup', this.onButtonUp);
+    el.removeEventListener('touchstart', this.onTrackpadStart);
+    el.removeEventListener('touchend', this.onTrackpadEnd);
     el.removeEventListener('model-loaded', this.onModelLoaded);
   },
 
@@ -155,7 +161,7 @@ AFRAME.registerComponent('paint-controls', {
       buttonMeshes.grip.right.material = material;
       return;
     }
-    if (!button) { return; }
+    if (!button || button.material === material) { return; }
     button.material = material;
   }
 });
