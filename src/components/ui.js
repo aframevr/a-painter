@@ -468,7 +468,7 @@ AFRAME.registerComponent('ui', {
     this.messagesMaterial = new THREE.MeshBasicMaterial({ map: null, transparent: true, opacity: 0.0 });
     this.objects.messageSave = model.getObjectByName('msg_save');
     this.objects.messageSave.material = this.messagesMaterial;
-    this.objects.messageSave.visible = false
+    this.objects.messageSave.visible = false;
     this.objects.messageError = model.getObjectByName('msg_error');
     this.objects.messageError.visible = false;
     this.objects.messageError.material = this.messagesMaterial;

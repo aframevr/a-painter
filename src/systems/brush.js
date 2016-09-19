@@ -180,7 +180,7 @@ AFRAME.registerSystem('brush', {
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
       Brush = AFRAME.BRUSHES[newBrushName];
-      console.warn('Invalid brush name: `' +  brushName + '` using `' + newBrushName + '`');
+      console.warn('Invalid brush name: `' + brushName + '` using `' + newBrushName + '`');
     }
 
     Brush.used = true;

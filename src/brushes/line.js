@@ -1,13 +1,13 @@
 /* globals AFRAME THREE */
 (function () {
   var line = {
+
     init: function (color, brushSize) {
       this.idx = 0;
       this.geometry = new THREE.BufferGeometry();
       this.vertices = new Float32Array(this.options.maxPoints * 3 * 3);
       this.normals = new Float32Array(this.options.maxPoints * 3 * 3);
       this.uvs = new Float32Array(this.options.maxPoints * 2 * 2);
-      this.texture = null;
 
       this.geometry.setDrawRange(0, 0);
       this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
@@ -22,15 +22,16 @@
 
       this.object3D.add(mesh);
     },
+
     getMaterial: function () {
-      var texture = this.materialOptions.texture;
+      var map = this.materialOptions.map;
       var type = this.materialOptions.type;
 
       var defaultOptions = {};
       var defaultTextureOptions = {};
-      if (texture) {
+      if (map) {
         defaultTextureOptions = {
-          map: texture,
+          map: map,
           transparent: true,
           alphaTest: 0.5
         };
@@ -97,6 +98,7 @@
 
       return true;
     },
+
     computeVertexNormals: function () {
       var pA = new THREE.Vector3();
       var pB = new THREE.Vector3();
@@ -287,7 +289,7 @@
   for (var i = 0; i < lines.length; i++) {
     var definition = lines[i];
     if (definition.materialOptions.textureSrc) {
-      definition.materialOptions.texture = textureLoader.load(definition.materialOptions.textureSrc);
+      definition.materialOptions.map = textureLoader.load(definition.materialOptions.textureSrc);
       delete definition.materialOptions.textureSrc;
     }
     AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
