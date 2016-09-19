@@ -1,7 +1,7 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
   schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 } },
-  dependencies: ['raycaster'],
+  dependencies: ['ui-raycaster'],
 
   init: function () {
     var el = this.el;
@@ -22,6 +22,7 @@ AFRAME.registerComponent('ui', {
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
     this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
+    this.rayAngle = 45;
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -43,14 +44,16 @@ AFRAME.registerComponent('ui', {
     el.appendChild(uiEl);
 
     // Ray entity setup
-    rayEl.setAttribute('material', { color: '#ffffff' });
-    rayEl.setAttribute('geometry', { primitive: 'box', height: 0.001, width: 0.001, depth: 1.0 });
+    rayEl.setAttribute('line', '');
     rayEl.setAttribute('visible', false);
     el.appendChild(rayEl);
 
     // Raycaster setup
-    el.setAttribute('raycaster', 'far', 0.5);
-    el.setAttribute('raycaster', 'objects', '.apainter-ui');
+    el.setAttribute('ui-raycaster', {
+      far: 0.2,
+      objects: '.apainter-ui',
+      rotation: -this.rayAngle
+    });
   },
 
   initColorWheel: function () {
@@ -109,7 +112,7 @@ AFRAME.registerComponent('ui', {
   tick: function () {
     // Hack until https://github.com/aframevr/aframe/issues/1886
     // is fixed.
-    this.el.components.raycaster.refreshObjects();
+    this.el.components['ui-raycaster'].refreshObjects();
     if (!this.closed && this.handEl) {
       this.updateIntersections();
       this.handleHover();
@@ -266,6 +269,8 @@ AFRAME.registerComponent('ui', {
       r: Math.sqrt(position.x * position.x + position.z * position.z),
       theta: Math.PI + Math.atan2(-position.z, position.x)
     };
+    console.log("OBJ x " + position.x + " y " + position.y + " z " + position.z);
+    console.log("Radius: " + polarPosition.r + " theta: " + polarPosition.theta);
     var angle = ((polarPosition.theta * (180 / Math.PI)) + 180) % 360;
     this.hsv.h = angle / 360;
     this.hsv.s = polarPosition.r / radius;
@@ -358,7 +363,7 @@ AFRAME.registerComponent('ui', {
   updateHoverObjects: function () {
     var intersectedObjects = this.intersectedObjects;
     intersectedObjects = intersectedObjects.filter(function (obj) {
-      return obj.object.name !== 'bb';
+      return obj.object.name !== 'bb' && obj.object.name !== 'msg_save';
     });
     this.hoveredOffObjects = this.hoveredOnObjects.filter(function (obj) {
       return intersectedObjects.indexOf(obj) === -1;
@@ -366,48 +371,52 @@ AFRAME.registerComponent('ui', {
     this.hoveredOnObjects = intersectedObjects;
   },
 
-  updateMaterials: function () {
-    var self = this;
-    var pressedObjects = this.pressedObjects;
-    var unpressedObjects = this.unpressedObjects;
-    var selectedObjects = this.selectedObjects;
-    // Remove hover highlights
-    this.hoveredOffObjects.forEach(function (obj) {
-      var object = obj.object;
-      object.material = self.highlightMaterials[object.name].normal;
-    });
-    // Add highlight to newly intersected objects
-    this.hoveredOnObjects.forEach(function (obj) {
-      var object = obj.object;
-      if (!self.highlightMaterials[object.name]) {
-        self.initHighlightMaterial(object);
-      }
-      // Update ray
-      self.handRayEl.setAttribute('scale', {x: 1.0, y: 1.0, z: obj.distance});
-      self.handRayEl.setAttribute('position', {x: 0, y: 0, z: -(obj.distance / 2.0)});
-      object.material = self.highlightMaterials[object.name].hover;
-    });
-    // Pressed Material
-    Object.keys(pressedObjects).forEach(function (key) {
-      var object = pressedObjects[key];
-      var materials = self.highlightMaterials[object.name];
-      object.material = materials.pressed || object.material;
-    });
-    // Unpressed Material
-    Object.keys(unpressedObjects).forEach(function (key) {
-      var object = unpressedObjects[key];
-      var materials = self.highlightMaterials[object.name];
-      object.material = materials.normal;
-      delete unpressedObjects[key];
-    });
-    // Selected material
-    Object.keys(selectedObjects).forEach(function (key) {
-      var object = selectedObjects[key];
-      var materials = self.highlightMaterials[object.name];
-      if (!materials) { return; }
-      object.material = materials.selected;
-    });
-  },
+  updateMaterials: (function () {
+    var point = new THREE.Vector3();
+    return function() {
+      var self = this;
+      var pressedObjects = this.pressedObjects;
+      var unpressedObjects = this.unpressedObjects;
+      var selectedObjects = this.selectedObjects;
+      // Remove hover highlights
+      this.hoveredOffObjects.forEach(function (obj) {
+        var object = obj.object;
+        object.material = self.highlightMaterials[object.name].normal;
+      });
+      // Add highlight to newly intersected objects
+      this.hoveredOnObjects.forEach(function (obj) {
+        var object = obj.object;
+        point.copy(obj.point);
+        if (!self.highlightMaterials[object.name]) {
+          self.initHighlightMaterial(object);
+        }
+        // Update ray
+        self.handRayEl.object3D.worldToLocal(point);
+        self.handRayEl.setAttribute('line', 'end', point);
+        object.material = self.highlightMaterials[object.name].hover;
+      });
+      // Pressed Material
+      Object.keys(pressedObjects).forEach(function (key) {
+        var object = pressedObjects[key];
+        var materials = self.highlightMaterials[object.name];
+        object.material = materials.pressed || object.material;
+      });
+      // Unpressed Material
+      Object.keys(unpressedObjects).forEach(function (key) {
+        var object = unpressedObjects[key];
+        var materials = self.highlightMaterials[object.name];
+        object.material = materials.normal;
+        delete unpressedObjects[key];
+      });
+      // Selected material
+      Object.keys(selectedObjects).forEach(function (key) {
+        var object = selectedObjects[key];
+        var materials = self.highlightMaterials[object.name];
+        if (!materials) { return; }
+        object.material = materials.selected;
+      });
+    }
+  })(),
 
   play: function () {
     var el = this.el;
@@ -515,6 +524,8 @@ AFRAME.registerComponent('ui', {
     this.initColorHistory();
     this.initBrushesMenu();
     this.setCursorTransparency();
+    this.updateColorUI(this.el.getComputedAttribute('brush').color);
+    this.updateSizeSlider(this.el.getComputedAttribute('brush').size);
   },
 
   initBrushesMenu: function () {
@@ -829,9 +840,8 @@ AFRAME.registerComponent('ui', {
       object3D.matrixWorld.decompose(originVec3, directionHelper, scaleDummy);
       // Apply rotation to a 0, 0, -1 vector.
       direction.set(0, 0, -1);
-      // direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), 30 / 2 * Math.PI);
+      direction.applyAxisAngle(new THREE.Vector3(1, 0, 0), -(this.rayAngle / 360) * 2 * Math.PI);
       direction.applyQuaternion(directionHelper);
-
       raycaster.set(originVec3, direction);
     };
   })(),
