@@ -41,14 +41,14 @@
         <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous">
         <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg" crossOrigin="anonymous">
         <img id="uinormal" src="https://cdn.aframe.io/a-painter/images/ui-normal.png" crossOrigin="anonymous">
-        <img id="apainterlogo" src="https://cdn.aframe.io/a-painter/images/logo.png" crossOrigin="anonymous">
         <a-asset-item id="logoobj" src="https://cdn.aframe.io/a-painter/models/logo.obj"></a-asset-item>
+        <a-asset-item id="logomtl" src="https://cdn.aframe.io/a-painter/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
-      <a-entity id="logo" material="flatShading:true; shader:flat; transparent:true; color:#ffffff; fog:false; src:#apainterlogo" obj-model="obj: #logoobj">
+      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl">
         <a-animation begin="fadeout" attribute="material.opacity" fill="none" from="1" to="0" dur="3000"></a-animation>
       </a-entity>
       <a-entity id="left-hand"
