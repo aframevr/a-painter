@@ -662,13 +662,13 @@
 /***/ function(module, exports) {
 
 	/* globals THREE */
-	var BinaryManager = function (buffer) {
+	window.BinaryManager = function (buffer) {
 	  this.dataview = new DataView(buffer);
 	  this.offset = 0;
 	  this.isLittleEndian = true;
 	};
 
-	BinaryManager.prototype = {
+	window.BinaryManager.prototype = {
 	  // READER
 	  readQuaternion: function () {
 	    return new THREE.Quaternion(
