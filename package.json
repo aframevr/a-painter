@@ -6,7 +6,7 @@
     "start": "live-server",
     "lint": "semistandard -v | snazzy"
   },
-  "repository": "fernandojsg/a-painter",
+  "repository": "aframevr/a-painter",
   "license": "MIT",
   "semistandard": {
     "ignore": [
