@@ -31,10 +31,12 @@
       </a-entity>
       <a-entity id="left-hand"
                 brush
+                if-not-vr="visible: false"
                 paint-controls="hand: left"
                 ui></a-entity>
       <a-entity id="right-hand"
                 brush
+                if-not-vr="visible: false"
                 paint-controls="hand: right"
                 ui></a-entity>
       <a-entity id="ground"
@@ -42,7 +44,11 @@
                 rotation="-90 0 0"
                 material="shader: flat; src: #floor">
       </a-entity>
-      <a-entity position="0 0 0" id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
+      <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
+
+      <a-entity if-not-vr="position: 0 0 2.5">
+        <a-camera></a-camera>
+      </a-entity>
     </a-scene>
     <div id="apainter-ui">
       <div class="progress hide">
