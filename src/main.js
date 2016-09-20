@@ -85,7 +85,7 @@ AFRAME.APAINTER = {
     this.sceneEl.emit('drawing-upload-started');
     var self = this;
 
-    var baseUrl = 'http://a-painter.aframe.io/?url=';
+    var baseUrl = 'https://aframe.io/a-painter/?url=';
 
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
