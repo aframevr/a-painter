@@ -25,6 +25,7 @@ AFRAME.APAINTER = {
     var urlParams = getUrlParams();
     if (urlParams.url) {
       this.brushSystem.loadFromUrl(urlParams.url);
+      document.getElementById('logo').setAttribute('visible', false);
     }
 
     this.startPainting = false;
