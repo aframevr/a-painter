@@ -1,5 +1,7 @@
 # A-Painter
 
+![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)
+
 ## Brush API
 
 ### Brush interface
