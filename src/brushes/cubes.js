@@ -1,5 +1,6 @@
 /* globals AFRAME THREE */
-AFRAME.registerBrush('cubes', {
+AFRAME.registerBrush('cubes',
+  {
     init: function (color, width) {
       this.material = new THREE.MeshStandardMaterial({
         color: this.data.color,

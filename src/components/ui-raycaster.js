@@ -1,4 +1,4 @@
-
+/* globals AFRAME THREE */
 /**
  * Raycaster component.
  *

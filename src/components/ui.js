@@ -40,6 +40,7 @@ AFRAME.registerComponent('ui', {
     uiEl.setAttribute('obj-model', 'obj:#uiobj');
     uiEl.setAttribute('position', '0 0.04 -0.15');
     uiEl.setAttribute('scale', '0 0 0');
+    uiEl.setAttribute('visible', false);
     uiEl.classList.add('apainter-ui');
     el.appendChild(uiEl);
 
@@ -269,8 +270,6 @@ AFRAME.registerComponent('ui', {
       r: Math.sqrt(position.x * position.x + position.z * position.z),
       theta: Math.PI + Math.atan2(-position.z, position.x)
     };
-    console.log("OBJ x " + position.x + " y " + position.y + " z " + position.z);
-    console.log("Radius: " + polarPosition.r + " theta: " + polarPosition.theta);
     var angle = ((polarPosition.theta * (180 / Math.PI)) + 180) % 360;
     this.hsv.h = angle / 360;
     this.hsv.s = polarPosition.r / radius;
@@ -373,7 +372,7 @@ AFRAME.registerComponent('ui', {
 
   updateMaterials: (function () {
     var point = new THREE.Vector3();
-    return function() {
+    return function () {
       var self = this;
       var pressedObjects = this.pressedObjects;
       var unpressedObjects = this.unpressedObjects;
@@ -415,7 +414,7 @@ AFRAME.registerComponent('ui', {
         if (!materials) { return; }
         object.material = materials.selected;
       });
-    }
+    };
   })(),
 
   play: function () {
@@ -673,6 +672,7 @@ AFRAME.registerComponent('ui', {
     var coords = { x: 0, y: 0, z: 0 };
     var tween;
     if (!this.closed) { return; }
+    this.uiEl.setAttribute('visible', true);
     tween = new AFRAME.TWEEN.Tween(coords)
         .to({ x: 1, y: 1, z: 1 }, 100)
         .onUpdate(function () {
@@ -855,6 +855,9 @@ AFRAME.registerComponent('ui', {
         .to({ x: 0, y: 0, z: 0 }, 100)
         .onUpdate(function () {
           uiEl.setAttribute('scale', this);
+        })
+        .onComplete(function () {
+          uiEl.setAttribute('visible', false);
         })
         .easing(AFRAME.TWEEN.Easing.Exponential.Out);
     tween.start();

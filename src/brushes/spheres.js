@@ -1,5 +1,6 @@
 /* globals AFRAME THREE */
-AFRAME.registerBrush('spheres', {
+AFRAME.registerBrush('spheres',
+  {
     init: function (color, width) {
       // Initialize the material based on the stroke color
       this.material = new THREE.MeshStandardMaterial({
@@ -14,7 +15,6 @@ AFRAME.registerBrush('spheres', {
     // This function is called every time we need to add a point to our stroke
     // It should returns true if the point is added correctly, false otherwise.
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
-
       // Create a new sphere mesh to insert at the given position
       var sphere = new THREE.Mesh(this.geometry, this.material);
 
