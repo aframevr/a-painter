@@ -23,6 +23,7 @@ AFRAME.registerComponent('ui', {
     this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
     this.rayAngle = 45;
+    this.rayDistance = 0.2;
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -46,12 +47,12 @@ AFRAME.registerComponent('ui', {
 
     // Ray entity setup
     rayEl.setAttribute('line', '');
-    rayEl.setAttribute('visible', false);
+    //rayEl.setAttribute('visible', false);
     el.appendChild(rayEl);
 
     // Raycaster setup
     el.setAttribute('ui-raycaster', {
-      far: 0.2,
+      far: this.rayDistance,
       objects: '.apainter-ui',
       rotation: -this.rayAngle
     });
@@ -842,6 +843,7 @@ AFRAME.registerComponent('ui', {
       direction.set(0, 0, -1);
       direction.applyAxisAngle(new THREE.Vector3(1, 0, 0), -(this.rayAngle / 360) * 2 * Math.PI);
       direction.applyQuaternion(directionHelper);
+      raycaster.far = this.rayDistance;
       raycaster.set(originVec3, direction);
     };
   })(),
