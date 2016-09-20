@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "A-Painter",
   "scripts": {
-    "start": "live-server",
+    "build": "NODE_ENV=production webpack",
+    "start": "webpack-dev-server",
     "lint": "semistandard -v | snazzy"
   },
   "repository": "aframevr/a-painter",
@@ -13,12 +14,10 @@
       "**/vendor/**"
     ]
   },
-  "dependencies": {
-    "aframe": "^0.3.1",
-    "live-server": "^1.1.0"
-  },
   "devDependencies": {
     "semistandard": "^9.0.0",
-    "snazzy": "^4.0.1"
+    "snazzy": "^4.0.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.1"
   }
 }
