@@ -662,7 +662,7 @@
 /***/ function(module, exports) {
 
 	/* globals THREE */
-	var BinaryManager = function (buffer) {
+	var BinaryManager = window.BinaryManager = function (buffer) {
 	  this.dataview = new DataView(buffer);
 	  this.offset = 0;
 	  this.isLittleEndian = true;
