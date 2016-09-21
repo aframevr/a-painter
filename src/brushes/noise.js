@@ -22,7 +22,7 @@
       }
 
       void main() {
-        float h = mod(vUv.x + time / 10000.0, 1.0);
+        float h = mod(vUv.x + time / 3000.0, 1.0);
         vec4 color = vec4(hsv2rgb(vec3(h, 1.0, 0.5)), 1.0);
         gl_FragColor = color;
       }
