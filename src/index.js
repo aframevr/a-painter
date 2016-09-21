@@ -15,8 +15,8 @@ require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
 
-require('./brushes/noise.js');
 require('./brushes/line.js');
 require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
+require('./brushes/noise.js');
