@@ -240,6 +240,7 @@ AFRAME.registerComponent('ui', {
   onBrushDown: function (name) {
     var brushName = this.brushButtonsMapping[name];
     if (!brushName) { return; }
+    console.log("Set brush button", name)
     this.selectBrushButton(name);
     this.handEl.setAttribute('brush', 'brush', brushName.toLowerCase());
   },
@@ -257,6 +258,7 @@ AFRAME.registerComponent('ui', {
     }
     selectedObjects[object.name] = object;
     this.selectedBrush = object;
+    console.log("Select brush", object)
   },
 
   onHueDown: function (position) {
