@@ -19,4 +19,4 @@ require('./brushes/line.js');
 require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
-require('./brushes/noise.js');
+require('./brushes/rainbow.js');

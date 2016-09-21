@@ -22,7 +22,7 @@
       }
 
       void main() {
-        float h = mod(vUv.x + time / 3000.0, 1.0);
+        float h = mod(vUv.x - time / 3000.0, 1.0);
         vec4 color = vec4(hsv2rgb(vec3(h, 1.0, 0.5)), 1.0);
         gl_FragColor = color;
       }
@@ -62,7 +62,6 @@
         });
     },
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
-      console.log("Add point")
       var uv = 0;
       for (i = 0; i < this.data.numPoints; i++) {
         this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
@@ -177,24 +176,5 @@
     }
   };
 
-  var lines = [
-    {
-      name: 'shadernoise',
-      materialOptions: {
-        type: 'shaded'
-      },
-      thumbnail: 'brushes/thumb_smooth.gif'
-    }
-  ];
-
-  var textureLoader = new THREE.TextureLoader();
-
-  for (var i = 0; i < lines.length; i++) {
-    var definition = lines[i];
-    if (definition.materialOptions.textureSrc) {
-      definition.materialOptions.map = textureLoader.load(definition.materialOptions.textureSrc);
-      delete definition.materialOptions.textureSrc;
-    }
-    AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
-  }
+  AFRAME.registerBrush("rainbow", Object.assign({}, line, {}), {thumbnail:'brushes/thumb_smooth.gif', maxPoints: 3000});
 })();
