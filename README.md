@@ -23,7 +23,8 @@ Then go to `http://localhost:8080` in your browser.
 ## Brush API
 
 ### Brush Interface
-To create a new brush, simply implement the following interface:
+
+To create a new brush, implement the following interface:
 
 ```javascript
 BrushInterface.prototype = {
@@ -42,6 +43,10 @@ BrushInterface.prototype = {
 * **tick** (*Optional*): Is called on every frame.
   * **timeOffset** (*int*): Elapsed milliseconds since the starting of A-Painter.
   * **delta** (*int*): Delta time in milliseconds since the last frame.
+
+*Development Tip*: set your brush as the default brush at the top of
+`src/components/brush.js` (`brush: {default: 'yourbrush'}`) while developing so
+you don't have to re-select it every time you reload.
 
 ### Common Data
 
