@@ -2,34 +2,35 @@
 
 Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 
-![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)
+[![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)](https://blog.mozvr.com/a-painter/)
 
 ## Brush API
 
 ### Brush interface
-To create a new brush the following interface need to be implemented:
+To create a new brush, simply implement the following interface:
 
 ```javascript
 BrushInterface.prototype = {
   addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
-  tick: function (timeoffset, delta) {}
-}
+  tick: function (timeOffset, delta) {}
+};
 ```
 
-* **addPoint** (*Mandatory*): It will be called every time the brush should add a new point to the stroke. You should return `true` if you've added something to the scene, `false` otherwise. To add some mesh to the scene every brush has an injected `object3D` attribute that can be used to add children to the scene.
+* **addPoint** (*Mandatory*): It will be called every time the brush should add a new point to the stroke. You should return `true` if you've added something to the scene and `false` otherwise. To add some mesh to the scene, every brush has an injected `object3D` attribute that can be used to add children to the scene.
   * **position** (*vector3*): Controller position.
   * **orientation** (*quaternion*): Controller orientation.
   * **pointerPosition** (*vector3*): Position of the pointer where the brush should start painting.
   * **pressure** (*float[0..1]*): Trigger pressure.
-  * **timestamp** (*int*): Elapsed milliseconds since the starting of a-painter.
+  * **timestamp** (*int*): Elapsed milliseconds since the starting of A-Painter.
 
 * **tick** (*Optional*): Is called on every frame.
-  * **timeoffset** (*int*): Elapsed milliseconds since the starting of a-painter.
+  * **timeOffset** (*int*): Elapsed milliseconds since the starting of A-Painter.
   * **delta** (*int*): Delta time in milliseconds since the last frame.
 
 ### Common data
 
 Every brush will have some common data injected with the following default values:
+
 ```javascript
 this.data = {
   points: [],
@@ -41,11 +42,11 @@ this.data = {
 };
 ```
 
-* **points** (*Array of vector3*): List of control points already painted in the current stroke with this brush. (It's updated on every call to `addPoint`).
-* **size** (*float*): Brush size. (It's defined when the stroke is created).
-* **prevPoint** (*vector3*): The previously added point (From the last `addPoint` call).
+* **points** (*Array of vector3*): List of control points already painted in the current stroke with this brush. (It's updated on every call to `addPoint`.)
+* **size** (*float*): Brush size. (It's defined when the stroke is created.)
+* **prevPoint** (*vector3*): The previously added point (from the last `addPoint` call).
 * **numPoints** (*int*): Length of `points` array.
-* **color** (*color*): Base color to be used on the brush (It's defined when the stroke is created).
+* **color** (*color*): Base color to be used on the brush. (It's defined when the stroke is created.)
 
 ### Register a new brush
 
@@ -59,7 +60,7 @@ Register brush needs three parameters:
 * **brushDefinition** (*object*): The custom implementation of the previously defined `brushDefinition`.
 * **options** (*object* [Optional]):
   * **spacing** (*float*): Minimum distance, in meters, from the previous point needed to call `addPoint`.
-  * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reached that number of points.
+  * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reaching that number of points.
 
 ## File format
 
