@@ -18,3 +18,4 @@ require('./brushes/line.js');
 require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
+require('./brushes/rainbow.js');
