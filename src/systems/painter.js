@@ -6,10 +6,8 @@ AFRAME.APAINTER = {
   version: 1
 };
 
-AFRAME.registerComponent('a-painter', {
-  sceneEl: null,
+AFRAME.registerSystem('painter', {
   init: function () {
-    this.sceneEl = document.querySelector('a-scene');
     this.brushSystem = this.sceneEl.systems.brush;
 
     function getUrlParams () {

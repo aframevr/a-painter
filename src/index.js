@@ -6,6 +6,7 @@ require('../vendor/OrbitControls.js');
 
 require('./systems/brush.js');
 require('./systems/ui.js');
+require('./systems/painter.js');
 
 require('./components/brush.js');
 require('./components/if-no-vr-headset.js');
@@ -16,7 +17,6 @@ require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
-require('./components/a-painter.js');
 
 require('./brushes/line.js');
 require('./brushes/stamp.js');

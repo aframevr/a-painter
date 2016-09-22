@@ -172,7 +172,7 @@ AFRAME.registerComponent('ui', {
       }
       case name === 'save': {
         if (!this.pressedObjects[name]) {
-          this.el.sceneEl.components['a-painter'].upload();
+          this.el.sceneEl.systems.painter.upload();
         }
         break;
       }
