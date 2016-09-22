@@ -16,11 +16,10 @@ require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
+require('./components/a-painter.js');
 
 require('./brushes/line.js');
 require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
-
-require('./main.js');

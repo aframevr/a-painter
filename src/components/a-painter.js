@@ -1,10 +1,12 @@
 /* global AFRAME Blob uploadcare */
 
-var saveAs = require('../vendor/saveas.js').saveAs;
+var saveAs = require('../../vendor/saveas.js').saveAs;
 
 AFRAME.APAINTER = {
-  version: 1,
-  brushes: {},
+  version: 1
+};
+
+AFRAME.registerComponent('a-painter', {
   sceneEl: null,
   init: function () {
     this.sceneEl = document.querySelector('a-scene');
@@ -129,6 +131,4 @@ AFRAME.APAINTER = {
       });
     }
   }
-};
-
-AFRAME.APAINTER.init();
+});

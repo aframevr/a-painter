@@ -9,11 +9,14 @@
       UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
     </script>
     <script src="vendor/aframe.min.js"></script>
+    <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
+    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
+    <script src="src/dragndrop.js"></script>
     <script src="build.js"></script>
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body style="background-color: #030404">
-    <a-scene>
+    <a-scene a-painter >
       <a-assets>
         <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous">
         <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg" crossOrigin="anonymous">
@@ -64,10 +67,6 @@
       </div>
     </div>
 
-    <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
-    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
-    <script src="src/dragndrop.js"></script>
-    <script src="build.js"></script>
     <script src="vendor/ga.js"></script>
 
     <!-- GitHub corner. -->
