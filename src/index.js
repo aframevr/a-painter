@@ -1,4 +1,3 @@
-require('../vendor/aframe.min.js');
 window.saveAs = require('../vendor/saveas.js').saveAs;
 require('../vendor/OrbitControls.js');
 
@@ -23,3 +22,5 @@ require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
+
+require('./main.js');
