@@ -1,5 +1,6 @@
 /* globals AFRAME Image FileReader */
-window.onload = function (event) {
+window.addEventListener("load", function (event) {
+  console.log('dragndrop');
   var dropArea = document.body;
 
   dropArea.addEventListener('dragover', function (event) {
@@ -79,4 +80,4 @@ window.onload = function (event) {
       }
     }
   }, false);
-};
+});
