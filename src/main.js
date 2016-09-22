@@ -1,3 +1,5 @@
+var saveAs = require('../vendor/saveas.js').saveAs;
+
 /* global AFRAME saveAs Blob uploadcare */
 AFRAME.APAINTER = {
   version: 1,

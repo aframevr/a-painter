@@ -1,8 +1,8 @@
 window.saveAs = require('../vendor/saveas.js').saveAs;
-require('../vendor/OrbitControls.js');
-
+require('./dragndrop.js');
 require('./binarymanager.js');
 require('./ui2d.js');
+require('../vendor/OrbitControls.js');
 
 require('./systems/brush.js');
 require('./systems/ui.js');
