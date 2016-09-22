@@ -1,5 +1,5 @@
 require('../vendor/aframe.min.js');
-require('../vendor/saveas.js');
+window.saveAs = require('../vendor/saveas.js').saveAs;
 
 require('./binarymanager.js');
 require('./ui2d.js');
