@@ -1,0 +1,24 @@
+{
+  "name": "a-painter",
+  "version": "0.1.0",
+  "description": "A-Painter",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "start": "webpack-dev-server --host 0.0.0.0",
+    "lint": "semistandard -v | snazzy"
+  },
+  "repository": "aframevr/a-painter",
+  "license": "MIT",
+  "semistandard": {
+    "ignore": [
+      "**/vendor/**"
+    ]
+  },
+  "devDependencies": {
+    "cross-env": "^2.0.1",
+    "semistandard": "^9.0.0",
+    "snazzy": "^4.0.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.1"
+  }
+}

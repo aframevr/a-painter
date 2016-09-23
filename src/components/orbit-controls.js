@@ -29,14 +29,16 @@ AFRAME.registerComponent('orbit-controls', {
   onEnterVR: function () {
     var currentPosition = this.el.getAttribute('position');
     var camera = this.el.getObject3D('camera');
+    this.controls.enabled = false;
+    camera.position.set(0, 0, 0);
+    camera.rotation.set(0, 0, 0);
+    if (this.el.sceneEl.isMobile) { return; }
     this.el.setAttribute('position', {
       x: currentPosition.x - this.data.position.x,
       y: currentPosition.y - this.data.position.y,
       z: currentPosition.z - this.data.position.z
     });
-    this.controls.enabled = false;
-    camera.position.set(0, 0, 0);
-    camera.rotation.set(0, 0, 0);
+
   },
 
   setupControls: function() {
@@ -47,7 +49,7 @@ AFRAME.registerComponent('orbit-controls', {
     controls.target.setX(-position.x);
     controls.target.setZ(-position.z);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
+    controls.dampingFactor = 1.0;
     controls.enableZoom = true;
   },
 

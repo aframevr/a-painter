@@ -71,8 +71,8 @@
 
 #apainter-logo {
   position: fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: 15px;
+  left: 15px;
   height: 54px;
   width: 226px;
   background-image: url(https://cdn.aframe.io/a-painter/images/apainter-banner.png);
