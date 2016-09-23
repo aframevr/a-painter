@@ -26,6 +26,8 @@ AFRAME.APAINTER = {
     if (urlParams.url) {
       this.brushSystem.loadFromUrl(urlParams.url);
       document.getElementById('logo').setAttribute('visible', false);
+      document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
+      document.getElementById('apainter-logo').classList.remove('hidden');
     }
 
     this.startPainting = false;

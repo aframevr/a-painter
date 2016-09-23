@@ -11,6 +11,8 @@ require('./components/brush.js');
 require('./components/if-no-vr-headset.js');
 require('./components/json-model.js');
 require('./components/line.js');
+require('./components/look-controls-alt.js');
+require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
