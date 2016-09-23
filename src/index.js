@@ -1,5 +1,6 @@
 require('../vendor/aframe.min.js');
 window.saveAs = require('../vendor/saveas.js').saveAs;
+require('../vendor/OrbitControls.js');
 
 require('./binarymanager.js');
 require('./ui2d.js');
