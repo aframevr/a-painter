@@ -1,10 +1,9 @@
-/* global AFRAME saveAs Blob uploadcare */
-AFRAME.APAINTER = {
-  version: 1,
-  brushes: {},
-  sceneEl: null,
+/* global AFRAME Blob uploadcare */
+
+var saveAs = require('../../vendor/saveas.js').saveAs;
+
+AFRAME.registerSystem('painter', {
   init: function () {
-    this.sceneEl = document.querySelector('a-scene');
     this.brushSystem = this.sceneEl.systems.brush;
 
     function getUrlParams () {
@@ -126,6 +125,4 @@ AFRAME.APAINTER = {
       });
     }
   }
-};
-
-AFRAME.APAINTER.init();
+});

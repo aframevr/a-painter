@@ -1,12 +1,12 @@
-require('../vendor/aframe.min.js');
 window.saveAs = require('../vendor/saveas.js').saveAs;
-require('../vendor/OrbitControls.js');
-
+require('./dragndrop.js');
 require('./binarymanager.js');
 require('./ui2d.js');
+require('../vendor/OrbitControls.js');
 
 require('./systems/brush.js');
 require('./systems/ui.js');
+require('./systems/painter.js');
 
 require('./components/brush.js');
 require('./components/if-no-vr-headset.js');
