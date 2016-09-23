@@ -68,3 +68,16 @@
   margin-top: 13px;
   background-color: #e42b5a;
 }
+
+#apainter-logo {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  height: 54px;
+  width: 226px;
+  background-image: url(https://cdn.aframe.io/a-painter/images/apainter-banner.png);
+}
+
+#apainter-logo.hidden {
+  display: none;
+}
