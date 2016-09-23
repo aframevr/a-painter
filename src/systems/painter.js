@@ -2,10 +2,6 @@
 
 var saveAs = require('../../vendor/saveas.js').saveAs;
 
-AFRAME.APAINTER = {
-  version: 1
-};
-
 AFRAME.registerSystem('painter', {
   init: function () {
     this.brushSystem = this.sceneEl.systems.brush;
