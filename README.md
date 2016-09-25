@@ -4,6 +4,8 @@ Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 
 [![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)](https://blog.mozvr.com/a-painter/)
 
+[VIEW GALLERY](https://github.com/aframevr/a-painter/issues/99)
+
 ## Usage
 
 - Grab a [WebVR-enabled browser](https://webvr.info/get-chrome/). Currently only the experimental Chromium build on Windows supports the Vive controllers. You will need to enable Gamepad Extensions in `about:config`.
