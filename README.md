@@ -12,15 +12,15 @@ Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 - Head to [https://aframe.io/a-painter/](https://aframe.io/a-painter/) and start painting. See the [blog post](https://blog.mozvr.com/a-painter/) for some instructions.
 - Painted something beautiful? Share it on [this GitHub issue](https://github.com/aframevr/a-painter/issues/99)!
 
-## Installation
+## Local Development
 
 ```bash
-git clone git@github.com:aframevr/a-painter
+git clone git@github.com:aframevr/a-painter && cd a-painter
 npm install
-npm run start
+npm start
 ```
 
-Then go to `http://localhost:8080` in your browser.
+Then, load `http://localhost:8080` in your browser.
 
 ## Brush API
 
