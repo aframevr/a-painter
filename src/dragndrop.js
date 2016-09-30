@@ -1,5 +1,5 @@
 /* globals AFRAME Image FileReader */
-window.addEventListener("load", function (event) {
+window.addEventListener('load', function (event) {
   var dropArea = document.body;
 
   dropArea.addEventListener('dragover', function (event) {
