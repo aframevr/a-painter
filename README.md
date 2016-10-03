@@ -8,7 +8,7 @@ Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 
 ## Usage
 
-- Grab a [WebVR-enabled browser](https://webvr.info/get-chrome/). Currently only the experimental Chromium build on Windows supports the Vive controllers. You will need to enable Gamepad Extensions in `about:config`.
+- Grab a [WebVR-enabled browser](https://webvr.info/get-chrome/). Currently only the experimental Chromium build on Windows supports the Vive controllers. (You will need to enable these flags for WebVR and Gamepad Extensions: `chrome://flags#enable-webvr` and `chrome://flags#enable-gamepad-extensions`.)
 - Head to [https://aframe.io/a-painter/](https://aframe.io/a-painter/) and start painting. See the [blog post](https://blog.mozvr.com/a-painter/) for some instructions.
 - Painted something beautiful? Share it on [this GitHub issue](https://github.com/aframevr/a-painter/issues/99)!
 
@@ -20,7 +20,7 @@ npm install
 npm start
 ```
 
-Then, load `http://localhost:8080` in your browser.
+Then, load [`http://localhost:8080`](http://localhost:8080) in your browser.
 
 ## Brush API
 
