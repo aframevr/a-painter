@@ -8,7 +8,6 @@ AFRAME.registerComponent('obj-model-material-modifier', {
   },
 
   init: function () {
-    var that = this;
     var el = this.el;
     var side = this.sideToThreeSide(this.data.side)
     if (!side) {
