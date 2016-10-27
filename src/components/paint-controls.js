@@ -139,6 +139,7 @@ AFRAME.registerComponent('paint-controls', {
   onButtonEvent: function (id, evtName) {
     var buttonName = this.mapping['button' + id];
     this.el.emit(buttonName + evtName);
+    console.log(buttonName + evtName);
     this.updateModel(buttonName, evtName);
   },
 
