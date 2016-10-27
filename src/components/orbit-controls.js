@@ -47,7 +47,7 @@ AFRAME.registerComponent('orbit-controls', {
     var renderer = this.el.sceneEl.renderer;
     var camera = this.el.getObject3D('camera');
     var controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-    var position = this.el.getComputedAttribute('position');
+    var position = this.el.getAttribute('position');
     controls.target.setX(-position.x);
     controls.target.setZ(-position.z);
     controls.enableDamping = true;
@@ -69,4 +69,3 @@ AFRAME.registerComponent('orbit-controls', {
     this.pause();
   }
 });
-

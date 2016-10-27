@@ -33,6 +33,7 @@
                 geometry="primitive: circle; radius: 12;"
                 rotation="-90 0 0"
                 material="shader: flat; src: #floor">
+              </a-entity>
       <a-entity id="left-hand"
                 brush
                 if-no-vr-headset="visible: false"
@@ -45,7 +46,6 @@
                 paint-controls="hand: right"
                 teleport="ground: #ground"
                 ui></a-entity>
-      </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
       <a-entity id="acamera" camera look-controls-alt orbit-controls></a-entity>
     </a-scene>
