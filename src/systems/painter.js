@@ -5,6 +5,7 @@ var saveAs = require('../../vendor/saveas.js').saveAs;
 AFRAME.registerSystem('painter', {
   init: function () {
     this.brushSystem = this.sceneEl.systems.brush;
+    this.showTemplateItems = true;
 
     function getUrlParams () {
       var match;
@@ -72,6 +73,13 @@ AFRAME.registerSystem('painter', {
       }
       if (event.keyCode === 86) { // v - save
         self.save();
+      }
+      if (event.keyCode === 79) { // o - toggle template objects+images visibility
+        self.showTemplateItems = !self.showTemplateItems;
+        var templateItems = document.querySelectorAll('.templateitem');
+        for (var i = 0; i < templateItems.length; i++) {
+            templateItems[i].setAttribute('visible', self.showTemplateItems);
+        }
       }
     });
 
