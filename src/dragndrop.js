@@ -43,6 +43,7 @@ window.addEventListener('load', function (event) {
           }
           // add mesh to entity
           entity.setObject3D('mesh', mesh);
+          entity.className = 'templateitem';
           document.querySelector('a-scene').appendChild(entity);
         };
         reader.readAsText(file);
@@ -73,6 +74,7 @@ window.addEventListener('load', function (event) {
           entity.setAttribute('position', pos.join(' '));
           entity.setAttribute('width', width);
           entity.setAttribute('height', height);
+          entity.className = 'templateitem';
           document.querySelector('a-scene').appendChild(entity);
         };
         reader.readAsDataURL(file);
