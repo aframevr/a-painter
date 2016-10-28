@@ -4,6 +4,7 @@ var saveAs = require('../../vendor/saveas.js').saveAs;
 
 AFRAME.registerSystem('painter', {
   init: function () {
+    this.version = '1.1';
     this.brushSystem = this.sceneEl.systems.brush;
     this.showTemplateItems = true;
 
@@ -58,7 +59,18 @@ AFRAME.registerSystem('painter', {
     var self = this;
     document.addEventListener('stroke-started', function (event) {
       if (!self.startPainting) {
-        document.getElementById('logo').emit('fadeout');
+        var logo = document.getElementById('logo');
+        var mesh = logo.getObject3D('mesh');
+        var object = { alpha: 1.0 };
+        var tween = new AFRAME.TWEEN.Tween(object)
+          .to({alpha: 0.0}, 4000)
+          .onComplete(function () {
+            logo.setAttribute('visible', false);
+          })
+          .onUpdate(function () {
+            mesh.children[0].material.opacity = object.alpha;
+          });
+        tween.start();
         self.startPainting = true;
       }
     });
