@@ -81,9 +81,7 @@ AFRAME.registerComponent('paint-controls', {
     var el = this.el;
     var controlConfiguration = {
       hand: data.hand,
-      controller: (data.hand === 'right') ? 0 : 1,
-      model: false,
-      rotationOffset: 0 // since current model is like vive controller and not hand
+      model: false // since paint-controls has its own model
     };
     el.setAttribute('vive-controls', controlConfiguration);
     el.setAttribute('oculus-touch-controls', controlConfiguration);
