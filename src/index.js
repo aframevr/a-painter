@@ -1,4 +1,4 @@
-require('../vendor/aframe-v0.4.0.min.js');
+require('../vendor/aframe-master.min.js');
 
 window.saveAs = require('../vendor/saveas.js').saveAs;
 require('./dragndrop.js');
