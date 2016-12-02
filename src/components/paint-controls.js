@@ -106,6 +106,7 @@ AFRAME.registerComponent('paint-controls', {
   onButtonChanged: function (evt) {
     var button = this.mapping['button' + evt.detail.id];
     var value;
+    if (typeof button === 'undefined' || typeof this.buttonMeshes === 'undefined') { return; }
     if (button !== 'trigger') { return; }
     value = evt.detail.state.value;
     this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
