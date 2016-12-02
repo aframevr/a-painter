@@ -2954,7 +2954,7 @@
 
 	  onButtonEvent: function (id, evtName) {
 	    var buttonName = this.mapping['button' + id];
-	    this.el.emit(buttonName + evtName);
+	    // oculus-touch-controls and vive-controls do this.el.emit, so don't do again here
 	    this.updateModel(buttonName, evtName);
 	  },
 
