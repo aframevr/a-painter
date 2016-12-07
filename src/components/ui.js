@@ -482,7 +482,7 @@ AFRAME.registerComponent('ui', {
     this.objects.messageError.visible = false;
     this.objects.messageError.material = this.messagesMaterial;
 
-    var messagesImageUrl = 'url(https://cdn.aframe.io/a-painter/images/messages.png)';
+    var messagesImageUrl = 'url(http://localhost:8080/assets/images/messages.png)';
 
     this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
       var material = self.messagesMaterial;

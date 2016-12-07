@@ -2220,8 +2220,8 @@
 
 	  initTextures: function () {
 	    var self = this;
-	    var hoverTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/ui-hover.png)';
-	    var pressedTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/ui-pressed.png)';
+	    var hoverTextureUrl = 'url(http://localhost:8080/assets/images/ui-hover.png)';
+	    var pressedTextureUrl = 'url(http://localhost:8080/assets/images/ui-pressed.png)';
 	    this.sceneEl.systems.material.loadTexture(hoverTextureUrl, {src: hoverTextureUrl}, onLoadedHoverTexture);
 	    this.sceneEl.systems.material.loadTexture(pressedTextureUrl, {src: pressedTextureUrl}, onLoadedPressedTexture);
 	    function onLoadedHoverTexture (texture) {
@@ -2801,9 +2801,9 @@
 	  init: function () {
 	    var el = this.el;
 	    var self = this;
-	    var highLightTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/controller-pressed.png)';
+	    var highLightTextureUrl = 'url(http://localhost:8080/assets/images/controller-pressed.png)';
 	    el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-	    el.setAttribute('json-model', {src: 'url(https://cdn.aframe.io/a-painter/models/controller.json)'});
+	    el.setAttribute('json-model', {src: 'url(http://localhost:8080/assets/models/controller.json)'});
 	    this.onButtonChanged = this.onButtonChanged.bind(this);
 	    this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
 	    this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
@@ -3441,7 +3441,7 @@
 	    this.objects.messageError.visible = false;
 	    this.objects.messageError.material = this.messagesMaterial;
 
-	    var messagesImageUrl = 'url(https://cdn.aframe.io/a-painter/images/messages.png)';
+	    var messagesImageUrl = 'url(http://localhost:8080/assets/images/messages.png)';
 
 	    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
 	      var material = self.messagesMaterial;
