@@ -30,10 +30,13 @@ To create a new brush, implement the following interface:
 
 ```javascript
 BrushInterface.prototype = {
+  init: function () {},
   addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
   tick: function (timeOffset, delta) {}
 };
 ```
+
+* **init** (): Use this for initializing variables, materials, etc. for your brush.
 
 * **addPoint** (*Mandatory*): It will be called every time the brush should add a new point to the stroke. You should return `true` if you've added something to the scene and `false` otherwise. To add some mesh to the scene, every brush has an injected `object3D` attribute that can be used to add children to the scene.
   * **position** (*vector3*): Controller position.
@@ -82,6 +85,7 @@ Register brush needs three parameters:
 * **brushName** (*string*): The unique brush name.
 * **brushDefinition** (*object*): The custom implementation of the previously defined `brushDefinition`.
 * **options** (*object* [Optional]):
+  * **thumbnail** (*string*): Path to the thumbnail image file.
   * **spacing** (*float*): Minimum distance, in meters, from the previous point needed to call `addPoint`.
   * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reaching that number of points.
 
