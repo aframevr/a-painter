@@ -6,6 +6,8 @@ require('./binarymanager.js');
 require('./ui2d.js');
 require('../vendor/OrbitControls.js');
 
+require('./utils.js');
+
 require('./systems/brush.js');
 require('./systems/ui.js');
 require('./systems/painter.js');
