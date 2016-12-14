@@ -3,6 +3,17 @@ var VERSION = 1;
 
 AFRAME.BRUSHES = {};
 
+Number.prototype.toNumFixed = function (num) {
+  return parseFloat(this.toFixed(num));
+}
+
+Array.prototype.toNumFixed = function (num) {
+  for (var i = 0; i < this.length; i++) {
+    this[i] = this[i].toNumFixed(num);
+  }
+  return this;
+}
+
 AFRAME.registerBrush = function (name, definition, options) {
   var proto = {};
 
@@ -32,6 +43,27 @@ AFRAME.registerBrush = function (name, definition, options) {
     reset: function () {},
     tick: function (timeoffset, delta) {},
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
+    getJSON: function (system) {
+      var points = [];
+      for (var i = 0; i < this.data.points.length; i++) {
+        var point = this.data.points[i];
+        points.push({
+          'orientation': point.orientation.toArray().toNumFixed(3),
+          'position': point.position.toArray().toNumFixed(3),
+          'pressure': point.pressure.toNumFixed(3),
+          'timestamp': point.timestamp
+        });
+      }
+
+      return {
+        brush: {
+          index: system.getUsedBrushes().indexOf(this.brushName),
+          color: this.data.color.toArray().toNumFixed(3),
+          size: this.data.size.toNumFixed(3)
+        },
+        points: points
+      };
+    },
     getBinary: function (system) {
       // Color = 3*4 = 12
       // NumPoints   =  4
@@ -199,6 +231,21 @@ AFRAME.registerSystem('brush', {
 
     return stroke;
   },
+  getJSON: function () {
+    // Strokes
+    var json = {
+      version: VERSION,
+      strokes: [],
+      author: '',
+      brushes: this.getUsedBrushes()
+    };
+
+    for (i = 0; i < this.strokes.length; i++) {
+      json.strokes.push(this.strokes[i].getJSON(this));
+    }
+
+    return json;
+  },
   getBinary: function () {
     var dataViews = [];
     var MAGIC = 'apainter';
@@ -242,6 +289,36 @@ AFRAME.registerSystem('brush', {
       return pointerPosition;
     };
   })(),
+  loadJSON: function (data) {
+    if (data.version !== VERSION) {
+      console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');
+    }
+
+    var usedBrushes = [];
+
+    for (var i = 0; i < data.strokes.length; i++) {
+      var strokeData = data.strokes[i];
+      var brush = strokeData.brush;
+
+      var stroke = this.addNewStroke(
+        data.brushes[brush.index],
+        new THREE.Color().fromArray(brush.color),
+        brush.size
+      );
+
+      for (var j = 0; j < strokeData.points.length; j++) {
+        var point = strokeData.points[j];
+
+        var position = new THREE.Vector3().fromArray(point.position);
+        var orientation = new THREE.Quaternion().fromArray(point.orientation);
+        var pressure = point.pressure;
+        var timestamp = point.timestamp;
+
+        var pointerPosition = this.getPointerPosition(position, orientation);
+        stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
+      }
+    }
+  },
   loadBinary: function (buffer) {
     var binaryManager = new BinaryManager(buffer);
     var magic = binaryManager.readString();
@@ -282,14 +359,21 @@ AFRAME.registerSystem('brush', {
       }
     }
   },
-  loadFromUrl: function (url) {
+  loadFromUrl: function (url, binary) {
     var loader = new THREE.XHRLoader(this.manager);
     loader.crossOrigin = 'anonymous';
-    loader.setResponseType('arraybuffer');
+    if (binary === true) {
+      loader.setResponseType('arraybuffer');
+    }
 
     var self = this;
+
     loader.load(url, function (buffer) {
-      self.loadBinary(buffer);
+      if (binary === true) {
+        self.loadBinary(buffer);
+      } else {
+        self.loadJSON(JSON.parse(buffer));
+      }
     });
   }
 });
