@@ -4,10 +4,29 @@ Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 
 [![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)](https://blog.mozvr.com/a-painter/)
 
+[VIEW GALLERY](https://github.com/aframevr/a-painter/issues/99)
+
+## Usage
+
+- Grab a [WebVR-enabled browser](https://webvr.info/get-chrome/). Currently only the experimental Chromium build on Windows supports the Vive controllers. You will need to enable Gamepad Extensions in `about:config`.
+- Head to [https://aframe.io/a-painter/](https://aframe.io/a-painter/) and start painting. See the [blog post](https://blog.mozvr.com/a-painter/) for some instructions.
+- Painted something beautiful? Share it on [this GitHub issue](https://github.com/aframevr/a-painter/issues/99)!
+
+## Installation
+
+```bash
+git clone git@github.com:aframevr/a-painter
+npm install
+npm run start
+```
+
+Then go to `http://localhost:8080` in your browser.
+
 ## Brush API
 
-### Brush interface
-To create a new brush, simply implement the following interface:
+### Brush Interface
+
+To create a new brush, implement the following interface:
 
 ```javascript
 BrushInterface.prototype = {
@@ -27,7 +46,11 @@ BrushInterface.prototype = {
   * **timeOffset** (*int*): Elapsed milliseconds since the starting of A-Painter.
   * **delta** (*int*): Delta time in milliseconds since the last frame.
 
-### Common data
+*Development Tip*: set your brush as the default brush at the top of
+`src/components/brush.js` (`brush: {default: 'yourbrush'}`) while developing so
+you don't have to re-select it every time you reload.
+
+### Common Data
 
 Every brush will have some common data injected with the following default values:
 
@@ -48,7 +71,7 @@ this.data = {
 * **numPoints** (*int*): Length of `points` array.
 * **color** (*color*): Base color to be used on the brush. (It's defined when the stroke is created.)
 
-### Register a new brush
+### Registering a New Brush
 
 To register a new brush we should call `AFRAME.registerBrush`:
 ```javascript
@@ -62,7 +85,7 @@ Register brush needs three parameters:
   * **spacing** (*float*): Minimum distance, in meters, from the previous point needed to call `addPoint`.
   * **maxPoints** (*integer*): If defined, `addPoint` won't be called after reaching that number of points.
 
-## File format
+## File Format
 
 A-Painter uses the following custom binary file format to store the drawings and its strokes.
 

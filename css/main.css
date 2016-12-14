@@ -68,3 +68,25 @@
   margin-top: 13px;
   background-color: #e42b5a;
 }
+
+#apainter-logo {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  height: 54px;
+  width: 252px;
+  background-image: url(https://cdn.aframe.io/a-painter/images/apainter-banner.png);
+}
+
+#apainter-logo.hidden, #apainter-author.hidden{
+  display: none;
+}
+
+#apainter-author {
+  position: fixed;
+  bottom: 28px;
+  left: 268px;
+  display: inline-block;
+  font: 18px arial, sans-serif;
+  color: #e42b5a;
+}

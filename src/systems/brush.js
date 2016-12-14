@@ -1,4 +1,6 @@
 /* globals AFRAME THREE BinaryManager */
+var VERSION = 1;
+
 AFRAME.BRUSHES = {};
 
 AFRAME.registerBrush = function (name, definition, options) {
@@ -139,6 +141,7 @@ AFRAME.registerSystem('brush', {
     this.strokes = [];
   },
   init: function () {
+    this.version = VERSION;
     this.clear();
   },
   tick: function (time, delta) {
@@ -209,7 +212,7 @@ AFRAME.registerSystem('brush', {
 
     // Header magic and version
     binaryManager.writeString(MAGIC);
-    binaryManager.writeUint16(AFRAME.APAINTER.version);
+    binaryManager.writeUint16(VERSION);
 
     binaryManager.writeUint8(usedBrushes.length);
     for (var i = 0; i < usedBrushes.length; i++) {
@@ -248,8 +251,8 @@ AFRAME.registerSystem('brush', {
     }
 
     var version = binaryManager.readUint16();
-    if (version !== AFRAME.APAINTER.version) {
-      console.error('Invalid version: ', version, '(Expected: ' + AFRAME.APAINTER.version + ')');
+    if (version !== VERSION) {
+      console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');
     }
 
     var numUsedBrushes = binaryManager.readUint8();

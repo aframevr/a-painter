@@ -1,5 +1,5 @@
 /* global Clipboard */
-window.onload = function (event) {
+window.addEventListener("load", function (event) {
   var apainterUI = document.getElementById('apainter-ui');
   var shareDiv = document.querySelector('#apainter-ui .share');
   var shareUrl = document.getElementById('apainter-share-url');
@@ -25,4 +25,4 @@ window.onload = function (event) {
   clipboard.on('error', function (e) {
     console.error('Error copying to clipboard:', e.action, e.trigger);
   });
-};
+});

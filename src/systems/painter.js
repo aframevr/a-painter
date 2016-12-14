@@ -1,10 +1,9 @@
-/* global AFRAME saveAs Blob uploadcare */
-AFRAME.APAINTER = {
-  version: 1,
-  brushes: {},
-  sceneEl: null,
+/* global AFRAME Blob uploadcare */
+
+var saveAs = require('../../vendor/saveas.js').saveAs;
+
+AFRAME.registerSystem('painter', {
   init: function () {
-    this.sceneEl = document.querySelector('a-scene');
     this.brushSystem = this.sceneEl.systems.brush;
 
     function getUrlParams () {
@@ -26,6 +25,9 @@ AFRAME.APAINTER = {
     if (urlParams.url) {
       this.brushSystem.loadFromUrl(urlParams.url);
       document.getElementById('logo').setAttribute('visible', false);
+      document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
+      document.getElementById('apainter-logo').classList.remove('hidden');
+      document.getElementById('apainter-author').classList.remove('hidden');
     }
 
     this.startPainting = false;
@@ -124,6 +126,4 @@ AFRAME.APAINTER = {
       });
     }
   }
-};
-
-AFRAME.APAINTER.init();
+});
