@@ -37,9 +37,9 @@ AFRAME.registerBrush = function (name, definition, options) {
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
         points.push({
-          'orientation': point.orientation.toArray().toNumFixed(3),
-          'position': point.position.toArray().toNumFixed(3),
-          'pressure': point.pressure.toNumFixed(3),
+          'orientation': point.orientation.toArray().toNumFixed(6),
+          'position': point.position.toArray().toNumFixed(6),
+          'pressure': point.pressure.toNumFixed(6),
           'timestamp': point.timestamp
         });
       }
@@ -47,8 +47,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       return {
         brush: {
           index: system.getUsedBrushes().indexOf(this.brushName),
-          color: this.data.color.toArray().toNumFixed(3),
-          size: this.data.size.toNumFixed(3)
+          color: this.data.color.toArray().toNumFixed(6),
+          size: this.data.size.toNumFixed(6)
         },
         points: points
       };
