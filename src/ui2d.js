@@ -1,5 +1,4 @@
 /* global Clipboard */
-/*
 window.addEventListener('load', function (event) {
   var apainterUI = document.getElementById('apainter-ui');
   var shareDiv = document.querySelector('#apainter-ui .share');
@@ -27,4 +26,3 @@ window.addEventListener('load', function (event) {
     console.error('Error copying to clipboard:', e.action, e.trigger);
   });
 });
-*/
