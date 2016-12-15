@@ -101,7 +101,7 @@ AFRAME.registerSystem('painter', {
       }
       if (event.keyCode === 76) {
         // load binary from file (l)
-        self.brushSystem.loadFromUrl('demo.apa');
+        self.brushSystem.loadFromUrl('demo.apa', true);
       }
       if (event.keyCode === 85) { // u - upload
         self.upload();

@@ -9,9 +9,9 @@ AFRAME.registerComponent('paint-controls', {
   init: function () {
     var el = this.el;
     var self = this;
-    var highLightTextureUrl = 'url(http://localhost:8080/assets/images/controller-pressed.png)';
+    var highLightTextureUrl = 'url(assets/images/controller-pressed.png)';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-    el.setAttribute('json-model', {src: 'url(http://localhost:8080/assets/models/controller.json)'});
+    el.setAttribute('json-model', {src: 'url(assets/models/controller.json)'});
     this.onButtonChanged = this.onButtonChanged.bind(this);
     this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
     this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };

@@ -86,15 +86,15 @@
         "sourceFile":"apainter_controller.blend"
     },
     "images":[{
-        "url":"http://localhost:8080/assets/images/controller-diffuse.png",
+        "url":"../../assets/images/controller-diffuse.png",
         "name":"apainter_controller_diffuse.png",
         "uuid":"2965B3C8-EF73-3474-B988-09B4BEA2701B"
     },{
-        "url":"http://localhost:8080/assets/images/controller-specular.png",
+        "url":"../../assets/images/controller-specular.png",
         "name":"apainter_controller_specular.png",
         "uuid":"FCC62F14-407C-36B3-A622-59728D8015C5"
     },{
-        "url":"http://localhost:8080/assets/images/messages.png",
+        "url":"../../assets/images/messages.png",
         "name":"messages.png",
         "uuid":"79A4971A-AF95-3BDB-9B67-AE0A16AFB18C"
     }],

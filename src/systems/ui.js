@@ -6,8 +6,8 @@ AFRAME.registerSystem('ui', {
 
   initTextures: function () {
     var self = this;
-    var hoverTextureUrl = 'url(http://localhost:8080/assets/images/ui-hover.png)';
-    var pressedTextureUrl = 'url(http://localhost:8080/assets/images/ui-pressed.png)';
+    var hoverTextureUrl = 'url(assets/images/ui-hover.png)';
+    var pressedTextureUrl = 'url(assets/images/ui-pressed.png)';
     this.sceneEl.systems.material.loadTexture(hoverTextureUrl, {src: hoverTextureUrl}, onLoadedHoverTexture);
     this.sceneEl.systems.material.loadTexture(pressedTextureUrl, {src: pressedTextureUrl}, onLoadedPressedTexture);
     function onLoadedHoverTexture (texture) {
