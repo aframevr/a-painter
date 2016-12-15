@@ -23,8 +23,9 @@ AFRAME.registerSystem('painter', {
       return urlParams;
     }
     var urlParams = getUrlParams();
-    if (urlParams.url) {
-      this.brushSystem.loadFromUrl(urlParams.url);
+    if (urlParams.url || urlParams.urljson) {
+      var isBinary = urlParams.urljson === undefined;
+      this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
       document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
       document.getElementById('apainter-logo').classList.remove('hidden');
@@ -96,6 +97,9 @@ AFRAME.registerSystem('painter', {
       if (event.keyCode === 86) { // v - save
         self.save();
       }
+      if (event.keyCode === 74) { // j - save json
+        self.saveJSON();
+      }
       if (event.keyCode === 79) { // o - toggle template objects+images visibility
         self.showTemplateItems = !self.showTemplateItems;
         var templateItems = document.querySelectorAll('.templateitem');
@@ -107,10 +111,14 @@ AFRAME.registerSystem('painter', {
 
     console.info('A-PAINTER Version: ' + this.version);
   },
+  saveJSON: function () {
+    var json = this.brushSystem.getJSON();
+    var blob = new Blob([JSON.stringify(json)], {type: 'application/json'});
+    saveAs(blob, 'demo.json');
+  },
   save: function () {
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-    // saveAs.js defines `saveAs` for saving files out of the browser
     saveAs(blob, 'demo.apa');
   },
   upload: function (success, error) {
