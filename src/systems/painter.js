@@ -31,6 +31,28 @@ AFRAME.registerSystem('painter', {
       document.getElementById('apainter-author').classList.remove('hidden');
     }
 
+    if (urlParams.bgcolor !== undefined) {
+      document.body.style.backgroundColor = '#' + urlParams.bgcolor;
+    }
+    if (urlParams.sky !== undefined) {
+      this.sceneEl.addEventListener('loaded', function (evt) {
+        if (urlParams.sky === '') {
+          document.getElementById('sky').setAttribute('visible', false);
+        } else {
+          document.getElementById('sky').setAttribute('material', 'src', 'url(' + urlParams.sky + ')');
+        }
+      });
+    }
+    if (urlParams.floor !== undefined) {
+      this.sceneEl.addEventListener('loaded', function (evt) {
+        if (urlParams.floor === '') {
+          document.getElementById('ground').setAttribute('visible', false);
+        } else {
+          document.getElementById('ground').setAttribute('material', 'src', 'url(' + urlParams.floor + ')');
+        }
+      });
+    }
+
     this.startPainting = false;
     var self = this;
     document.addEventListener('stroke-started', function (event) {
