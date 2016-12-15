@@ -1,6 +1,6 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
-  dependencies: ['tracked-controls', 'brush'],
+  dependencies: ['vive-controls', 'oculus-touch-controls', 'brush'],
 
   schema: {
     hand: {default: 'left'}
@@ -9,9 +9,9 @@ AFRAME.registerComponent('paint-controls', {
   init: function () {
     var el = this.el;
     var self = this;
-    var highLightTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/controller-pressed.png)';
+    var highLightTextureUrl = 'https://cdn.aframe.io/a-painter/images/controller-pressed.png';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-    el.setAttribute('json-model', {src: 'url(https://cdn.aframe.io/a-painter/models/controller.json)'});
+    el.setAttribute('json-model', {src: 'https://cdn.aframe.io/a-painter/models/controller.json'});
     this.onButtonChanged = this.onButtonChanged.bind(this);
     this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
     this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
@@ -79,10 +79,12 @@ AFRAME.registerComponent('paint-controls', {
   update: function () {
     var data = this.data;
     var el = this.el;
-    // handId: 0 - right, 1 - left
-    var controller = data.hand === 'right' ? 0 : 1;
-    el.setAttribute('tracked-controls', 'controller', controller);
-    el.setAttribute('tracked-controls', 'hand', data.hand);
+    var controlConfiguration = {
+      hand: data.hand,
+      model: false // since paint-controls has its own model
+    };
+    el.setAttribute('vive-controls', controlConfiguration);
+    el.setAttribute('oculus-touch-controls', controlConfiguration);
   },
 
   play: function () {
@@ -104,6 +106,7 @@ AFRAME.registerComponent('paint-controls', {
   onButtonChanged: function (evt) {
     var button = this.mapping['button' + evt.detail.id];
     var value;
+    if (typeof button === 'undefined' || typeof this.buttonMeshes === 'undefined') { return; }
     if (button !== 'trigger') { return; }
     value = evt.detail.state.value;
     this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
@@ -138,7 +141,7 @@ AFRAME.registerComponent('paint-controls', {
 
   onButtonEvent: function (id, evtName) {
     var buttonName = this.mapping['button' + id];
-    this.el.emit(buttonName + evtName);
+    // oculus-touch-controls and vive-controls do this.el.emit, so don't do again here
     this.updateModel(buttonName, evtName);
   },
 

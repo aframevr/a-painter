@@ -197,7 +197,7 @@ AFRAME.registerComponent('ui', {
   },
 
   copyBrush: function () {
-    var brush = this.el.getComputedAttribute('brush');
+    var brush = this.el.getAttribute('brush');
     this.handEl.setAttribute('brush', 'brush', brush.brush);
     this.handEl.setAttribute('brush', 'color', brush.color);
     this.handEl.setAttribute('brush', 'size', brush.size);
@@ -482,7 +482,7 @@ AFRAME.registerComponent('ui', {
     this.objects.messageError.visible = false;
     this.objects.messageError.material = this.messagesMaterial;
 
-    var messagesImageUrl = 'url(https://cdn.aframe.io/a-painter/images/messages.png)';
+    var messagesImageUrl = 'https://cdn.aframe.io/a-painter/images/messages.png';
 
     this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
       var material = self.messagesMaterial;
@@ -524,8 +524,8 @@ AFRAME.registerComponent('ui', {
     this.initColorHistory();
     this.initBrushesMenu();
     this.setCursorTransparency();
-    this.updateColorUI(this.el.getComputedAttribute('brush').color);
-    this.updateSizeSlider(this.el.getComputedAttribute('brush').size);
+    this.updateColorUI(this.el.getAttribute('brush').color);
+    this.updateSizeSlider(this.el.getAttribute('brush').size);
   },
 
   initBrushesMenu: function () {
@@ -589,7 +589,6 @@ AFRAME.registerComponent('ui', {
       function loadBrush (name, id, thumbnailUrl) {
         var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
         if (thumbnailUrl && !brushesMaterials[brushName]) {
-          thumbnailUrl = 'url(' + thumbnailUrl + ')';
           self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
           return;
         }
@@ -733,7 +732,7 @@ AFRAME.registerComponent('ui', {
   syncUI: function () {
     var brush;
     if (!this.handEl || !this.objects) { return; }
-    brush = this.handEl.getComputedAttribute('brush');
+    brush = this.handEl.getAttribute('brush');
     this.updateSizeSlider(brush.size);
     this.updateColorUI(brush.color);
     this.updateColorHistory();
@@ -754,7 +753,7 @@ AFRAME.registerComponent('ui', {
   },
 
   updateColorHistory: function () {
-    var color = this.handEl && this.handEl.getComputedAttribute('brush').color;
+    var color = this.handEl && this.handEl.getAttribute('brush').color;
     var colorStack = this.colorStack;
     if (!color) { color = this.el.components.brush.schema.color.default; }
     this.objects.currentColor.material.color.set(color);
@@ -818,7 +817,7 @@ AFRAME.registerComponent('ui', {
     var color;
     var colorStack = this.colorStack;
     if (!this.colorHasChanged) { return; }
-    color = this.handEl.getComputedAttribute('brush').color;
+    color = this.handEl.getAttribute('brush').color;
     this.colorHasChanged = false;
     if (colorStack.length === 7) { colorStack.shift(); }
     colorStack.push(color);
