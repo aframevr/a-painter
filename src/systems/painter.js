@@ -28,7 +28,7 @@ AFRAME.registerSystem('painter', {
       document.getElementById('logo').setAttribute('visible', false);
       document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
       document.getElementById('apainter-logo').classList.remove('hidden');
-      document.getElementById('apainter-author').classList.remove('hidden');
+      //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
     }
 
     this.startPainting = false;
