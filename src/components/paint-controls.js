@@ -82,7 +82,6 @@ AFRAME.registerComponent('paint-controls', {
     // handId: 0 - right, 1 - left
     var controller = data.hand === 'right' ? 0 : 1;
     el.setAttribute('tracked-controls', 'controller', controller);
-    el.setAttribute('tracked-controls', 'hand', data.hand);
   },
 
   play: function () {

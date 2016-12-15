@@ -75,7 +75,7 @@
   left: 15px;
   height: 54px;
   width: 226px; /* 252px; for logo with author */
-  background-image: url(http://localhost:8080/assets/images/apainter-banner.png);
+  background-image: url(../assets/images/apainter-banner.png);
 }
 
 #apainter-logo.hidden, #apainter-author.hidden{
