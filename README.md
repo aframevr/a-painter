@@ -72,7 +72,8 @@ Every brush will have some common data injected with the following default value
 this.data = {
   points: [],
   size: brushSize,
-  prevPoint: null,
+  prevPosition: null,
+  prevPointerPosition: null,
   numPoints: 0,
   maxPoints: 1000,
   color: color.clone()
@@ -81,7 +82,8 @@ this.data = {
 
 * **points** (*Array of vector3*): List of control points already painted in the current stroke with this brush. (It's updated on every call to `addPoint`.)
 * **size** (*float*): Brush size. (It's defined when the stroke is created.)
-* **prevPoint** (*vector3*): The previously added point (from the last `addPoint` call).
+* **prevPosition** (*vector3*): The latest controller position (from the last `addPoint` call).
+* **prevPointerPosition** (*vector3*): The latest pointer position (from the last `addPoint` call).
 * **numPoints** (*int*): Length of `points` array.
 * **color** (*color*): Base color to be used on the brush. (It's defined when the stroke is created.)
 
