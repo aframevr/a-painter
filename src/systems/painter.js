@@ -54,6 +54,13 @@ AFRAME.registerSystem('painter', {
       });
     }
 
+    if (urlParams.gallery) {
+      document.getElementById('apainter-logo').classList.remove('hidden');
+      document.getElementById('logo').setAttribute('visible', false);
+      document.getElementById('right-hand').setAttribute('gallery-controls', '');
+      document.getElementById('carousel').setAttribute('visible', true);
+    }
+
     this.startPainting = false;
     var self = this;
     document.addEventListener('stroke-started', function (event) {

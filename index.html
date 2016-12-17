@@ -19,6 +19,16 @@
         <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous">
         <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg" crossOrigin="anonymous">
         <img id="uinormal" src="https://cdn.aframe.io/a-painter/images/ui-normal.png" crossOrigin="anonymous">
+
+        <img id="preview-you-shall-not-pass" src="http://localhost:8080/assets/images/you-shall-not-pass.png">
+        <img id="preview-aframe-astronaut" src="http://localhost:8080/assets/images/aframe-astronaut.png">
+        <img id="preview-alien-creeper" src="http://localhost:8080/assets/images/alien-creeper.png">
+        <img id="preview-flying-man" src="http://localhost:8080/assets/images/flying-man.png">
+        <img id="preview-skull-head" src="http://localhost:8080/assets/images/skull-head.png">
+        <img id="preview-spongebob-imagination" src="http://localhost:8080/assets/images/spongebob-imagination.png">
+        <img id="preview-man-and-butterfly" src="http://localhost:8080/assets/images/man-and-butterfly.png">
+        <img id="preview-tree-stub" src="http://localhost:8080/assets/images/tree-stub.png">
+
         <a-asset-item id="logoobj" src="https://cdn.aframe.io/a-painter/models/logo.obj"></a-asset-item>
         <a-asset-item id="logomtl" src="https://cdn.aframe.io/a-painter/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
@@ -43,6 +53,12 @@
                 geometry="primitive: circle; radius: 12;"
                 rotation="-90 0 0"
                 material="shader: flat; src: #floor">
+      </a-entity>
+
+      <a-entity id="carousel" position="-1.1 0.7 0" visible="false">
+        <a-image id="preview-0" position="0 1.5 -1.25" geometry="height:0.5;width:0.7" material="opacity:0.3;shader:flat" src="#preview-you-shall-not-pass"></a-image>
+        <a-image id="preview-1" position="0 0.9 -1.25" geometry="height:0.5;width:0.7" src="#preview-you-shall-not-pass"></a-image>
+        <a-image id="preview-2" position="0 0.3 -1.25" geometry="height:0.5;width:0.7" material="opacity:0.3;shader:flat" src="#preview-you-shall-not-pass"></a-image>
       </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
       <a-entity id="acamera" camera look-controls-alt orbit-controls></a-entity>
