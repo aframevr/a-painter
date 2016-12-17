@@ -87,7 +87,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       this.data = {
         points: [],
         size: brushSize,
-        prevPoint: null,
+        prevPosition: null,
+        prevPointerPosition: null,
         numPoints: 0,
         color: color.clone()
       };
@@ -97,7 +98,7 @@ AFRAME.registerBrush = function (name, definition, options) {
 
   function wrapAddPoint (addPointMethod) {
     return function addPoint (position, orientation, pointerPosition, pressure, timestamp) {
-      if ((this.data.prevPoint && this.data.prevPoint.distanceTo(position) <= this.options.spacing) ||
+      if ((this.data.prevPosition && this.data.prevPosition.distanceTo(position) <= this.options.spacing) ||
           this.options.maxPoints !== 0 && this.data.numPoints >= this.options.maxPoints) {
         return;
       }
@@ -110,7 +111,8 @@ AFRAME.registerBrush = function (name, definition, options) {
           'timestamp': timestamp
         });
 
-        this.data.prevPoint = position.clone();
+        this.data.prevPosition = position.clone();
+        this.data.prevPointerPosition = pointerPosition.clone();
       }
     };
   }
