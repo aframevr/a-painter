@@ -20,6 +20,8 @@ npm install
 npm start
 ```
 
+If you don't have `git`, you can go to http://github.com/aframevr/a-painter, click on the green button "Clone or download", download the zip and unzip it wherever you want. If you don't have `npm`, you can use any web server like [mongoose](https://www.cesanta.com/products/binary) and copy it to A-Painter folder.
+
 Then, load [`http://localhost:8080`](http://localhost:8080) in your browser.
 
 ## URL parameters
