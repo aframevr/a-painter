@@ -5,6 +5,7 @@ var saveAs = require('../../vendor/saveas.js').saveAs;
 AFRAME.registerSystem('painter', {
   init: function () {
     this.brushSystem = this.sceneEl.systems.brush;
+    this.showTemplateItems = true;
 
     function getUrlParams () {
       var match;
@@ -22,12 +23,35 @@ AFRAME.registerSystem('painter', {
       return urlParams;
     }
     var urlParams = getUrlParams();
-    if (urlParams.url) {
-      this.brushSystem.loadFromUrl(urlParams.url);
+    if (urlParams.url || urlParams.urljson) {
+      var isBinary = urlParams.urljson === undefined;
+      this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
       document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
       document.getElementById('apainter-logo').classList.remove('hidden');
-      document.getElementById('apainter-author').classList.remove('hidden');
+      //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
+    }
+
+    if (urlParams.bgcolor !== undefined) {
+      document.body.style.backgroundColor = '#' + urlParams.bgcolor;
+    }
+    if (urlParams.sky !== undefined) {
+      this.sceneEl.addEventListener('loaded', function (evt) {
+        if (urlParams.sky === '') {
+          document.getElementById('sky').setAttribute('visible', false);
+        } else {
+          document.getElementById('sky').setAttribute('material', 'src', 'url(' + urlParams.sky + ')');
+        }
+      });
+    }
+    if (urlParams.floor !== undefined) {
+      this.sceneEl.addEventListener('loaded', function (evt) {
+        if (urlParams.floor === '') {
+          document.getElementById('ground').setAttribute('visible', false);
+        } else {
+          document.getElementById('ground').setAttribute('material', 'src', 'url(' + urlParams.floor + ')');
+        }
+      });
     }
 
     this.startPainting = false;
@@ -73,14 +97,28 @@ AFRAME.registerSystem('painter', {
       if (event.keyCode === 86) { // v - save
         self.save();
       }
+      if (event.keyCode === 74) { // j - save json
+        self.saveJSON();
+      }
+      if (event.keyCode === 79) { // o - toggle template objects+images visibility
+        self.showTemplateItems = !self.showTemplateItems;
+        var templateItems = document.querySelectorAll('.templateitem');
+        for (var i = 0; i < templateItems.length; i++) {
+            templateItems[i].setAttribute('visible', self.showTemplateItems);
+        }
+      }
     });
 
     console.info('A-PAINTER Version: ' + this.version);
   },
+  saveJSON: function () {
+    var json = this.brushSystem.getJSON();
+    var blob = new Blob([JSON.stringify(json)], {type: 'application/json'});
+    saveAs(blob, 'demo.json');
+  },
   save: function () {
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-    // saveAs.js defines `saveAs` for saving files out of the browser
     saveAs(blob, 'demo.apa');
   },
   upload: function (success, error) {

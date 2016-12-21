@@ -1,5 +1,5 @@
 /* global Clipboard */
-window.addEventListener("load", function (event) {
+window.addEventListener('load', function (event) {
   var apainterUI = document.getElementById('apainter-ui');
   var shareDiv = document.querySelector('#apainter-ui .share');
   var shareUrl = document.getElementById('apainter-share-url');

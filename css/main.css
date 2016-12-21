@@ -74,7 +74,7 @@
   bottom: 15px;
   left: 15px;
   height: 54px;
-  width: 252px;
+  width: 226px; /* 252px; for logo with author */
   background-image: url(https://cdn.aframe.io/a-painter/images/apainter-banner.png);
 }
 
