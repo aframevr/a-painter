@@ -28,6 +28,7 @@ AFRAME.registerSystem('painter', {
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
       document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
+      document.getElementById('acamera').setAttribute('orbit-controls', 'rotation', '0 90 3');
       document.getElementById('apainter-logo').classList.remove('hidden');
       //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
     }
@@ -89,7 +90,7 @@ AFRAME.registerSystem('painter', {
       }
       if (event.keyCode === 76) {
         // load binary from file (l)
-        self.brushSystem.loadFromUrl('demo.apa');
+        self.brushSystem.loadFromUrl('demo.apa', true);
       }
       if (event.keyCode === 85) { // u - upload
         self.upload();
