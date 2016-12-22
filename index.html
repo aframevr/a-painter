@@ -17,12 +17,13 @@
   <body style="background-color: #030404">
     <a-scene>
       <a-assets>
-        <img id="floor" src="assets/images/floor.jpg" crossOrigin="anonymous">
         <img id="skymap" src="assets/images/sky.jpg" crossOrigin="anonymous">
         <img id="uinormal" src="assets/images/ui-normal.png" crossOrigin="anonymous">
+        <img id="floor" src="assets/images/floor.jpg" crossOrigin="anonymous">
         <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
         <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
+        <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
@@ -30,22 +31,24 @@
       <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
       <!--geometry="primitive: circle; radius: 12;"
       rotation="-90 0 0"-->
+      <a-entity id="hitEntityLeft" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
+      <a-entity id="hitEntityRight" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
 
       <a-entity id="ground"
-                geometry="primitive: box; width: 12; height: 0.1; depth: 12"
+                geometry="primitive: box; width: 12; height: 0.01; depth: 12"
                 material="shader: flat; src: #floor">
               </a-entity>
       <a-entity id="left-hand"
                 brush
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: left"
-                teleport="ground: #ground"
+                teleport="ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
                 ui></a-entity>
       <a-entity id="right-hand"
                 brush
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: right"
-                teleport="ground: #ground"
+                teleport="ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
                 ui></a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
       <a-entity id="acamera" camera look-controls-alt orbit-controls></a-entity>
