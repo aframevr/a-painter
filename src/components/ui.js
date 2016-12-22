@@ -482,7 +482,7 @@ AFRAME.registerComponent('ui', {
     this.objects.messageError.visible = false;
     this.objects.messageError.material = this.messagesMaterial;
 
-    var messagesImageUrl = 'url(assets/images/messages.png)';
+    var messagesImageUrl = 'assets/images/messages.png';
 
     this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
       var material = self.messagesMaterial;
@@ -589,7 +589,6 @@ AFRAME.registerComponent('ui', {
       function loadBrush (name, id, thumbnailUrl) {
         var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
         if (thumbnailUrl && !brushesMaterials[brushName]) {
-          thumbnailUrl = 'url(' + thumbnailUrl + ')';
           self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
           return;
         }

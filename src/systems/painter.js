@@ -41,7 +41,7 @@ AFRAME.registerSystem('painter', {
         if (urlParams.sky === '') {
           document.getElementById('sky').setAttribute('visible', false);
         } else {
-          document.getElementById('sky').setAttribute('material', 'src', 'url(' + urlParams.sky + ')');
+          document.getElementById('sky').setAttribute('material', 'src', urlParams.sky);
         }
       });
     }
@@ -50,7 +50,7 @@ AFRAME.registerSystem('painter', {
         if (urlParams.floor === '') {
           document.getElementById('ground').setAttribute('visible', false);
         } else {
-          document.getElementById('ground').setAttribute('material', 'src', 'url(' + urlParams.floor + ')');
+          document.getElementById('ground').setAttribute('material', 'src', urlParams.floor);
         }
       });
     }
