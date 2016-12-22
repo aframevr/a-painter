@@ -93,7 +93,7 @@
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.linePosition.needsUpdate = true;
 
-        this.geometry.setDrawRange(0, this.data.numPoints * this.subdivisions);
+        this.geometry.setDrawRange(0, this.data.numPoints * FLAKES_PER_POINT);
 
         return true;
       },
