@@ -9,9 +9,9 @@ AFRAME.registerComponent('paint-controls', {
   init: function () {
     var el = this.el;
     var self = this;
-    var highLightTextureUrl = 'url(https://cdn.aframe.io/a-painter/images/controller-pressed.png)';
+    var highLightTextureUrl = 'url(assets/images/controller-pressed.png)';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-    el.setAttribute('json-model', {src: 'url(https://cdn.aframe.io/a-painter/models/controller.json)'});
+    el.setAttribute('json-model', {src: 'url(assets/models/controller.json)'});
     this.onButtonChanged = this.onButtonChanged.bind(this);
     this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
     this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
@@ -82,7 +82,6 @@ AFRAME.registerComponent('paint-controls', {
     // handId: 0 - right, 1 - left
     var controller = data.hand === 'right' ? 0 : 1;
     el.setAttribute('tracked-controls', 'controller', controller);
-    el.setAttribute('tracked-controls', 'hand', data.hand);
   },
 
   play: function () {

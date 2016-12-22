@@ -1,7 +1,7 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('json-model', {
   schema: {
-    src: {type: 'src'}
+    src: {type: 'asset'}
   },
 
   init: function () {

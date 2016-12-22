@@ -82,7 +82,7 @@ AFRAME.registerComponent('look-controls-alt', {
     var deltaHMDPosition = new THREE.Vector3();
     return function () {
       var el = this.el;
-      var currentPosition = el.getComputedAttribute('position');
+      var currentPosition = el.getAttribute('position');
       var currentHMDPosition;
       var previousHMDPosition = this.previousHMDPosition;
       var sceneEl = this.el.sceneEl;

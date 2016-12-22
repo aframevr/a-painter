@@ -11,39 +11,42 @@
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
     <script src="build.js"></script>
+    <script src="vendor/aframe-teleport-component.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body style="background-color: #030404">
     <a-scene>
       <a-assets>
-        <img id="floor" src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous">
-        <img id="skymap" src="https://cdn.aframe.io/a-painter/images/sky.jpg" crossOrigin="anonymous">
-        <img id="uinormal" src="https://cdn.aframe.io/a-painter/images/ui-normal.png" crossOrigin="anonymous">
-        <a-asset-item id="logoobj" src="https://cdn.aframe.io/a-painter/models/logo.obj"></a-asset-item>
-        <a-asset-item id="logomtl" src="https://cdn.aframe.io/a-painter/models/logo.mtl"></a-asset-item>
-        <a-asset-item id="uiobj" src="https://cdn.aframe.io/a-painter/models/ui.obj"></a-asset-item>
+        <img id="floor" src="assets/images/floor.jpg" crossOrigin="anonymous">
+        <img id="skymap" src="assets/images/sky.jpg" crossOrigin="anonymous">
+        <img id="uinormal" src="assets/images/ui-normal.png" crossOrigin="anonymous">
+        <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
+        <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
+        <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
-      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl">
-        <a-animation begin="fadeout" attribute="material.opacity" fill="none" from="1" to="0" dur="3000"></a-animation>
-      </a-entity>
+      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
+      <!--geometry="primitive: circle; radius: 12;"
+      rotation="-90 0 0"-->
+
+      <a-entity id="ground"
+                geometry="primitive: box; width: 12; height: 0.1; depth: 12"
+                material="shader: flat; src: #floor">
+              </a-entity>
       <a-entity id="left-hand"
                 brush
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: left"
+                teleport="ground: #ground"
                 ui></a-entity>
       <a-entity id="right-hand"
                 brush
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: right"
+                teleport="ground: #ground"
                 ui></a-entity>
-      <a-entity id="ground"
-                geometry="primitive: circle; radius: 12;"
-                rotation="-90 0 0"
-                material="shader: flat; src: #floor">
-      </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
       <a-entity id="acamera" camera look-controls-alt orbit-controls></a-entity>
     </a-scene>
