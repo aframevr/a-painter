@@ -9,9 +9,9 @@ AFRAME.registerComponent('paint-controls', {
   init: function () {
     var el = this.el;
     var self = this;
-    var highLightTextureUrl = 'url(assets/images/controller-pressed.png)';
+    var highLightTextureUrl = 'assets/images/controller-pressed.png';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-    el.setAttribute('json-model', {src: 'url(assets/models/controller.json)'});
+    el.setAttribute('json-model', {src: 'assets/models/controller.json'});
     this.onButtonChanged = this.onButtonChanged.bind(this);
     this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
     this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
@@ -81,6 +81,8 @@ AFRAME.registerComponent('paint-controls', {
     var el = this.el;
     // handId: 0 - right, 1 - left
     var controller = data.hand === 'right' ? 0 : 1;
+    // in 0.4.0 the id is no longer 'OpenVR Gamepad' by default
+    el.setAttribute('tracked-controls', 'id', 'OpenVR Gamepad');
     el.setAttribute('tracked-controls', 'controller', controller);
   },
 
