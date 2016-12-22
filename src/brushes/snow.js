@@ -48,7 +48,6 @@
       init: function (color, brushSize) {
         this.idx = 0;
         this.geometry = new THREE.BufferGeometry();
-        this.subdivisions = 8
         this.vertices = new Float32Array(this.options.maxPoints * 3 * FLAKES_PER_POINT);
         this.linePositions = new Float32Array(this.options.maxPoints * FLAKES_PER_POINT);
         this.currentLinePosition = 0;
