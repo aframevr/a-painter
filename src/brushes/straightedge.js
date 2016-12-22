@@ -35,5 +35,5 @@ AFRAME.registerBrush('straightedge',
       return true;
     }
   },
-  {thumbnail: 'brushes/thumb_cubes.gif', spacing: 0.01}
+  {thumbnail: 'brushes/thumb_straightedge.png', spacing: 0.01}
 );
