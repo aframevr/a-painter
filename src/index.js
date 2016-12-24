@@ -27,4 +27,4 @@ require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
-require('./brushes/sculpt-sphere.js');
+require('./brushes/single-sphere.js');
