@@ -9,7 +9,7 @@ AFRAME.registerBrush('single-sphere',
         side: THREE.FrontSide,
         shading: THREE.SmoothShading
       });
-      this.geometry = new THREE.SphereGeometry(0.5, 16, 16);
+      this.geometry = new THREE.IcosahedronGeometry(0.5, 2);
       this.mesh = new THREE.Mesh(this.geometry, this.material);
       this.object3D.add(this.mesh);
       this.mesh.visible = false
