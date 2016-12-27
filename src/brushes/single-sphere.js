@@ -9,7 +9,7 @@ AFRAME.registerBrush('single-sphere',
         side: THREE.FrontSide,
         shading: THREE.SmoothShading
       });
-      this.geometry = new THREE.IcosahedronGeometry(0.5, 2);
+      this.geometry = new THREE.IcosahedronGeometry(1, 2);
       this.mesh = new THREE.Mesh(this.geometry, this.material);
       this.object3D.add(this.mesh);
       this.mesh.visible = false
@@ -20,7 +20,7 @@ AFRAME.registerBrush('single-sphere',
         this.mesh.position.set(this.firstPoint.x, this.firstPoint.y, this.firstPoint.z)
       }
       this.mesh.visible = true
-      var distance = this.firstPoint.distanceTo(pointerPosition) * 2;
+      var distance = this.firstPoint.distanceTo(pointerPosition);
       this.mesh.scale.set(distance, distance, distance);
       return true;
     }
