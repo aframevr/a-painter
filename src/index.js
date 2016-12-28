@@ -28,3 +28,9 @@ require('./brushes/stamp.js');
 require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
+
+var f = function() {
+  requestAnimationFrame(f)
+  AFRAME.TWEEN.update()
+}
+requestAnimationFrame(f)

@@ -1,7 +1,7 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
   schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 } },
-  dependencies: ['ui-raycaster', 'screenshot-camera'],
+  dependencies: ['ui-raycaster', 'screenshot-camera', 'brush'],
 
   init: function () {
     var el = this.el;
@@ -156,6 +156,7 @@ AFRAME.registerComponent('ui', {
       }
       case name === 'clear': {
         if (!this.pressedObjects[name]) {
+          this.toggleCaptureCamera();
           this.el.sceneEl.systems.brush.clear();
         }
         break;
@@ -353,6 +354,14 @@ AFRAME.registerComponent('ui', {
     var brushSize = (position.x - sliderBoundingBox.min.x) / sliderWidth;
     brushSize = brushSize * AFRAME.components.brush.schema.size.max;
     this.handEl.setAttribute('brush', 'size', brushSize);
+  },
+
+  toggleCaptureCamera: function() {
+    var enableScreenshot = !this.handEl.getAttribute('screenshot-camera').enabled
+    console.log("Will enable screenshot", enableScreenshot)
+    this.handEl.setAttribute('screenshot-camera', 'enabled', enableScreenshot)
+    this.handEl.setAttribute('brush', 'enabled', !enableScreenshot)
+    this.handEl.isInCameraMode = enableScreenshot
   },
 
   handleHover: function () {
@@ -806,7 +815,8 @@ AFRAME.registerComponent('ui', {
   onIntersectionCleared: function () {
     this.checkMenuIntersections = false;
     this.rayEl.setAttribute('visible', false);
-    this.el.setAttribute('brush', 'enabled', true);
+    // Only re-enable if we're not in camera mode
+    this.el.setAttribute('brush', 'enabled', !this.el.isInCameraMode);
   },
 
   onIntersectedCleared: function (evt) {
