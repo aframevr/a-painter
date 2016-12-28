@@ -1,7 +1,7 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
   schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 } },
-  dependencies: ['ui-raycaster'],
+  dependencies: ['ui-raycaster', 'screenshot-camera'],
 
   init: function () {
     var el = this.el;
