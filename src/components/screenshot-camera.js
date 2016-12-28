@@ -5,7 +5,6 @@ AFRAME.registerComponent('screenshot-camera', {
     width: {default: 1024, min: 1, max: 2048},
     height: {default: 768, min: 1, max: 1516},
     brush: {default: 'flat'},
-    enabled: { default: false }
   },
   init: function () {
     var data = this.data;
@@ -41,13 +40,14 @@ AFRAME.registerComponent('screenshot-camera', {
     this.el.object3D.add(this.screen)
     this.el.object3D.add(this.camera)
 
+    this.el.addEventListener('trigger-mode-changed', this.triggerModeChanged.bind(this))
+    this.triggerModeChanged();
     this.canTakePicture = true
-
     this.el.addEventListener('triggerchanged', function (evt) {
-      if (!this.data.enabled) {
+      if (!this.enabled) {
         return
       }
-      
+
       if (evt.detail.value == 1 && this.canTakePicture) {
         this.saveNextTick = true
         this.canTakePicture = false
@@ -61,12 +61,13 @@ AFRAME.registerComponent('screenshot-camera', {
     this.canvas.height = height
   },
 
-  update: function() {
-    this.screen.visible = this.data.enabled
+  triggerModeChanged: function() {
+    this.enabled = this.el.getAttribute('trigger-mode') == 'camera'
+    this.screen.visible = this.enabled
   },
 
   tick: function(time, timeDelta) {
-    if (!this.data.enabled) return
+    if (!this.enabled) return
     this.sceneEl.renderer.render(this.scene, this.camera, this.renderTarget, true)
     if (this.saveNextTick) {
       this.saveCapture();

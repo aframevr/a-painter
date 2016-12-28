@@ -28,6 +28,9 @@ AFRAME.registerComponent('brush', {
 
     var self = this;
 
+    this.el.addEventListener('trigger-mode-changed', this.triggerModeChanged.bind(this));
+    this.triggerModeChanged();
+
     this.el.addEventListener('axismove', function (evt) {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0) {
         return;
@@ -37,7 +40,7 @@ AFRAME.registerComponent('brush', {
     });
 
     this.el.addEventListener('buttondown', function (evt) {
-      if (!self.data.enabled) { return; }
+      if (!self.enabled) { return; }
       // Grip
       if (evt.detail.id === 2) {
         self.system.undo();
@@ -45,7 +48,7 @@ AFRAME.registerComponent('brush', {
     });
 
     this.el.addEventListener('buttonchanged', function (evt) {
-      if (!self.data.enabled) { return; }
+      if (!self.enabled) { return; }
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;
@@ -65,7 +68,14 @@ AFRAME.registerComponent('brush', {
       }
     });
   },
+
+  triggerModeChanged:  function() {
+    this.enabled = this.data.enabled && this.el.getAttribute('trigger-mode') == 'brush'
+  },
+
   update: function (oldData) {
+    this.triggerModeChanged();
+
     var data = this.data;
     if (oldData.color !== data.color) {
       this.color.set(data.color);

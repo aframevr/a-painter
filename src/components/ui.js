@@ -357,11 +357,9 @@ AFRAME.registerComponent('ui', {
   },
 
   toggleCaptureCamera: function() {
-    var enableScreenshot = !this.handEl.getAttribute('screenshot-camera').enabled
-    console.log("Will enable screenshot", enableScreenshot)
-    this.handEl.setAttribute('screenshot-camera', 'enabled', enableScreenshot)
-    this.handEl.setAttribute('brush', 'enabled', !enableScreenshot)
-    this.handEl.isInCameraMode = enableScreenshot
+    var enableCamera = this.handEl.getAttribute('trigger-mode') != 'camera'
+    this.handEl.setAttribute('trigger-mode', enableCamera ? 'camera' : 'brush')
+    this.handEl.emit('trigger-mode-changed')
   },
 
   handleHover: function () {
@@ -815,8 +813,7 @@ AFRAME.registerComponent('ui', {
   onIntersectionCleared: function () {
     this.checkMenuIntersections = false;
     this.rayEl.setAttribute('visible', false);
-    // Only re-enable if we're not in camera mode
-    this.el.setAttribute('brush', 'enabled', !this.el.isInCameraMode);
+    this.el.setAttribute('brush', 'enabled', true);
   },
 
   onIntersectedCleared: function (evt) {
