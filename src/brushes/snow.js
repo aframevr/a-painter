@@ -33,11 +33,13 @@
   var fragmentShader = `
     uniform sampler2D flake;
     uniform float time;
+    uniform vec3 color;
 
     varying float alpha;
 
     void main() {
       vec4 c = texture2D(flake, gl_PointCoord);
+      c.rgb *= color;
       c.a *= alpha / 2.0;
       gl_FragColor = c;
     }
@@ -65,6 +67,7 @@
           transparent: true,
           depthTest: false,
           uniforms: {
+            color: {type: 'c', value: new THREE.Color(this.data.color)},
             flake: {type: 't', value: null},
             time: {type: 'f', value: 0},
             size: {type: 'f', value: this.data.size}
