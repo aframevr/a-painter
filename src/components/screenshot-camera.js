@@ -1,10 +1,8 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('screenshot-camera', {
   schema: {
-    color: {type: 'color', default: '#ef2d5e'},
     width: {default: 1024, min: 1, max: 2048},
     height: {default: 768, min: 1, max: 1516},
-    brush: {default: 'flat'},
   },
   init: function () {
     var data = this.data;
@@ -14,13 +12,8 @@ AFRAME.registerComponent('screenshot-camera', {
     this.scene = this.sceneEl.object3D
 
     this.renderTarget = new THREE.WebGLRenderTarget(width, height, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      wrapS: THREE.ClampToEdgeWrapping,
-      wrapT: THREE.ClampToEdgeWrapping,
       format: THREE.RGBAFormat,
       type: THREE.UnsignedByteType,
-      autoClear: true
     })
 
     var ratio = width / height;
