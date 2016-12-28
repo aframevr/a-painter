@@ -51,11 +51,6 @@ AFRAME.registerComponent('screenshot-camera', {
     }.bind(this));
 
     this.canvas = document.createElement('canvas')
-    this.canvas.style.position = 'fixed'
-    this.canvas.style.backgroundColor = 'red'
-    this.canvas.style.top = 0;
-    this.canvas.style.zindex = 10000
-    document.body.appendChild(this.canvas)
     this.canvas.width = width
     this.canvas.height = height
   },
@@ -72,17 +67,13 @@ AFRAME.registerComponent('screenshot-camera', {
     var width = this.data.width
     var height = this.data.height
     this.pixels = new Uint8Array(4 * width * height)
-    debugger
-    this.sceneEl.renderer.readRenderTargetPixels(
-      this.renderTarget,
-      0, 0, width, height,
-      this.pixels
-    )
-    var gl = this.sceneEl.renderer.context
-    console.log(gl.getError())
-    var allZero = true
-    for (var i = 0; i < this.pixels.length; i++) { if (this.pixels[i] != 0) allZero = false}
-    console.log("All zeros?", allZero)
+    var renderer = this.sceneEl.renderer
+
+    var _gl = renderer.context
+    var framebuffer = renderer.properties.get(this.renderTarget).__webglFramebuffer
+    _gl.bindFramebuffer( _gl.FRAMEBUFFER, framebuffer );
+    _gl.readPixels( 0, 0, width, height, _gl.RGBA,_gl.UNSIGNED_BYTE,  this.pixels );
+    this.pixels = this.flipPixelsVertically(this.pixels, width, height)
 
     this.imageData = new ImageData(new Uint8ClampedArray(this.pixels), width, height)
     this.canvas.getContext('2d').putImageData(this.imageData, 0, 0)
@@ -100,5 +91,18 @@ AFRAME.registerComponent('screenshot-camera', {
         document.body.removeChild(aEl);
       }, 1);
     }, 'image/png');
-  }
+  },
+
+  flipPixelsVertically: function (pixels, width, height) {
+    var flippedPixels = pixels.slice(0);
+    for (var x = 0; x < width; ++x) {
+      for (var y = 0; y < height; ++y) {
+        flippedPixels[x * 4 + y * width * 4] = pixels[x * 4 + (height - y) * width * 4];
+        flippedPixels[x * 4 + 1 + y * width * 4] = pixels[x * 4 + 1 + (height - y) * width * 4];
+        flippedPixels[x * 4 + 2 + y * width * 4] = pixels[x * 4 + 2 + (height - y) * width * 4];
+        flippedPixels[x * 4 + 3 + y * width * 4] = pixels[x * 4 + 3 + (height - y) * width * 4];
+      }
+    }
+    return flippedPixels;
+  },
 });
