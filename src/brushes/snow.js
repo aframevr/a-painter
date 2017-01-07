@@ -77,7 +77,6 @@
         var mesh = new THREE.Points(this.geometry, this.material);
         mesh.frustumCulled = false; // So that when its origin point goes off camera, the points dont disappear
         mesh.vertices = this.vertices;
-        this.startTime = Date.now()
 
         var textureLoader = new THREE.TextureLoader();
         this.material.uniforms.flake.value = textureLoader.load("brushes/snowflake.png");
@@ -86,10 +85,11 @@
       },
 
       addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
+        if (!this.startTime) this.startTime = timestamp
         for (var i = 0; i < FLAKES_PER_POINT; i++) {
           var linepos = this.currentLinePosition++
           this.randValues[linepos] = Math.random();
-          this.birthTime[linepos] = Date.now() - this.startTime;
+          this.birthTime[linepos] = timestamp - this.startTime;
           this.vertices[ this.idx++ ] = pointerPosition.x;
           this.vertices[ this.idx++ ] = pointerPosition.y;
           this.vertices[ this.idx++ ] = pointerPosition.z;
@@ -105,7 +105,7 @@
       },
 
       tick: function(timeOffset, delta) {
-        this.material.uniforms.time.value = (Date.now() - this.startTime) / 100.0;
+        this.material.uniforms.time.value = (timeOffset - this.startTime) / 100.0;
       },
     },
     {thumbnail:'brushes/snowflake.png', maxPoints: 3000}
