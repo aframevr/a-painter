@@ -26,7 +26,18 @@ window.addEventListener('load', function (event) {
           document.querySelector('a-scene').systems.brush.loadBinary(event.target.result);
         };
         reader.readAsArrayBuffer(file);
-      } else if (file.name.substr(file.name.length - 4).toLowerCase() === '.obj') {
+      }
+      else if (file.name.substr(file.name.length - 5).toLowerCase() === '.json') {
+        // a-painter json
+        var reader = new FileReader();
+
+        // file read, parse obj and add to the scene
+        reader.onload = function (event) {
+          document.querySelector('a-scene').systems.brush.loadJSON(JSON.parse(event.target.result));
+        };
+        reader.readAsText(file);
+      } 
+      else if (file.name.substr(file.name.length - 4).toLowerCase() === '.obj') {
         // OBJs
         reader = new FileReader();
 
