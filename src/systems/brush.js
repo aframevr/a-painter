@@ -282,7 +282,7 @@ AFRAME.registerSystem('brush', {
   })(),
   loadJSON: function (data) {
     if (data.version !== VERSION) {
-      console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');
+      console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
 
     var usedBrushes = [];
