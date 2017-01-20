@@ -216,6 +216,7 @@ AFRAME.registerSystem('brush', {
     this.strokes.push(stroke);
 
     var entity = document.createElement('a-entity');
+    entity.className = "a-stroke";
     document.querySelector('a-scene').appendChild(entity);
     entity.setObject3D('mesh', stroke.object3D);
     stroke.entity = entity;
