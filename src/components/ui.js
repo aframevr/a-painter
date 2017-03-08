@@ -190,7 +190,6 @@ AFRAME.registerComponent('ui', {
       }
       default: {
         this.activeWidget = undefined;
-        console.log('Unkown button down ' + name);
       }
     }
     this.pressedObjects[name] = object;
@@ -446,7 +445,9 @@ AFRAME.registerComponent('ui', {
   onModelLoaded: function (evt) {
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
-    if (evt.detail.format !== 'json') { return; }
+    model = evt.detail.model;
+    if (evt.detail.format !== 'obj') { return; }
+
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
     this.objects.brightnessSlider = model.getObjectByName('brightness');
@@ -546,9 +547,6 @@ AFRAME.registerComponent('ui', {
     var hueCursor = this.objects.hueCursor;
     var brightnessCursor = this.objects.brightnessCursor;
     var sizeCursor = this.objects.sizeCursor;
-    sizeCursor.material = sizeCursor.material.clone();
-    hueCursor.material = hueCursor.material.clone();
-    brightnessCursor.material = brightnessCursor.material.clone();
     sizeCursor.material.alphaTest = 0.5;
     hueCursor.material.alphaTest = 0.5;
     brightnessCursor.material.alphaTest = 0.5;
