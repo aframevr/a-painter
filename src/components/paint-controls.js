@@ -1,6 +1,6 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
-  dependencies: ['tracked-controls', 'brush'],
+  dependencies: ['brush'],
 
   schema: {
     hand: {default: 'left'}
@@ -79,11 +79,7 @@ AFRAME.registerComponent('paint-controls', {
   update: function () {
     var data = this.data;
     var el = this.el;
-    // handId: 0 - right, 1 - left
-    var controller = data.hand === 'right' ? 0 : 1;
-    // in 0.4.0 the id is no longer 'OpenVR Gamepad' by default
-    el.setAttribute('tracked-controls', 'id', 'OpenVR Gamepad');
-    el.setAttribute('tracked-controls', 'controller', controller);
+    el.setAttribute('auto-detect-controllers', 'hand', data.hand);
   },
 
   play: function () {
@@ -107,7 +103,7 @@ AFRAME.registerComponent('paint-controls', {
     var value;
     if (button !== 'trigger' || !this.buttonMeshes) { return; }
     value = evt.detail.state.value;
-    this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
+    if (this.buttonMeshes) { this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12); }
     this.el.emit(button + 'changed', {value: value});
   },
 

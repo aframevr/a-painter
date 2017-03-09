@@ -67,12 +67,13 @@
 	__webpack_require__(21);
 	__webpack_require__(22);
 	__webpack_require__(23);
-
 	__webpack_require__(24);
+
 	__webpack_require__(25);
 	__webpack_require__(26);
 	__webpack_require__(27);
 	__webpack_require__(28);
+	__webpack_require__(29);
 
 
 /***/ },
@@ -2530,6 +2531,80 @@
 /* 15 */
 /***/ function(module, exports) {
 
+	/* globals AFRAME */
+	AFRAME.registerComponent('auto-detect-controllers', {
+	  schema: {
+	    hand: {default: 'left'}
+	  },
+
+	  init: function () {
+	    var el = this.el;
+	    var self = this;
+	    this.rescheduleCheck = true;
+	    this.injectedControls = false;
+	  },
+
+	  update: function () {
+	    var data = this.data;
+	    var el = this.el;
+	    this.checkControllerType = this.checkControllerType.bind(this);
+	    this.checkControllerType();
+	  },
+
+	  play: function () {
+	    this.rescheduleCheck = !this.injectedControls;
+	  },
+
+	  pause: function () {
+	    this.rescheduleCheck = false;
+	  },
+
+	  injectOculusTouch: function () {
+	    this.injectedControls = true;
+	    this.el.setAttribute('tracked-controls', 'id', 'Oculus Touch ' + (this.data.hand === 'left' ? '(Left)' : '(Right)'));
+	    this.el.setAttribute('tracked-controls', 'controller', '0');
+	    this.el.setAttribute('tracked-controls', 'hand', this.data.hand); // although tracked-controls doesn't use this yet
+	  },
+
+	  injectVive: function () {
+	    this.injectedControls = true;
+	    this.el.setAttribute('tracked-controls', 'id', 'OpenVR Gamepad');
+	    this.el.setAttribute('tracked-controls', 'controller', this.data.hand === 'left' ? '1' : '0');
+	    this.el.setAttribute('tracked-controls', 'hand', this.data.hand); // although tracked-controls doesn't use this yet
+	  },
+
+	  checkControllerType: function () {
+	    if (this.injectedControls || !navigator.getGamepads) { return; }
+
+	    var gamepads = navigator.getGamepads();
+	    if (gamepads) {
+	      for (var i = 0; i < gamepads.length; i++) {
+	        var gamepad = gamepads[i];
+	        if (gamepad) {
+	          if (gamepad.id.indexOf('Oculus Touch') === 0) {
+	            this.injectOculusTouch();
+	            break;
+	          }
+	          if (gamepad.id.indexOf('OpenVR Gamepad') === 0) {
+	            this.injectVive();
+	            break;
+	          }
+	        }
+	      }
+	    }
+
+	    this.rescheduleCheck = !this.injectedControls;
+	    if (this.rescheduleCheck) {
+	      setTimeout(this.checkControllerType, 1000);
+	    }
+	  }
+	});
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
 	/* globals AFRAME THREE */
 	AFRAME.registerComponent('brush', {
 	  schema: {
@@ -2628,7 +2703,7 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/* global AFRAME */
@@ -2671,7 +2746,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -2703,7 +2778,7 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -2739,7 +2814,7 @@
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	AFRAME.registerComponent('look-controls-alt', {
@@ -2859,7 +2934,7 @@
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	AFRAME.registerComponent('orbit-controls', {
@@ -2936,12 +3011,12 @@
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerComponent('paint-controls', {
-	  dependencies: ['tracked-controls', 'brush'],
+	  dependencies: ['brush'],
 
 	  schema: {
 	    hand: {default: 'left'}
@@ -3020,11 +3095,7 @@
 	  update: function () {
 	    var data = this.data;
 	    var el = this.el;
-	    // handId: 0 - right, 1 - left
-	    var controller = data.hand === 'right' ? 0 : 1;
-	    // in 0.4.0 the id is no longer 'OpenVR Gamepad' by default
-	    el.setAttribute('tracked-controls', 'id', 'OpenVR Gamepad');
-	    el.setAttribute('tracked-controls', 'controller', controller);
+	    el.setAttribute('auto-detect-controllers', 'hand', data.hand);
 	  },
 
 	  play: function () {
@@ -3048,7 +3119,7 @@
 	    var value;
 	    if (button !== 'trigger' || !this.buttonMeshes) { return; }
 	    value = evt.detail.state.value;
-	    this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
+	    if (this.buttonMeshes) { this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12); }
 	    this.el.emit(button + 'changed', {value: value});
 	  },
 
@@ -3104,7 +3175,7 @@
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -3978,7 +4049,7 @@
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4143,7 +4214,7 @@
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4446,7 +4517,7 @@
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4817,7 +4888,7 @@
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4875,7 +4946,7 @@
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4909,7 +4980,7 @@
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
