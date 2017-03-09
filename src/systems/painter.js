@@ -61,16 +61,14 @@ AFRAME.registerSystem('painter', {
       if (!self.startPainting) {
         var logo = document.getElementById('logo');
         var mesh = logo.getObject3D('mesh');
-        var object = { alpha: 1.0 };
-        var tween = new AFRAME.TWEEN.Tween(object)
+        var tween = new AFRAME.TWEEN.Tween({ alpha: 1.0 })
           .to({alpha: 0.0}, 4000)
           .onComplete(function () {
             logo.setAttribute('visible', false);
           })
           .onUpdate(function () {
-            mesh.children[0].material.opacity = object.alpha;
-          });
-        tween.start();
+            mesh.children[0].material.opacity = this.alpha;
+          }).start();
         self.startPainting = true;
       }
     });
