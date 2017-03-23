@@ -433,7 +433,7 @@ AFRAME.registerComponent('ui', {
   pause: function () {
     var el = this.el;
     var handEl = this.handEl;
-    el.removeEventListener('buttondown', this.toggleMenu);
+    el.removeEventListener('menudown', this.toggleMenu);
     el.removeEventListener('raycaster-intersection', this.onIntersection);
     el.removeEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.removeEventListener('raycaster-intersected', this.onIntersected);

@@ -1,5 +1,3 @@
-require('../vendor/aframe-master.min.js');
-
 window.saveAs = require('../vendor/saveas.js').saveAs;
 require('./dragndrop.js');
 require('./binarymanager.js');

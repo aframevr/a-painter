@@ -2,7 +2,7 @@
 AFRAME.registerComponent('brush', {
   schema: {
     color: {type: 'color', default: '#ef2d5e'},
-    size: {default: 0.01, min: 0.0, max: 0.3},
+    size: {default: 0.01, min: 0.001, max: 0.3},
     brush: {default: 'flat'},
     enabled: { default: true }
   },
@@ -29,6 +29,7 @@ AFRAME.registerComponent('brush', {
     var self = this;
 
     this.previousAxis = 0;
+/*
     this.el.addEventListener('axismove', function (evt) {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || this.previousAxis === evt.detail.axis[1]) {
         return;
@@ -39,7 +40,7 @@ AFRAME.registerComponent('brush', {
 
       self.el.setAttribute('brush', 'size', size);
     });
-
+*/
     this.el.addEventListener('buttondown', function (evt) {
       if (!self.data.enabled) { return; }
       // Grip

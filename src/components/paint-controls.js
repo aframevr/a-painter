@@ -1,6 +1,6 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
-  dependencies: ['tracked-controls', 'brush'],
+  dependencies: ['brush'],
 
   schema: {
     hand: {default: 'left'}
@@ -12,9 +12,6 @@ AFRAME.registerComponent('paint-controls', {
     var highLightTextureUrl = 'assets/images/controller-pressed.png';
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
     el.setAttribute('json-model', {src: 'assets/models/controller.json'});
-    this.onButtonChanged = this.onButtonChanged.bind(this);
-    this.onButtonDown = function (evt) { self.onButtonEvent(evt.detail.id, 'down'); };
-    this.onButtonUp = function (evt) { self.onButtonEvent(evt.detail.id, 'up'); };
     this.onModelLoaded = this.onModelLoaded.bind(this);
     function createTexture (texture) {
       var material = self.highLightMaterial = new THREE.MeshBasicMaterial();
@@ -24,6 +21,40 @@ AFRAME.registerComponent('paint-controls', {
     el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.size); });
     el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
 
+    this.startAxis = 0;
+    this.startValue = 0;
+
+    el.addEventListener('axismove', function (evt) {
+      if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || this.previousAxis === evt.detail.axis[1]) {
+        return;
+      }
+
+/*
+      if (self.touchStarted) {
+        self.touchStarted = false;
+        self.startAxis = evt.detail.axis[1];
+        self.startValue = self.el.getAttribute('brush').size;
+      }
+      var delta = self.startAxis - evt.detail.axis[1];
+*/
+      self.startValue = self.el.getAttribute('brush').size;
+
+      var delta = evt.detail.axis[1] / 100;
+      var value = self.startValue + delta
+      var size = el.components.brush.schema.size;
+      if (value > size.max) {
+        value = size.max;
+      }
+      else if (value < size.min) {
+        value = size.min;
+      }
+      self.el.setAttribute('brush', 'size', value);
+    });
+
+
+    el.addEventListener('trackpadtouchstart', this.touchStart.bind(this));
+
+    this.touchStarted = false;
     this.numberStrokes = 0;
 
     document.addEventListener('stroke-started', function (event) {
@@ -48,6 +79,10 @@ AFRAME.registerComponent('paint-controls', {
         tween.start();
       }
     });
+  },
+
+  touchStart: function (evt) {
+    this.touchStarted = true;
   },
 
   changeBrushColor: function (color) {
@@ -79,36 +114,18 @@ AFRAME.registerComponent('paint-controls', {
   update: function () {
     var data = this.data;
     var el = this.el;
-    // handId: 0 - right, 1 - left
-    var controller = data.hand === 'right' ? 0 : 1;
-    // in 0.4.0 the id is no longer 'OpenVR Gamepad' by default
-    el.setAttribute('tracked-controls', 'id', 'OpenVR Gamepad');
-    el.setAttribute('tracked-controls', 'controller', controller);
+    el.setAttribute('vive-controls', {hand: data.hand, model: false});
+    el.setAttribute('oculus-touch-controls', {hand: data.hand, model: false});
   },
 
   play: function () {
     var el = this.el;
-    el.addEventListener('buttonchanged', this.onButtonChanged);
-    el.addEventListener('buttondown', this.onButtonDown);
-    el.addEventListener('buttonup', this.onButtonUp);
     el.addEventListener('model-loaded', this.onModelLoaded);
   },
 
   pause: function () {
     var el = this.el;
-    el.removeEventListener('buttonchanged', this.onButtonChanged);
-    el.removeEventListener('buttondown', this.onButtonDown);
-    el.removeEventListener('buttonup', this.onButtonUp);
     el.removeEventListener('model-loaded', this.onModelLoaded);
-  },
-
-  onButtonChanged: function (evt) {
-    var button = this.mapping['button' + evt.detail.id];
-    var value;
-    if (button !== 'trigger' || !this.buttonMeshes) { return; }
-    value = evt.detail.state.value;
-    this.buttonMeshes.trigger.rotation.x = -value * (Math.PI / 12);
-    this.el.emit(button + 'changed', {value: value});
   },
 
   onModelLoaded: function (evt) {
