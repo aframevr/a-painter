@@ -27,7 +27,7 @@ AFRAME.registerComponent('orbit-controls', {
   },
 
   onEnterVR: function () {
-    if (!AFRAME.utils.checkHeadsetConnected() && !this.el.sceneEl.isMobile) {return; }
+    if (!AFRAME.utils.device.checkHeadsetConnected() && !this.el.sceneEl.isMobile) {return; }
 
     var currentPosition = this.el.getAttribute('position');
     var camera = this.el.getObject3D('camera');

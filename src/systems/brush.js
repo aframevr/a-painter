@@ -292,8 +292,6 @@ AFRAME.registerSystem('brush', {
         return position;
       }
 
-      this.controllerName
-
       var offsets = controllerOffset[this.controllerName];
       var pointer = offsets.vec
         .clone()
