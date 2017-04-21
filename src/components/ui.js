@@ -124,6 +124,7 @@ AFRAME.registerComponent('ui', {
 
   onTriggerChanged: function (evt) {
     var triggerValue = evt.detail.value;
+    console.log(triggerValue);
     this.lastTriggerValue = triggerValue;
     if (evt.detail.value >= 0.25) {
       this.triggeredPressed = true;
@@ -446,7 +447,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
     model = evt.detail.model;
-    if (evt.detail.format !== 'obj') { return; }
+    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) { return; }
 
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');

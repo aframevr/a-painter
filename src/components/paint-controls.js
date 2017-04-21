@@ -10,16 +10,33 @@ AFRAME.registerComponent('paint-controls', {
     var el = this.el;
     var self = this;
     var highLightTextureUrl = 'assets/images/controller-pressed.png';
-    el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
-    el.setAttribute('json-model', {src: 'assets/models/controller.json'});
+    this.controller = null;
+
     this.onModelLoaded = this.onModelLoaded.bind(this);
+    el.addEventListener('model-loaded', this.onModelLoaded);
+
+    el.addEventListener('controllerconnected', function (evt) {
+      var controllerName = evt.detail.name;
+
+      if (controllerName === 'oculus-touch-controls') {
+        var hand = evt.detail.component.data.hand;
+        el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
+      } else if (controllerName === 'vive-controls') {
+        el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+      } else { return; }
+
+      this.controller = controllerName;
+    });
+
+    el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.size); });
+    el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
+
     function createTexture (texture) {
       var material = self.highLightMaterial = new THREE.MeshBasicMaterial();
       material.map = texture;
       material.needsUpdate = true;
     }
-    el.addEventListener('brushsize-changed', function (evt) { self.changeBrushSize(evt.detail.size); });
-    el.addEventListener('brushcolor-changed', function (evt) { self.changeBrushColor(evt.detail.color); });
+    el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
 
     this.startAxis = 0;
     this.startValue = 0;
@@ -39,8 +56,8 @@ AFRAME.registerComponent('paint-controls', {
 */
       self.startValue = self.el.getAttribute('brush').size;
 
-      var delta = evt.detail.axis[1] / 100;
-      var value = self.startValue + delta
+      var delta = evt.detail.axis[1] / 300;
+      var value = self.startValue - delta;
       var size = el.components.brush.schema.size;
       if (value > size.max) {
         value = size.max;
@@ -68,13 +85,15 @@ AFRAME.registerComponent('paint-controls', {
         var tween = new AFRAME.TWEEN.Tween(object)
           .to({alpha: 0.0}, 4000)
           .onComplete(function () {
+            /* @todo Change tooltips
             self.buttonMeshes.tooltips.forEach(function (tooltip) {
               tooltip.visible = false;
             });
+            */
           })
           .delay(2000)
           .onUpdate(function () {
-            self.buttonMeshes.tooltips[0].material.opacity = object.alpha;
+            // @todo Change tooltips self.buttonMeshes.tooltips[0].material.opacity = object.alpha;
           });
         tween.start();
       }
@@ -115,17 +134,13 @@ AFRAME.registerComponent('paint-controls', {
     var data = this.data;
     var el = this.el;
     el.setAttribute('vive-controls', {hand: data.hand, model: false});
-    el.setAttribute('oculus-touch-controls', {hand: data.hand});
+    el.setAttribute('oculus-touch-controls', {hand: data.hand, model: false});
   },
 
   play: function () {
-    var el = this.el;
-    el.addEventListener('model-loaded', this.onModelLoaded);
   },
 
   pause: function () {
-    var el = this.el;
-    el.removeEventListener('model-loaded', this.onModelLoaded);
   },
 
   onModelLoaded: function (evt) {
@@ -133,6 +148,7 @@ AFRAME.registerComponent('paint-controls', {
     var buttonMeshes;
     if (evt.detail.target !== this.el) { return; }
     buttonMeshes = this.buttonMeshes = {};
+/*
     buttonMeshes.grip = {
       left: controllerObject3D.getObjectByName('leftgrip'),
       right: controllerObject3D.getObjectByName('rightgrip')
@@ -141,8 +157,12 @@ AFRAME.registerComponent('paint-controls', {
     buttonMeshes.system = controllerObject3D.getObjectByName('systembutton');
     buttonMeshes.trackpad = controllerObject3D.getObjectByName('touchpad');
     buttonMeshes.trigger = controllerObject3D.getObjectByName('trigger');
+*/
     buttonMeshes.sizeHint = controllerObject3D.getObjectByName('sizehint');
     buttonMeshes.colorTip = controllerObject3D.getObjectByName('tip');
+
+    // @todo Change Tooltips
+/*
     buttonMeshes.tooltips = [
       controllerObject3D.getObjectByName('msg_leftgrip'),
       controllerObject3D.getObjectByName('msg_rightgrip'),
@@ -150,6 +170,10 @@ AFRAME.registerComponent('paint-controls', {
       controllerObject3D.getObjectByName('msg_touchpad'),
       controllerObject3D.getObjectByName('msg_trigger')
     ];
+    buttonMeshes.tooltips.forEach(function (tooltip) {
+      tooltip.visible = false;
+    });
+*/
     this.changeBrushSize(this.el.components.brush.data.size);
     this.changeBrushColor(this.el.components.brush.color);
   },
