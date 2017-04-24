@@ -67,16 +67,19 @@ AFRAME.registerComponent('paint-controls', {
 
           var currentAxis = (evt.detail.axis[1] + 1) / 2;
           var delta = (self.startAxis - currentAxis) / 2;
+
           self.startAxis = currentAxis;
 
           var startValue = self.el.getAttribute('brush').size;
           var size = el.components.brush.schema.size;
-          var value = THREE.Math.clamp(self.startValue - delta, size.min, size.max);
+          var value = THREE.Math.clamp(startValue - delta, size.min, size.max);
 
           self.el.setAttribute('brush', 'size', value);
         });
 
-        el.addEventListener('trackpadtouchstart', self.touchStart.bind(self));
+        el.addEventListener('trackpadtouchstart', function () {
+          self.touchStarted = true;
+        });
 
         self.touchStarted = false;
 
@@ -96,7 +99,6 @@ AFRAME.registerComponent('paint-controls', {
     el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
 
     this.startAxis = 0;
-    this.startValue = 0;
 
     this.numberStrokes = 0;
 
@@ -127,10 +129,6 @@ AFRAME.registerComponent('paint-controls', {
         tween.start();
       }
     });
-  },
-
-  touchStart: function (evt) {
-    this.touchStarted = true;
   },
 
   changeBrushColor: function (color) {
