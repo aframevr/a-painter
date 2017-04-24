@@ -20,12 +20,24 @@ AFRAME.registerComponent('paint-controls', {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     el.addEventListener('model-loaded', this.onModelLoaded);
 
+    el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+    var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
+    tooltips.forEach(function (tooltip) {
+      tooltip.setAttribute('visible', true);
+    });
+
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
       if (controllerName === 'oculus-touch-controls') {
         var hand = evt.detail.component.data.hand;
         el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
         el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
+
+
+        var tooltips = Array.prototype.slice.call(document.querySelectorAll('.oculus-tooltips'));
+        tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', true);
+        });
 
         el.addEventListener('axismove', function (evt) {
           if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
@@ -39,6 +51,11 @@ AFRAME.registerComponent('paint-controls', {
 
       } else if (controllerName === 'vive-controls') {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+
+        var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
+        tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', true);
+        });
 
         el.addEventListener('axismove', function (evt) {
           if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
