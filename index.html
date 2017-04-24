@@ -15,6 +15,7 @@
     <script src="vendor/aframe-master.min.js"></script>
     <script src="build.js"></script>
     <script src="vendor/aframe-teleport-component.min.js"></script>
+    <script src="vendor/aframe-tooltip-component.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
@@ -48,14 +49,49 @@
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: left"
                 teleport="ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
-                ui></a-entity>
+                ui>
+                  <a-entity>
+                    <a-entity id="tooltip_x" tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: -0.009 0.0 -0.002; rotation: -90 0 0; src: assets/images/tooltip.png"
+                            position="0.066 0.013 0.013">
+                    </a-entity>
+                    <a-entity id="tooltip_y" tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: 0.008 0 -0.001; rotation: -90 0 0; src: assets/images/tooltip.png"
+                        position="0.059 0.015 -0.028">
+                    </a-entity>
+                    <a-entity id="tooltip_thumb" tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: -0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                        position="-0.07 0.01 0.06">
+                    </a-entity>
+                    <a-entity id="tooltip_trigger" tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0.002 -0.023 -0.02; lineHorizontalAlign: right; rotation: -90 0 0; src: assets/images/tooltip.png"
+                        position="-0.09 0.020 -0.067">
+                    </a-entity>
+                    <a-entity id="tooltip_grip" tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: 0.005 -0.022 0.027; rotation: -90 0 0; src: assets/images/tooltip.png"
+                        position="0.058 -0.01 0.055">
+                    </a-entity>
+                  </a-entity>
+                </a-entity>
       <a-entity id="right-hand"
                 brush
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: right"
                 teleport="ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
                 ui>
-                </a-entity>
+                  <a-entity>
+                      <a-entity id="tooltip_a" tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: 0.009 0.0 -0.002; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.066 0.013 0.013">
+                      </a-entity>
+                      <a-entity id="tooltip_b" tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: -0.008 0 -0.001; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.059 0.015 -0.028">
+                      </a-entity>
+                      <a-entity id="tooltip_thumb" tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.07 0.01 0.06">
+                      </a-entity>
+                      <a-entity id="tooltip_trigger" tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: -0.002 -0.023 -0.02; lineHorizontalAlign: left; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.09 0.020 -0.067">
+                      </a-entity>
+                      <a-entity id="tooltip_grip" tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: -0.005 -0.022 0.027; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.058 -0.01 0.055">
+                      </a-entity>
+                  </a-entity>
+      </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
       <a-entity id="acamera" camera look-controls-alt orbit-controls></a-entity>
     </a-scene>

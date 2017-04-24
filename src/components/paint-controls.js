@@ -1,3 +1,7 @@
+AFRAME.registerSystem('paint-controls', {
+  numberStrokes: 0
+});
+
 /* globals AFRAME THREE */
 AFRAME.registerComponent('paint-controls', {
   dependencies: ['brush'],
@@ -82,22 +86,25 @@ AFRAME.registerComponent('paint-controls', {
       if (event.detail.entity.components['paint-controls'] !== self) { return; }
 
       self.numberStrokes++;
+      self.system.numberStrokes++;
 
       // 3 Strokes to hide
-      if (self.numberStrokes === 3) {
-        var object = { alpha: 1.0 };
+      if (self.system.numberStrokes === 3) {
+        var tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
+        var object = { opacity: 1.0 };
+
         var tween = new AFRAME.TWEEN.Tween(object)
-          .to({alpha: 0.0}, 4000)
+          .to({opacity: 0.0}, 4000)
           .onComplete(function () {
-            /* @todo Change tooltips
-            self.buttonMeshes.tooltips.forEach(function (tooltip) {
-              tooltip.visible = false;
+            tooltips.forEach(function (tooltip) {
+              tooltip.setAttribute('visible', false);
             });
-            */
           })
           .delay(2000)
           .onUpdate(function () {
-            // @todo Change tooltips self.buttonMeshes.tooltips[0].material.opacity = object.alpha;
+            tooltips.forEach(function (tooltip) {
+              tooltip.setAttribute('tooltip', {opacity: object.opacity});
+            });
           });
         tween.start();
       }
