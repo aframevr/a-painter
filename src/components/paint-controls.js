@@ -20,12 +20,6 @@ AFRAME.registerComponent('paint-controls', {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     el.addEventListener('model-loaded', this.onModelLoaded);
 
-    el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
-    var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
-    tooltips.forEach(function (tooltip) {
-      tooltip.setAttribute('visible', true);
-    });
-
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
       if (controllerName === 'oculus-touch-controls') {
