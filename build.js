@@ -2426,12 +2426,24 @@
 	    this.onModelLoaded = this.onModelLoaded.bind(this);
 	    el.addEventListener('model-loaded', this.onModelLoaded);
 
+	    el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+	    var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
+	    tooltips.forEach(function (tooltip) {
+	      tooltip.setAttribute('visible', true);
+	    });
+
 	    el.addEventListener('controllerconnected', function (evt) {
 	      var controllerName = evt.detail.name;
 	      if (controllerName === 'oculus-touch-controls') {
 	        var hand = evt.detail.component.data.hand;
 	        el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
 	        el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
+
+
+	        var tooltips = Array.prototype.slice.call(document.querySelectorAll('.oculus-tooltips'));
+	        tooltips.forEach(function (tooltip) {
+	          tooltip.setAttribute('visible', true);
+	        });
 
 	        el.addEventListener('axismove', function (evt) {
 	          if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
@@ -2446,6 +2458,11 @@
 	      } else if (controllerName === 'vive-controls') {
 	        el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
 
+	        var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
+	        tooltips.forEach(function (tooltip) {
+	          tooltip.setAttribute('visible', true);
+	        });
+
 	        el.addEventListener('axismove', function (evt) {
 	          if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
 
@@ -2456,16 +2473,19 @@
 
 	          var currentAxis = (evt.detail.axis[1] + 1) / 2;
 	          var delta = (self.startAxis - currentAxis) / 2;
+
 	          self.startAxis = currentAxis;
 
 	          var startValue = self.el.getAttribute('brush').size;
 	          var size = el.components.brush.schema.size;
-	          var value = THREE.Math.clamp(self.startValue - delta, size.min, size.max);
+	          var value = THREE.Math.clamp(startValue - delta, size.min, size.max);
 
 	          self.el.setAttribute('brush', 'size', value);
 	        });
 
-	        el.addEventListener('trackpadtouchstart', self.touchStart.bind(self));
+	        el.addEventListener('trackpadtouchstart', function () {
+	          self.touchStarted = true;
+	        });
 
 	        self.touchStarted = false;
 
@@ -2485,7 +2505,6 @@
 	    el.sceneEl.systems.material.loadTexture(highLightTextureUrl, {src: highLightTextureUrl}, createTexture);
 
 	    this.startAxis = 0;
-	    this.startValue = 0;
 
 	    this.numberStrokes = 0;
 
@@ -2516,10 +2535,6 @@
 	        tween.start();
 	      }
 	    });
-	  },
-
-	  touchStart: function (evt) {
-	    this.touchStarted = true;
 	  },
 
 	  changeBrushColor: function (color) {
