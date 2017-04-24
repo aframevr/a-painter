@@ -166,6 +166,12 @@ AFRAME.registerSystem('brush', {
   init: function () {
     this.version = VERSION;
     this.clear();
+    this.controllerName = null;
+
+    var self = this;
+    this.sceneEl.addEventListener('controllerconnected', function (evt) {
+      self.controllerName = evt.detail.name;
+    });
   },
   tick: function (time, delta) {
     if (!this.strokes.length) { return; }
@@ -270,13 +276,28 @@ AFRAME.registerSystem('brush', {
   },
   getPointerPosition: (function () {
     var pointerPosition = new THREE.Vector3();
-    var offset = new THREE.Vector3(0, 0.7, 1);
+    var controllerOffset = {
+      'vive-controls': {
+        vec: new THREE.Vector3(0, 0.7, 1),
+        mult: -0.03
+      },
+      'oculus-touch-controls': {
+        vec: new THREE.Vector3(0, 0, 2.8),
+        mult: -0.05
+      }
+    };
+
     return function getPointerPosition (position, orientation) {
-      var pointer = offset
+      if (!this.controllerName) {
+        return position;
+      }
+
+      var offsets = controllerOffset[this.controllerName];
+      var pointer = offsets.vec
         .clone()
         .applyQuaternion(orientation)
         .normalize()
-        .multiplyScalar(-0.03);
+        .multiplyScalar(offsets.mult);
       pointerPosition.copy(position).add(pointer);
       return pointerPosition;
     };

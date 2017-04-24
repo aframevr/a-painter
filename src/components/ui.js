@@ -40,6 +40,7 @@ AFRAME.registerComponent('ui', {
     });
     uiEl.setAttribute('obj-model', 'obj:#uiobj');
     uiEl.setAttribute('position', '0 0.04 -0.15');
+
     uiEl.setAttribute('scale', '0 0 0');
     uiEl.setAttribute('visible', false);
     uiEl.classList.add('apainter-ui');
@@ -55,6 +56,31 @@ AFRAME.registerComponent('ui', {
       far: this.rayDistance,
       objects: '.apainter-ui',
       rotation: -this.rayAngle
+    });
+
+    this.controller = null;
+
+    var self = this;
+    el.addEventListener('controllerconnected', function (evt) {
+      var controllerName = evt.detail.name;
+
+      self.controller = {
+        name: controllerName,
+        hand: evt.detail.component.data.hand
+      }
+
+      if (controllerName === 'oculus-touch-controls') {
+        self.uiEl.setAttribute('rotation', '45 0 0');
+        uiEl.setAttribute('position', '0 0.13 -0.08');
+        self.rayAngle = 0;
+        el.setAttribute('ui-raycaster', {
+          rotation: 0
+        });
+      }
+
+      if (self.el.isPlaying) {
+        self.addToggleEvent();
+      }
     });
   },
 
@@ -417,10 +443,41 @@ AFRAME.registerComponent('ui', {
     };
   })(),
 
+  addToggleEvent: function () {
+    var el = this.el;
+
+    if (this.controller.name === 'oculus-touch-controls') {
+      if (this.controller.hand === 'left') {
+        el.addEventListener('xbuttondown', this.toggleMenu);
+      } else {
+        el.addEventListener('abuttondown', this.toggleMenu);
+      }
+    } else if (this.controller.name === 'vive-controls') {
+      el.addEventListener('menudown', this.toggleMenu);
+    }
+  },
+
+  removeToggleEvent: function () {
+    var el = this.el;
+
+    if (this.controller.name === 'oculus-touch-controls') {
+      if (this.controller.hand === 'left') {
+        el.removeEventListener('xbuttondown', this.toggleMenu);
+      } else {
+        el.removeEventListener('abuttondown', this.toggleMenu);
+      }
+    } else if (this.controller.name === 'vive-controls') {
+      el.removeEventListener('menudown', this.toggleMenu);
+    }
+  },
+
   play: function () {
     var el = this.el;
     var handEl = this.handEl;
-    el.addEventListener('menudown', this.toggleMenu);
+    if (this.controller) {
+      this.addToggleEvent();
+    }
+
     el.addEventListener('model-loaded', this.onModelLoaded);
     el.addEventListener('raycaster-intersection', this.onIntersection);
     el.addEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
@@ -433,7 +490,11 @@ AFRAME.registerComponent('ui', {
   pause: function () {
     var el = this.el;
     var handEl = this.handEl;
-    el.removeEventListener('buttondown', this.toggleMenu);
+
+    if (this.controller) {
+      this.removeToggleEvent();
+    }
+
     el.removeEventListener('raycaster-intersection', this.onIntersection);
     el.removeEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.removeEventListener('raycaster-intersected', this.onIntersected);
@@ -446,7 +507,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
     model = evt.detail.model;
-    if (evt.detail.format !== 'obj') { return; }
+    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) { return; }
 
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
