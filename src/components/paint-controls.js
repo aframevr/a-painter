@@ -45,6 +45,7 @@ AFRAME.registerComponent('paint-controls', {
 
       } else if (controllerName === 'vive-controls') {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+        el.setAttribute('teleport-controls', {button: 'trackpad'});
 
         var tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
         tooltips.forEach(function (tooltip) {
