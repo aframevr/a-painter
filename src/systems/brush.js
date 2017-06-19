@@ -82,7 +82,7 @@ AFRAME.registerBrush = function (name, definition, options) {
   };
 
   function wrapInit (initMethod) {
-    return function init (color, brushSize) {
+    return function init (color, brushSize, owner, timestamp) {
       this.object3D = new THREE.Object3D();
       this.data = {
         points: [],
@@ -90,7 +90,9 @@ AFRAME.registerBrush = function (name, definition, options) {
         prevPosition: null,
         prevPointerPosition: null,
         numPoints: 0,
-        color: color.clone()
+        color: color.clone(),
+        timestamp: timestamp,
+        owner: owner
       };
       initMethod.call(this, color, brushSize);
     };
@@ -142,7 +144,12 @@ AFRAME.registerSystem('brush', {
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
-    var stroke = this.strokes.pop();
+  	var stroke;
+    for(let i = this.strokes.length-1; i >= 0; i--){
+      if(this.strokes[i].data.owner !== 'local') continue;
+      stroke = this.strokes.splice(i, 1)[0];
+      break;
+    }
     if (stroke) {
       var entity = stroke.entity;
       entity.emit('stroke-removed', {entity: entity});
@@ -152,7 +159,9 @@ AFRAME.registerSystem('brush', {
   clear: function () {
     // Remove all the stroke entities
     for (var i = 0; i < this.strokes.length; i++) {
+      if(this.strokes[i].data.owner !== 'local') continue;
       var entity = this.strokes[i].entity;
+      entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
     }
 
@@ -189,6 +198,8 @@ AFRAME.registerSystem('brush', {
       var numPoints = parseInt(Math.random() * 500);
 
       var stroke = this.addNewStroke(brushName, color, size);
+      var entity = document.querySelector('#left-hand');
+      entity.emit('stroke-started', {entity, stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
@@ -207,7 +218,7 @@ AFRAME.registerSystem('brush', {
       }
     }
   },
-  addNewStroke: function (brushName, color, size) {
+  addNewStroke: function (brushName, color, size, owner='local', timestamp=Date.now()) {
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -218,7 +229,7 @@ AFRAME.registerSystem('brush', {
     Brush.used = true;
     var stroke = new Brush();
     stroke.brush = Brush;
-    stroke.init(color, size);
+    stroke.init(color, size, owner, timestamp);
     this.strokes.push(stroke);
 
     var entity = document.createElement('a-entity');
