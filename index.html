@@ -28,7 +28,7 @@
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
   </head>
   <body style="background-color: #030404">
-    <a-scene networked-scene avatar-replayer="spectatorMode: true">
+    <a-scene networked-scene="" avatar-replayer="spectatorMode: false">
       <a-assets>
         <img id="skymap" src="assets/images/sky.jpg" crossOrigin="anonymous">
         <img id="uinormal" src="assets/images/ui-normal.png" crossOrigin="anonymous">
@@ -110,6 +110,7 @@
               </a-entity>
       <a-entity id="left-hand"
                 brush
+                networked="template:#left-hand-template"
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: left"
                 teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
@@ -152,6 +153,7 @@
                 </a-entity>
       <a-entity id="right-hand"
                 brush
+                networked="template:#right-hand-template"
                 if-no-vr-headset="visible: false"
                 paint-controls="hand: right"
                 teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
@@ -194,7 +196,7 @@
       </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
 
-      <a-entity id="acamera" camera networked="template:#head-template;showLocalTemplate:false;" look-controls-alt wasd-controls orbit-controls></a-entity>
+      <a-entity id="acamera" camera networked="template:#head-template;showLocalTemplate:false;" look-controls wasd-controls position="0 1.3 0"></a-entity>
 
     </a-scene>
     <a href="https://aframe.io/a-painter/"><div id="apainter-logo" class="hidden"></div><div id="apainter-author" style="display:none" class="hidden">authorname</div></a>
