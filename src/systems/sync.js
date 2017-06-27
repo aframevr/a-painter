@@ -7,5 +7,9 @@ AFRAME.registerSystem('sync', {
     this.el.addEventListener('stroke-added', function (evt) {
       // Do something with stroke data.
     });
+
+    /* On subscribe.
+      brushSystem.loadJSON({strokes: [stroke]});
+    */
   },
 });
