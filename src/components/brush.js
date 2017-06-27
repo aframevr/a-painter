@@ -63,6 +63,7 @@ AFRAME.registerComponent('brush', {
         } else {
           if (self.active) {
             self.previousEntity = self.currentEntity;
+            self.el.emit('stroke-added', {stroke: self.currentStroke.data});
             self.currentStroke = null;
           }
           self.active = false;
@@ -91,6 +92,7 @@ AFRAME.registerComponent('brush', {
         var pointerPosition = this.system.getPointerPosition(position, rotation);
         this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
       }
+      this.lastActive = this.active;
     };
   })(),
   startNewStroke: function () {
