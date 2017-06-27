@@ -63,7 +63,7 @@ AFRAME.registerComponent('brush', {
         } else {
           if (self.active) {
             self.previousEntity = self.currentEntity;
-            self.el.emit('stroke-added', {stroke: self.currentStroke.data});
+            self.el.emit('stroke-added', {stroke: self.currentStroke});
             self.currentStroke = null;
           }
           self.active = false;
