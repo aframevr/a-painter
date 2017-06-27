@@ -4,7 +4,7 @@
   "description": "A-Painter",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "start": "webpack-dev-server --host 0.0.0.0",
+    "start": "node ./server.js",
     "lint": "semistandard -v | snazzy"
   },
   "repository": "aframevr/a-painter",
@@ -22,6 +22,7 @@
     "webpack-dev-server": "^1.16.1"
   },
   "dependencies": {
-    "aframe-tooltip-component": "^0.1.0"
+    "aframe-tooltip-component": "^0.1.0",
+    "networked-aframe": "^0.2.0"
   }
 }
