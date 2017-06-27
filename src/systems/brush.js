@@ -319,6 +319,7 @@ AFRAME.registerSystem('brush', {
     for (var i = 0; i < data.strokes.length; i++) {
       var strokeData = data.strokes[i];
       var brush = strokeData.brush;
+      console.log(strokeData);
 
       var stroke = this.addNewStroke(
         data.brushes[brush.index],

@@ -4,14 +4,11 @@ AFRAME.registerSystem('sync', {
     this.previousStrokes = null;
 
     this.el.addEventListener('stroke-added', function (evt) {
-      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke)
-      brushSystem.loadJSON({version: 1, strokes: [evt.detail.stroke.getJSON(brushSystem)],
-                            brushes: brushSystem.brushes});
+      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke.getJSON(brushSystem));
     });
 
-    NAF.connection.subscribeToDataChannel('stroke', function (stroke) {
-      brushSystem.loadJSON({version: 1, strokes: [evt.detail.stroke.getJSON(brushSystem)],
-                            brushes: brushSystem.brushes});
+    NAF.connection.subscribeToDataChannel('stroke', function (senderId, type, stroke, targetId) {
+      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: brushSystem.brushes});
     });
   },
 });
