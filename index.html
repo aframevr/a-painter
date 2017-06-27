@@ -12,8 +12,10 @@
     </script>
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
-    <script src="vendor/aframe-master.min.js"></script>
+    <script src="https://rawgit.com/aframevr/aframe/88ab1e0/dist/aframe-master.min.js"></script>
+    <script>delete AFRAME.components.line;</script>
     <script src="build.js"></script>
+    <script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
     <script src="vendor/aframe-teleport-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
@@ -26,7 +28,7 @@
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
   </head>
   <body style="background-color: #030404">
-    <a-scene networked-scene>
+    <a-scene networked-scene avatar-replayer="spectatorMode: true">
       <a-assets>
         <img id="skymap" src="assets/images/sky.jpg" crossOrigin="anonymous">
         <img id="uinormal" src="assets/images/ui-normal.png" crossOrigin="anonymous">
