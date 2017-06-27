@@ -1,5 +1,3 @@
-var diff = require('deep-diff');
-
 AFRAME.registerSystem('sync', {
   init: function () {
     var brushSystem = this.el.systems.brush;
