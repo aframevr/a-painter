@@ -66,15 +66,16 @@
 	__webpack_require__(18);
 	__webpack_require__(19);
 	__webpack_require__(20);
-
 	__webpack_require__(21);
+
 	__webpack_require__(22);
 	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
 	__webpack_require__(26);
-
 	__webpack_require__(27);
+
+	__webpack_require__(28);
 
 
 /***/ }),
@@ -3722,6 +3723,23 @@
 /* 21 */
 /***/ (function(module, exports) {
 
+	AFRAME.registerComponent('body', {
+	  init: function () {
+	    this.head = this.el.previousElementSibling;
+	  },
+	  tick: function (time, delta) {
+	    if (!this.head) return;
+	    var pos = this.head.getAttribute('position');
+	    var rot = this.head.getAttribute('rotation');
+	    this.el.setAttribute('position', pos);
+	    this.el.setAttribute('rotation', {x: rot.x * 0.3, y: rot.y, z: rot.z * 0.3});
+	  }
+	});
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
 	/* globals AFRAME THREE */
 	(function () {
 	  var line = {
@@ -4022,7 +4040,7 @@
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4393,7 +4411,7 @@
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4451,7 +4469,7 @@
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4485,7 +4503,7 @@
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4596,7 +4614,7 @@
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4631,7 +4649,7 @@
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerSystem('sync', {
@@ -4640,7 +4658,6 @@
 	    this.previousStrokes = null;
 
 	    this.el.addEventListener('stroke-added', function (evt) {
-	      console.log(evt.detail.stroke.getJSON(brushSystem));
 	      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke.getJSON(brushSystem));
 	    });
 

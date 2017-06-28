@@ -225,7 +225,7 @@
     ], 
     "images" : [
         {
-            "uri" : "avatartex.png"
+            "uri" : "avatar-diffuse.png"
         }
     ], 
     "materials" : [
