@@ -66,15 +66,16 @@
 	__webpack_require__(18);
 	__webpack_require__(19);
 	__webpack_require__(20);
-
 	__webpack_require__(21);
+
 	__webpack_require__(22);
 	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
 	__webpack_require__(26);
-
 	__webpack_require__(27);
+
+	__webpack_require__(28);
 
 
 /***/ }),
@@ -3770,6 +3771,22 @@
 /* 21 */
 /***/ (function(module, exports) {
 
+	AFRAME.registerComponent('body', {
+	  init: function () {
+	    // this.head = this.el.previousElementSibling;
+	    this.head = this.el.parentNode;
+	  },
+	  tick: function (time, delta) {
+	    if (!this.head) return;
+	    var rot = this.head.getAttribute('rotation');
+	    // this.el.setAttribute('rotation', {x: rot.x * 0.3, y: rot.y, z: rot.z * 0.3});
+	  }
+	});
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
 	/* globals AFRAME THREE */
 	(function () {
 	  var line = {
@@ -4070,7 +4087,7 @@
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4441,7 +4458,7 @@
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4499,7 +4516,7 @@
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4533,7 +4550,7 @@
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4644,7 +4661,7 @@
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4679,7 +4696,7 @@
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerSystem('sync', {
