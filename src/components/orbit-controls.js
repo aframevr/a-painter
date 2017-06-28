@@ -53,6 +53,23 @@ AFRAME.registerComponent('orbit-controls', {
     controls.enableDamping = true;
     controls.dampingFactor = 1.0;
     controls.enableZoom = true;
+    controls.zoomSpeed = 2;
+  },
+
+  tick: function () {
+    var camera = this.el.getObject3D('camera');
+    var worldPos = camera.getWorldPosition();
+    var worldRot = camera.getWorldRotation();
+    this.el.components.position.data = {
+      x: worldPos.x,
+      y: worldPos.y,
+      z: worldPos.z
+    };
+    this.el.components.rotation.data = {
+      x: THREE.Math.radToDeg(worldRot.x),
+      y: THREE.Math.radToDeg(worldRot.y),
+      z: THREE.Math.radToDeg(worldRot.z)
+    };
   },
 
   play: function () {
