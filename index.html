@@ -16,6 +16,7 @@
     <script>delete AFRAME.components.line;</script>
     <script src="build.js"></script>
     <script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
+    <script src="vendor/aframe-extras.loaders.js"></script>
     <script src="vendor/aframe-teleport-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
@@ -39,20 +40,15 @@
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
         <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
 
-        <img src="assets/avatars/avatar1/avatar1.jpg">
-        <a-asset-item id="avatar1-head-obj" src="assets/avatars/avatar1/avatar1-head.gltf"></a-asset-item>
+        <img src="assets/avatars/avatar-diffuse.png">
+        <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
 
         <script id="player-template" type="text/html">
           <a-entity></a-entity>
         </script>
 
         <script id="head-template" type="text/html">
-          <a-entity class="heads" show-child="0">
-            <a-entity class="head" gltf-model="#avatar1-head-obj"></a-entity>
-            <a-entity class="head" gltf-model="#avatar2-head-obj"></a-entity>
-            <a-entity class="head" gltf-model="#avatar3-head-obj"></a-entity>
-            <a-entity class="head" gltf-model="#avatar4-head-obj"></a-entity>
-          </a-entity>
+          <a-entity class="head" gltf-model-next="#avatar1-head-obj"></a-entity>
         </script>
 
         <script id="left-hand-template" type="text/html">
@@ -73,35 +69,14 @@
           </a-entity>
         </script>
 
-        <img src="assets/avatars/avatar1/avatar1.jpg">
-        <img src="assets/avatars/avatar2/avatar2.jpg">
-        <img src="assets/avatars/avatar2/avatar2spec.jpg">
-        <img src="assets/avatars/avatar3/avatar3.jpg">
-        <img src="assets/avatars/avatar3/avatar3spec.jpg">
-        <img src="assets/avatars/avatar4/avatar4.jpg">
-
-        <a-asset-item id="avatar1-head-obj" src="assets/avatars/avatar1/avatar1-head.gltf"></a-asset-item>
+        <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
         <a-asset-item id="avatar1-hand-right-obj" src="assets/avatars/avatar1/avatar1-hand-right.gltf"></a-asset-item>
         <a-asset-item id="avatar1-hand-left-obj" src="assets/avatars/avatar1/avatar1-hand-left.gltf"></a-asset-item>
-
-        <a-asset-item id="avatar2-head-obj" src="assets/avatars/avatar2/avatar2-head.gltf"></a-asset-item>
-        <a-asset-item id="avatar2-hand-right-obj" src="assets/avatars/avatar2/avatar2-hand-right.gltf"></a-asset-item>
-        <a-asset-item id="avatar2-hand-left-obj" src="assets/avatars/avatar2/avatar2-hand-left.gltf"></a-asset-item>
-
-        <a-asset-item id="avatar3-head-obj" src="assets/avatars/avatar3/avatar3-head.gltf"></a-asset-item>
-        <a-asset-item id="avatar3-hand-right-obj" src="assets/avatars/avatar3/avatar3-hand-right.gltf"></a-asset-item>
-        <a-asset-item id="avatar3-hand-left-obj" src="assets/avatars/avatar3/avatar3-hand-left.gltf"></a-asset-item>
-
-        <a-asset-item id="avatar4-head-obj" src="assets/avatars/avatar4/avatar4-head.gltf"></a-asset-item>
-        <a-asset-item id="avatar4-hand-right-obj" src="assets/avatars/avatar4/avatar4-hand-right.gltf"></a-asset-item>
-        <a-asset-item id="avatar4-hand-left-obj" src="assets/avatars/avatar4/avatar4-hand-left.gltf"></a-asset-item>
       </a-assets>
        <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
-      geometry="primitive: circle; radius: 12;"
-      rotation="-90 0 0"
       <a-entity id="hitEntityLeft" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
       <a-entity id="hitEntityRight" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
 
