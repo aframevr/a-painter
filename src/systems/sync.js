@@ -8,7 +8,7 @@ AFRAME.registerSystem('sync', {
     });
 
     NAF.connection.subscribeToDataChannel('stroke', function (senderId, type, stroke, targetId) {
-      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: brushSystem.brushes});
+      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: Object.keys(AFRAME.BRUSHES)});
     });
   },
 });

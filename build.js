@@ -56,8 +56,8 @@
 	__webpack_require__(9);
 	__webpack_require__(10);
 	__webpack_require__(11);
-	__webpack_require__(12);
 
+	__webpack_require__(12);
 	__webpack_require__(13);
 	__webpack_require__(14);
 	__webpack_require__(15);
@@ -66,13 +66,14 @@
 	__webpack_require__(18);
 	__webpack_require__(19);
 	__webpack_require__(20);
-	__webpack_require__(21);
 
+	__webpack_require__(21);
 	__webpack_require__(22);
 	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
 	__webpack_require__(26);
+
 	__webpack_require__(27);
 
 
@@ -1416,7 +1417,7 @@
 
 	      return {
 	        brush: {
-	          index: system.getUsedBrushes().indexOf(this.brushName),
+	          name: this.brushName,
 	          color: arrayToNumFixed(this.data.color.toArray(), 6),
 	          size: this.data.size.toNumFixed(6)
 	        },
@@ -1689,10 +1690,9 @@
 	    for (var i = 0; i < data.strokes.length; i++) {
 	      var strokeData = data.strokes[i];
 	      var brush = strokeData.brush;
-	      console.log(strokeData);
 
 	      var stroke = this.addNewStroke(
-	        data.brushes[brush.index],
+	        brush.name,
 	        new THREE.Color().fromArray(brush.color),
 	        brush.size
 	      );
@@ -1991,26 +1991,6 @@
 /* 12 */
 /***/ (function(module, exports) {
 
-	AFRAME.registerSystem('sync', {
-	  init: function () {
-	    var brushSystem = this.el.systems.brush;
-	    this.previousStrokes = null;
-
-	    this.el.addEventListener('stroke-added', function (evt) {
-	      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke.getJSON(brushSystem));
-	    });
-
-	    NAF.connection.subscribeToDataChannel('stroke', function (senderId, type, stroke, targetId) {
-	      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: brushSystem.brushes});
-	    });
-	  },
-	});
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports) {
-
 	/* globals AFRAME THREE */
 	AFRAME.registerComponent('brush', {
 	  schema: {
@@ -2116,7 +2096,7 @@
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports) {
 
 	/* global AFRAME */
@@ -2159,7 +2139,7 @@
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -2192,7 +2172,7 @@
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -2228,7 +2208,7 @@
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerComponent('look-controls-alt', {
@@ -2348,7 +2328,7 @@
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerComponent('orbit-controls', {
@@ -2425,7 +2405,7 @@
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerSystem('paint-controls', {
@@ -2641,7 +2621,7 @@
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -3574,7 +3554,7 @@
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -3739,7 +3719,7 @@
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4042,7 +4022,7 @@
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4413,7 +4393,7 @@
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4471,7 +4451,7 @@
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4505,7 +4485,7 @@
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4616,7 +4596,7 @@
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4648,6 +4628,27 @@
 	  },
 	  {thumbnail: 'brushes/thumb_single_sphere.png', spacing: 0.0}
 	);
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports) {
+
+	AFRAME.registerSystem('sync', {
+	  init: function () {
+	    var brushSystem = this.el.systems.brush;
+	    this.previousStrokes = null;
+
+	    this.el.addEventListener('stroke-added', function (evt) {
+	      console.log(evt.detail.stroke.getJSON(brushSystem));
+	      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke.getJSON(brushSystem));
+	    });
+
+	    NAF.connection.subscribeToDataChannel('stroke', function (senderId, type, stroke, targetId) {
+	      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: Object.keys(AFRAME.BRUSHES)});
+	    });
+	  },
+	});
 
 
 /***/ })
