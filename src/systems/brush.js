@@ -46,6 +46,7 @@ AFRAME.registerBrush = function (name, definition, options) {
 
       return {
         brush: {
+          id: this.id,
           name: this.brushName,
           color: arrayToNumFixed(this.data.color.toArray(), 6),
           size: this.data.size.toNumFixed(6)
@@ -104,12 +105,14 @@ AFRAME.registerBrush = function (name, definition, options) {
       }
       if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
         this.data.numPoints++;
-        this.data.points.push({
+
+        var point = {
           'position': position.clone(),
           'orientation': orientation.clone(),
           'pressure': pressure,
           'timestamp': timestamp
-        });
+        };
+        this.data.points.push(point);
 
         this.data.prevPosition = position.clone();
         this.data.prevPointerPosition = pointerPosition.clone();
@@ -174,6 +177,7 @@ AFRAME.registerSystem('brush', {
     this.version = VERSION;
     this.clear();
     this.controllerName = null;
+    this.id = this.createStrokeId();
 
     var self = this;
     this.sceneEl.addEventListener('controllerconnected', function (evt) {
@@ -215,6 +219,10 @@ AFRAME.registerSystem('brush', {
     }
   },
   addNewStroke: function (brushName, color, size) {
+    var strokeId = this.createStrokeId();
+    return this.addStroke(strokeId, brushName, color, size);
+  },
+  addStroke: function (id, brushName, color, size) {
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -224,6 +232,7 @@ AFRAME.registerSystem('brush', {
 
     Brush.used = true;
     var stroke = new Brush();
+    stroke.id = id;
     stroke.brush = Brush;
     stroke.init(color, size);
     this.strokes.push(stroke);
@@ -235,6 +244,19 @@ AFRAME.registerSystem('brush', {
     stroke.entity = entity;
 
     return stroke;
+  },
+  createStrokeId: function () {
+    return Math.random().toString(36).substring(2, 9);
+  },
+  addPointToStroke: function (strokeId, data) {
+    var stroke;
+    for (var i = 0; i < this.strokes.length; i++) {
+      if (this.strokes[i].id == strokeId) {
+        stroke = this.strokes[i];
+        break;
+      }
+    }
+    stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
   },
   getJSON: function () {
     // Strokes
@@ -321,6 +343,7 @@ AFRAME.registerSystem('brush', {
       var brush = strokeData.brush;
 
       var stroke = this.addNewStroke(
+        brush.id,
         brush.name,
         new THREE.Color().fromArray(brush.color),
         brush.size

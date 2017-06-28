@@ -1417,6 +1417,7 @@
 
 	      return {
 	        brush: {
+	          id: this.id,
 	          name: this.brushName,
 	          color: arrayToNumFixed(this.data.color.toArray(), 6),
 	          size: this.data.size.toNumFixed(6)
@@ -1475,12 +1476,14 @@
 	      }
 	      if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
 	        this.data.numPoints++;
-	        this.data.points.push({
+
+	        var point = {
 	          'position': position.clone(),
 	          'orientation': orientation.clone(),
 	          'pressure': pressure,
 	          'timestamp': timestamp
-	        });
+	        };
+	        this.data.points.push(point);
 
 	        this.data.prevPosition = position.clone();
 	        this.data.prevPointerPosition = pointerPosition.clone();
@@ -1545,6 +1548,7 @@
 	    this.version = VERSION;
 	    this.clear();
 	    this.controllerName = null;
+	    this.id = this.createStrokeId();
 
 	    var self = this;
 	    this.sceneEl.addEventListener('controllerconnected', function (evt) {
@@ -1586,6 +1590,10 @@
 	    }
 	  },
 	  addNewStroke: function (brushName, color, size) {
+	    var strokeId = this.createStrokeId();
+	    return this.addStroke(strokeId, brushName, color, size);
+	  },
+	  addStroke: function (id, brushName, color, size) {
 	    var Brush = this.getBrushByName(brushName);
 	    if (!Brush) {
 	      var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -1595,6 +1603,7 @@
 
 	    Brush.used = true;
 	    var stroke = new Brush();
+	    stroke.id = id;
 	    stroke.brush = Brush;
 	    stroke.init(color, size);
 	    this.strokes.push(stroke);
@@ -1606,6 +1615,19 @@
 	    stroke.entity = entity;
 
 	    return stroke;
+	  },
+	  createStrokeId: function () {
+	    return Math.random().toString(36).substring(2, 9);
+	  },
+	  addPointToStroke: function (strokeId, data) {
+	    var stroke;
+	    for (var i = 0; i < this.strokes.length; i++) {
+	      if (this.strokes[i].id == strokeId) {
+	        stroke = this.strokes[i];
+	        break;
+	      }
+	    }
+	    stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
 	  },
 	  getJSON: function () {
 	    // Strokes
@@ -1692,6 +1714,7 @@
 	      var brush = strokeData.brush;
 
 	      var stroke = this.addNewStroke(
+	        brush.id,
 	        brush.name,
 	        new THREE.Color().fromArray(brush.color),
 	        brush.size
@@ -2084,6 +2107,14 @@
 	        this.obj.matrixWorld.decompose(position, rotation, scale);
 	        var pointerPosition = this.system.getPointerPosition(position, rotation);
 	        this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
+	        this.el.emit('stroke-point-added', {
+	          strokeId: this.currentStroke.id,
+	          position: position,
+	          orientation: rotation,
+	          pointerPosition: pointerPosition,
+	          pressure: this.sizeModifier,
+	          timestamp: time
+	        });
 	      }
 	      this.lastActive = this.active;
 	    };
@@ -4639,15 +4670,46 @@
 	    var brushSystem = this.el.systems.brush;
 	    this.previousStrokes = null;
 
-	    this.el.addEventListener('stroke-added', function (evt) {
-	      console.log(evt.detail.stroke.getJSON(brushSystem));
-	      NAF.connection.broadcastDataGuaranteed('stroke', evt.detail.stroke.getJSON(brushSystem));
+	    var toVector3 = function (obj) {
+	      return new THREE.Vector3(obj.x, obj.y, obj.z)
+	    }
+
+	    var toQuat = function (obj) {
+	      return new THREE.Vector4(obj._x, obj._y, obj._z, obj._w);
+	    }
+
+	    /* Sending */
+
+	    this.el.addEventListener('stroke-started', function (evt) {
+	      var json = evt.detail.stroke.getJSON(brushSystem);
+	      // console.log('sending new stroke', json);
+	      NAF.connection.broadcastDataGuaranteed('stroke-started', json);
 	    });
 
-	    NAF.connection.subscribeToDataChannel('stroke', function (senderId, type, stroke, targetId) {
-	      brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: Object.keys(AFRAME.BRUSHES)});
+	    this.el.addEventListener('stroke-point-added', function(evt) {
+	      // console.log('sending point', evt.detail);
+	      delete evt.detail.target;
+	      NAF.connection.broadcastDataGuaranteed('stroke-point-added', evt.detail);
 	    });
-	  },
+
+	    /* Receiving */
+
+	    NAF.connection.subscribeToDataChannel('stroke-started', function (senderId, type, data, targetId) {
+	      // brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: brushSystem.brushes});
+	      var brush = data.brush;
+	      var color = new THREE.Color().fromArray(brush.color);
+	      brushSystem.addStroke(brush.id, brush.name, color, brush.size)
+	    });
+
+	    NAF.connection.subscribeToDataChannel('stroke-point-added', function (senderId, type, data, targetId) {
+	      // console.log('receiving point', data);
+	      data.position = toVector3(data.position);
+	      data.pointerPosition = toVector3(data.pointerPosition);
+	      data.orientation = toQuat(data.orientation);
+
+	      brushSystem.addPointToStroke(data.strokeId, data);
+	    });
+	  }
 	});
 
 
