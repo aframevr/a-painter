@@ -46,7 +46,7 @@ AFRAME.registerBrush = function (name, definition, options) {
 
       return {
         brush: {
-          index: system.getUsedBrushes().indexOf(this.brushName),
+          name: this.brushName,
           color: arrayToNumFixed(this.data.color.toArray(), 6),
           size: this.data.size.toNumFixed(6)
         },
@@ -319,10 +319,9 @@ AFRAME.registerSystem('brush', {
     for (var i = 0; i < data.strokes.length; i++) {
       var strokeData = data.strokes[i];
       var brush = strokeData.brush;
-      console.log(strokeData);
 
       var stroke = this.addNewStroke(
-        data.brushes[brush.index],
+        brush.name,
         new THREE.Color().fromArray(brush.color),
         brush.size
       );
