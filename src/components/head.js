@@ -1,13 +1,6 @@
-AFRAME.registerComponent('body', {
-  init: function () {
-    this.head = this.el.parentNode;
+AFRAME.registerComponent('head', {
+  init: function() {
     this.scene = document.querySelector('a-scene');
-  },
-
-  tick: function (time, delta) {
-    if (!this.head) return;
-    var rot = this.head.getAttribute('rotation');
-    this.el.setAttribute('rotation', {x: -rot.x * 0.3, y: 0, z: -rot.z * 0.3});
   },
 
   play: function() {
@@ -27,10 +20,20 @@ AFRAME.registerComponent('body', {
   },
 
   enteredVR: function () {
-    this.el.setAttribute('visible', true);
+    this.showAvatar('vr');
   },
 
   exitedVR: function () {
-    this.el.setAttribute('visible', false);
+    this.showAvatar('non-vr');
+  },
+
+  showAvatar: function (avatar) {
+    var vrHead = this.el.querySelector('.head.vr');
+    var nonVrhead = this.el.querySelector('.head.non-vr');
+    var vr = avatar != 'vr';
+    console.error('showing vr avatar?', vr);
+
+    vrHead.setAttribute('visible', vr);
+    nonVrhead.setAttribute('visible', !vr);
   }
 });

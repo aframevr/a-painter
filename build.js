@@ -67,15 +67,17 @@
 	__webpack_require__(19);
 	__webpack_require__(20);
 	__webpack_require__(21);
-
 	__webpack_require__(22);
 	__webpack_require__(23);
+
 	__webpack_require__(24);
 	__webpack_require__(25);
 	__webpack_require__(26);
 	__webpack_require__(27);
-
 	__webpack_require__(28);
+	__webpack_require__(29);
+
+	__webpack_require__(30);
 
 
 /***/ }),
@@ -3771,20 +3773,132 @@
 /* 21 */
 /***/ (function(module, exports) {
 
-	AFRAME.registerComponent('body', {
-	  init: function () {
-	    // this.head = this.el.previousElementSibling;
-	    this.head = this.el.parentNode;
+	AFRAME.registerComponent('head', {
+	  init: function() {
+	    this.scene = document.querySelector('a-scene');
 	  },
-	  tick: function (time, delta) {
-	    if (!this.head) return;
-	    var rot = this.head.getAttribute('rotation');
-	    // this.el.setAttribute('rotation', {x: rot.x * 0.3, y: rot.y, z: rot.z * 0.3});
+
+	  play: function() {
+	    this.addEventListeners();
+	  },
+
+	  pause: function() {
+	    this.removeEventListeners();
+	  },
+
+	  addEventListeners: function() {
+	    this.scene.addEventListener('enter-vr', this.enteredVR);
+	  },
+
+	  removeEventListeners: function() {
+	    this.scene.addEventListener('exit-vr', this.exitedVR);
+	  },
+
+	  enteredVR: function () {
+	    this.showAvatar('vr');
+	  },
+
+	  exitedVR: function () {
+	    this.showAvatar('non-vr');
+	  },
+
+	  showAvatar: function (avatar) {
+	    var vrHead = this.el.querySelector('.head.vr');
+	    var nonVrhead = this.el.querySelector('.head.non-vr');
+	    var vr = avatar != 'vr';
+	    console.error('showing vr avatar?', vr);
+
+	    vrHead.setAttribute('visible', vr);
+	    nonVrhead.setAttribute('visible', !vr);
 	  }
 	});
 
 /***/ }),
 /* 22 */
+/***/ (function(module, exports) {
+
+	AFRAME.registerComponent('body', {
+	  init: function () {
+	    this.head = this.el.parentNode;
+	    this.scene = document.querySelector('a-scene');
+	  },
+
+	  tick: function (time, delta) {
+	    if (!this.head) return;
+	    var rot = this.head.getAttribute('rotation');
+	    this.el.setAttribute('rotation', {x: -rot.x * 0.3, y: 0, z: -rot.z * 0.3});
+	  },
+
+	  play: function() {
+	    this.addEventListeners();
+	  },
+
+	  pause: function() {
+	    this.removeEventListeners();
+	  },
+
+	  addEventListeners: function() {
+	    this.scene.addEventListener('enter-vr', this.enteredVR);
+	  },
+
+	  removeEventListeners: function() {
+	    this.scene.addEventListener('exit-vr', this.exitedVR);
+	  },
+
+	  enteredVR: function () {
+	    this.el.setAttribute('visible', true);
+	  },
+
+	  exitedVR: function () {
+	    this.el.setAttribute('visible', false);
+	  }
+	});
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports) {
+
+	AFRAME.registerComponent('multiuser-mode', {
+	  init: function () {
+	    var params = this.getUrlParams();
+
+	    if (this.el.isMobile) {
+	      // Mobile controls.
+	      this.el.querySelector('[camera]').setAttribute('spawn-in-circle', {radius: 3});
+	      this.el.querySelector('[camera]').removeAttribute('look-controls');
+	      this.el.querySelector('[camera]').setAttribute('orbit-controls', '');
+	    }
+	    else {
+	      // Don't let replayer interfere with mobile when testing.
+	      this.el.setAttribute('avatar-replayer', '');
+	    }
+
+	    if (params.multiuser) {
+	      this.el.setAttribute('networked-scene', {
+	        room: params.multiuser
+	      });
+	    }
+	  },
+
+	  getUrlParams: function () {
+	    var match;
+	    var pl = /\+/g;  // Regex for replacing addition symbol with a space
+	    var search = /([^&=]+)=?([^&]*)/g;
+	    var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
+	    var query = window.location.search.substring(1);
+	    var urlParams = {};
+
+	    match = search.exec(query);
+	    while (match) {
+	      urlParams[decode(match[1])] = decode(match[2]);
+	      match = search.exec(query);
+	    }
+	    return urlParams;
+	  }
+	});
+
+/***/ }),
+/* 24 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4087,7 +4201,7 @@
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4458,7 +4572,7 @@
 
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4516,7 +4630,7 @@
 
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4550,7 +4664,7 @@
 
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4661,7 +4775,7 @@
 
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4696,7 +4810,7 @@
 
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports) {
 
 	AFRAME.registerSystem('sync', {
