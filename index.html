@@ -12,9 +12,9 @@
     </script>
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
-    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
     <script src="vendor/easyrtc.js"></script>
+    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script>delete AFRAME.components.line;</script>
     <script src="build.js"></script>
     <script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
@@ -66,26 +66,26 @@
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
         <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
 
-        <script id="head-template" type="text/html">
-          <a-entity class="head non-vr" gltf-model-next="#avatar1-head-mobile-obj" rotation="0 180 0"</a-entity>
+        <div id="head-template" type="text/html">
+          <a-entity class="head non-vr" gltf-model-next="#avatar1-head-mobile-obj" rotation="0 180 0"></a-entity>
           <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" rotation="0 0 0" visible="false"></a-entity>
-        </script>
+        </div>
 
-        <script id="body-template" type="text/html">
+        <div id="body-template" type="text/html">
           <a-entity class="body vr" gltf-model-next="#avatar1-body-obj" rotation="0 180 0"></a-entity>
-        </script>
+        </div>
 
-        <script id="left-hand-template" type="text/html">
+        <div id="left-hand-template" type="text/html">
           <a-entity class="hands">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
-        </script>
+        </div>
 
-        <script id="right-hand-template" type="text/html">
+        <div id="right-hand-template" type="text/html">
           <a-entity class="hands">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
-        </script>
+        </div>
 
         <img src="assets/avatars/avatar-diffuse.png">
         <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
