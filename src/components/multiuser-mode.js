@@ -16,7 +16,8 @@ AFRAME.registerComponent('multiuser-mode', {
     if (params.multiuser) {
       this.el.setAttribute('networked-scene', {
         app: 'a-painter',
-        room: params.multiuser
+        room: params.multiuser,
+        signalURL: 'https://haydenlee.io/'
       });
     }
   },
