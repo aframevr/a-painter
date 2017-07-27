@@ -64,15 +64,13 @@
 	__webpack_require__(16);
 	__webpack_require__(17);
 	__webpack_require__(18);
+
 	__webpack_require__(19);
 	__webpack_require__(20);
-
 	__webpack_require__(21);
 	__webpack_require__(22);
 	__webpack_require__(23);
 	__webpack_require__(24);
-	__webpack_require__(25);
-	__webpack_require__(26);
 
 
 /***/ },
@@ -2171,162 +2169,6 @@
 /* 15 */
 /***/ function(module, exports) {
 
-	/* globals AFRAME THREE */
-	AFRAME.registerComponent('line', {
-	  schema: {
-	    start: {type: 'vec3', default: '0 0 0'},
-	    end: {type: 'vec3', default: '0 0 0'}
-	  },
-
-	  init: function () {
-	    var material = new THREE.LineBasicMaterial({color: 0xffffff});
-	    var geometry = this.geometry = new THREE.Geometry();
-	    this.line = new THREE.Line(geometry, material);
-	    this.el.setObject3D('line', this.line);
-	  },
-
-	  update: function () {
-	    var vertices = [];
-	    var start = this.data.start;
-	    var end = this.data.end;
-	    var halfX = (start.x + end.x) / 2;
-	    var halfY = (start.y + end.y) / 2;
-	    var halfZ = (start.z + end.z) / 2;
-	    var half = new THREE.Vector3(halfX, halfY, halfZ);
-	    vertices.push(start);
-	    vertices.push(half);
-	    vertices.push(end);
-	    this.geometry.vertices = vertices;
-	    this.geometry.verticesNeedUpdate = true;
-	  }
-
-	});
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	AFRAME.registerComponent('look-controls-alt', {
-	  dependencies: ['position', 'rotation'],
-
-	  schema: {
-	    enabled: {default: true},
-	    hmdEnabled: {default: true},
-	    standing: {default: true}
-	  },
-
-	  init: function () {
-	    var sceneEl = this.el.sceneEl;
-	    this.previousHMDPosition = new THREE.Vector3();
-	    this.setupHMDControls();
-	  },
-
-	  update: function (oldData) {
-	    var data = this.data;
-	    var hmdEnabled = data.hmdEnabled;
-	    if (!data.enabled || !hmdEnabled || !this.el.sceneEl.is('vr-mode')) { return; }
-	    this.controls.standing = data.standing;
-	    this.controls.update();
-	    this.updateOrientation();
-	    this.updatePosition();
-	  },
-
-	  play: function () {
-	    this.addEventListeners();
-	  },
-
-	  tick: function (t) {
-	    this.update();
-	  },
-
-	  remove: function () {
-	    this.pause();
-	  },
-
-	  setupHMDControls: function () {
-	    this.dolly = new THREE.Object3D();
-	    this.euler = new THREE.Euler();
-	    this.controls = new THREE.VRControls(this.dolly);
-	    this.controls.userHeight = 0.0;
-	  },
-
-	  addEventListeners: function () {
-	    var sceneEl = this.el.sceneEl;
-	    var canvasEl = sceneEl.canvas;
-
-	    // listen for canvas to load.
-	    if (!canvasEl) {
-	      sceneEl.addEventListener('render-target-loaded', this.addEventListeners.bind(this));
-	      return;
-	    }
-	  },
-
-	  updateOrientation: (function () {
-	    var hmdEuler = new THREE.Euler();
-	    return function () {
-	      var hmdQuaternion = this.calculateHMDQuaternion();
-	      var radToDeg = THREE.Math.radToDeg;
-	      var rotation;
-	      hmdEuler.setFromQuaternion(hmdQuaternion, 'YXZ');
-	      if (!this.el.sceneEl.is('vr-mode')) { return; }
-	      rotation = {
-	        x: radToDeg(hmdEuler.x),
-	        y: radToDeg(hmdEuler.y),
-	        z: radToDeg(hmdEuler.z)
-	      };
-	      this.el.setAttribute('rotation', rotation);
-	    };
-	  })(),
-
-	  calculateHMDQuaternion: (function () {
-	    var hmdQuaternion = new THREE.Quaternion();
-	    return function () {
-	      hmdQuaternion.copy(this.dolly.quaternion);
-	      return hmdQuaternion;
-	    };
-	  })(),
-
-	  updatePosition: (function () {
-	    var deltaHMDPosition = new THREE.Vector3();
-	    return function () {
-	      var el = this.el;
-	      var currentPosition = el.getAttribute('position');
-	      var currentHMDPosition;
-	      var previousHMDPosition = this.previousHMDPosition;
-	      var sceneEl = this.el.sceneEl;
-	      currentHMDPosition = this.calculateHMDPosition();
-	      deltaHMDPosition.copy(currentHMDPosition).sub(previousHMDPosition);
-	      if (!sceneEl.is('vr-mode') || this.isNullVector(deltaHMDPosition)) { return; }
-	      previousHMDPosition.copy(currentHMDPosition);
-	      // Do nothing if we have not moved.
-	      if (!sceneEl.is('vr-mode')) { return; }
-	      el.setAttribute('position', {
-	        x: currentPosition.x + deltaHMDPosition.x,
-	        y: currentPosition.y + deltaHMDPosition.y,
-	        z: currentPosition.z + deltaHMDPosition.z
-	      });
-	    };
-	  })(),
-
-	  calculateHMDPosition: function () {
-	    var dolly = this.dolly;
-	    var position = new THREE.Vector3();
-	    dolly.updateMatrix();
-	    position.setFromMatrixPosition(dolly.matrix);
-	    return position;
-	  },
-
-	  isNullVector: function (vector) {
-	    return vector.x === 0 && vector.y === 0 && vector.z === 0;
-	  }
-	});
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
-
 	AFRAME.registerComponent('orbit-controls', {
 	  dependencies: ['camera'],
 	  schema: {
@@ -2401,7 +2243,7 @@
 
 
 /***/ },
-/* 18 */
+/* 16 */
 /***/ function(module, exports) {
 
 	AFRAME.registerSystem('paint-controls', {
@@ -2617,7 +2459,7 @@
 
 
 /***/ },
-/* 19 */
+/* 17 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -3550,7 +3392,7 @@
 
 
 /***/ },
-/* 20 */
+/* 18 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -3715,7 +3557,7 @@
 
 
 /***/ },
-/* 21 */
+/* 19 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4018,7 +3860,7 @@
 
 
 /***/ },
-/* 22 */
+/* 20 */
 /***/ function(module, exports) {
 
 	/* global AFRAME THREE */
@@ -4389,7 +4231,7 @@
 
 
 /***/ },
-/* 23 */
+/* 21 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4447,7 +4289,7 @@
 
 
 /***/ },
-/* 24 */
+/* 22 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4481,7 +4323,7 @@
 
 
 /***/ },
-/* 25 */
+/* 23 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
@@ -4592,7 +4434,7 @@
 
 
 /***/ },
-/* 26 */
+/* 24 */
 /***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
