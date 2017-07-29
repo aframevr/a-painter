@@ -19,11 +19,11 @@ AFRAME.registerComponent('body', {
   },
 
   addEventListeners: function() {
-    this.scene.addEventListener('enter-vr', this.enteredVR);
+    this.scene.addEventListener('enter-vr', this.enteredVR.bind(this));
   },
 
   removeEventListeners: function() {
-    this.scene.addEventListener('exit-vr', this.exitedVR);
+    this.scene.addEventListener('exit-vr', this.exitedVR.bind(this));
   },
 
   enteredVR: function () {
