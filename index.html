@@ -67,8 +67,8 @@
         <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
 
         <div id="head-template" type="text/html">
-          <a-entity class="head non-vr" gltf-model-next="#avatar1-head-mobile-obj" rotation="0 180 0"></a-entity>
-          <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" rotation="0 0 0" visible="false"></a-entity>
+          <a-entity class="head non-vr" obj-model="obj: #camera-obj; mtl: #camera-mtl" scale="0.3 0.3 0.3"></a-entity>
+          <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" visible="false"></a-entity>
         </div>
 
         <div id="body-template" type="text/html">
@@ -93,6 +93,9 @@
         <a-asset-item id="avatar1-body-obj" src="assets/avatars/apainter-body.gltf"></a-asset-item>
         <a-asset-item id="avatar1-hand-obj" src="assets/avatars/apainter-hand-2.gltf"></a-asset-item>
         <!-- <a-asset-item id="avatar1-hand-right-obj" src="assets/avatars/apainter-hand.gltf"></a-asset-item> -->
+
+        <a-asset-item id="camera-obj" src="./assets/avatars/google-blocks-camera/model.obj"></a-asset-item>
+        <a-asset-item id="camera-mtl" src="./assets/avatars/google-blocks-camera/materials.mtl"></a-asset-item>
 
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
