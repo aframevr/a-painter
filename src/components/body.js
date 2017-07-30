@@ -2,6 +2,10 @@ AFRAME.registerComponent('body', {
   init: function () {
     this.head = this.el.parentNode;
     this.scene = document.querySelector('a-scene');
+
+    if (this.isPlayingAvatarRecording()) {
+      this.el.setAttribute('visible', true);
+    }
   },
 
   tick: function (time, delta) {
@@ -19,11 +23,15 @@ AFRAME.registerComponent('body', {
   },
 
   addEventListeners: function() {
-    this.scene.addEventListener('enter-vr', this.enteredVR.bind(this));
+    if (!this.isPlayingAvatarRecording()) {
+      this.scene.addEventListener('enter-vr', this.enteredVR.bind(this));
+    }
   },
 
   removeEventListeners: function() {
-    this.scene.addEventListener('exit-vr', this.exitedVR.bind(this));
+    if (!this.isPlayingAvatarRecording()) {
+      this.scene.addEventListener('exit-vr', this.exitedVR.bind(this));
+    }
   },
 
   enteredVR: function () {
@@ -32,5 +40,28 @@ AFRAME.registerComponent('body', {
 
   exitedVR: function () {
     this.el.setAttribute('visible', false);
+  },
+
+  isPlayingAvatarRecording: function() {
+    if (!this.hasOwnProperty('urlParams')) {
+      this.urlParams = this.getUrlParams();
+    }
+    return this.urlParams.hasOwnProperty('avatar-recording');
+  },
+
+  getUrlParams: function () {
+    var match;
+    var pl = /\+/g;  // Regex for replacing addition symbol with a space
+    var search = /([^&=]+)=?([^&]*)/g;
+    var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
+    var query = window.location.search.substring(1);
+    var urlParams = {};
+
+    match = search.exec(query);
+    while (match) {
+      urlParams[decode(match[1])] = decode(match[2]);
+      match = search.exec(query);
+    }
+    return urlParams;
   }
 });
