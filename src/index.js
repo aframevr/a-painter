@@ -20,7 +20,7 @@ require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
-require('./components/head.js');
+require('./components/local-player.js');
 require('./components/body.js');
 require('./components/multiuser-mode.js');
 

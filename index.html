@@ -17,12 +17,12 @@
     <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
     <script>delete AFRAME.components.line;</script>
     <script src="build.js"></script>
+    <script src="https://unpkg.com/networked-aframe@^0.2.3/dist/networked-aframe.js"></script>
     <script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
     <script src="vendor/aframe-extras.loaders.js"></script>
     <script src="vendor/aframe-teleport-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <script src="vendor/spawn-in-circle.js"></script>
-    <script src="https://unpkg.com/networked-aframe@^0.2.2/dist/networked-aframe.js"></script>
     <script>
       var headSchema = {
         template: '#head-template',
@@ -46,7 +46,7 @@
         components: [
           'position',
           'rotation',
-          'visible',
+          'visible'
         ]
       };
       NAF.schemas.add(bodySchema);
@@ -98,7 +98,7 @@
         </div>
 
         <div id="body-template" type="text/html">
-          <a-entity class="body vr" gltf-model-next="#avatar1-body-obj" rotation="0 180 0"></a-entity>
+          <a-entity id="body-debug" class="body vr" gltf-model-next="#avatar1-body-obj" rotation="0 180 0"></a-entity>
         </div>
 
         <div id="left-hand-template" type="text/html">
@@ -111,6 +111,10 @@
           <a-entity class="hands" visible="false">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
+        </div>
+
+        <div id="empty-template" type="text/html">
+          <a-entity></a-entity>
         </div>
 
         <img src="assets/avatars/avatar-diffuse.png">
@@ -136,99 +140,102 @@
                 material="shader: flat; src: #floor">
               </a-entity>
 
-      <a-entity id="left-hand"
-                class="local-hand"
-                brush
-                networked="template:#left-hand-template;showLocalTemplate:false;"
-                if-no-vr-headset="visible: false"
-                paint-controls="hand: left"
-                teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
-                ui>
-                  <a-entity class="vive-tooltips" visible="false">
-                    <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
-                              position="0.1 0.025 0.048"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Main menu; width: 0.07; height: 0.03; targetPosition: 0 -0.07 -0.062; lineHorizontalAlign: center; lineVerticalAlign: bottom; src: assets/images/tooltip.png"
-                              position="0 0.015 -0.05"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Press to paint\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0 -0.06 0.067; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                              position="-0.11 -0.055 0.04"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Undo; width: 0.06; height: 0.03; targetPosition: -0.003 0.046 0.106; src: assets/images/tooltip.png"
-                              position="0.1 -0.005 0.12"
-                              rotation="-90 0 0">
-                    </a-entity>
-                  </a-entity>
-                  <a-entity class="oculus-tooltips" visible="false">
-                    <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: -0.009 0.0 -0.002; rotation: -90 0 0; src: assets/images/tooltip.png"
-                            position="0.066 0.013 0.013">
-                    </a-entity>
-                    <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: 0.008 0 -0.001; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="0.059 0.015 -0.028">
-                    </a-entity>
-                    <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: -0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="-0.07 0.01 0.06">
-                    </a-entity>
-                    <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0.002 -0.023 -0.02; lineHorizontalAlign: right; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="-0.09 0.020 -0.067">
-                    </a-entity>
-                    <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: 0.005 -0.022 0.027; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="0.058 -0.01 0.055">
-                    </a-entity>
-                  </a-entity>
-                </a-entity>
-      <a-entity id="right-hand"
-                class="local-hand"
-                brush
-                networked="template:#right-hand-template;showLocalTemplate:false;"
-                if-no-vr-headset="visible: false"
-                paint-controls="hand: right"
-                teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
-                ui>
-                  <a-entity class="vive-tooltips" visible="false">
-                    <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
-                              position="0.1 0.025 0.048"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Main menu; width: 0.07; height: 0.03; targetPosition: 0 -0.07 -0.062; lineHorizontalAlign: center; lineVerticalAlign: bottom; src: assets/images/tooltip.png"
-                              position="0 0.015 -0.05"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Press to paint\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0 -0.06 0.067; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                              position="-0.11 -0.055 0.04"
-                              rotation="-90 0 0">
-                    </a-entity>
-                    <a-entity tooltip="text: Undo; width: 0.06; height: 0.03; targetPosition: -0.003 0.046 0.106; src: assets/images/tooltip.png"
-                              position="0.1 -0.005 0.12"
-                              rotation="-90 0 0">
-                    </a-entity>
-                  </a-entity>
-                  <a-entity class="oculus-tooltips" visible="false">
-                    <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: 0.009 0.0 -0.002; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                        position="-0.066 0.013 0.013">
-                    </a-entity>
-                    <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: -0.008 0 -0.001; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                        position="-0.059 0.015 -0.028">
-                    </a-entity>
-                    <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="0.07 0.01 0.06">
-                    </a-entity>
-                    <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: -0.002 -0.023 -0.02; lineHorizontalAlign: left; rotation: -90 0 0; src: assets/images/tooltip.png"
-                        position="0.09 0.020 -0.067">
-                    </a-entity>
-                    <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: -0.005 -0.022 0.027; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                        position="-0.058 -0.01 0.055">
-                    </a-entity>
-                  </a-entity>
-      </a-entity>
-      <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
+      <a-entity local-player networked="template:#empty-template">
+        
+        <a-entity id="acamera" camera="userHeight: 1.6" networked="template:#head-template;showLocalTemplate:false;" look-controls wasd-controls>
+          <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
+        </a-entity>
 
-      <a-entity id="acamera" camera="userHeight: 1.6" networked="template:#head-template;showLocalTemplate:false;" look-controls wasd-controls head>
-        <a-entity id="local-body" networked="template:#body-template;showLocalTemplate:false;" body visible="false"></a-entity>
+        <a-entity id="left-hand"
+                  brush
+                  networked="template:#left-hand-template;showLocalTemplate:false;"
+                  if-no-vr-headset="visible: false"
+                  paint-controls="hand: left"
+                  teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
+                  ui>
+                    <a-entity class="vive-tooltips" visible="false">
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
+                                position="0.1 0.025 0.048"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Main menu; width: 0.07; height: 0.03; targetPosition: 0 -0.07 -0.062; lineHorizontalAlign: center; lineVerticalAlign: bottom; src: assets/images/tooltip.png"
+                                position="0 0.015 -0.05"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Press to paint\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0 -0.06 0.067; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                                position="-0.11 -0.055 0.04"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Undo; width: 0.06; height: 0.03; targetPosition: -0.003 0.046 0.106; src: assets/images/tooltip.png"
+                                position="0.1 -0.005 0.12"
+                                rotation="-90 0 0">
+                      </a-entity>
+                    </a-entity>
+                    <a-entity class="oculus-tooltips" visible="false">
+                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: -0.009 0.0 -0.002; rotation: -90 0 0; src: assets/images/tooltip.png"
+                              position="0.066 0.013 0.013">
+                      </a-entity>
+                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: 0.008 0 -0.001; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.059 0.015 -0.028">
+                      </a-entity>
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: -0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="-0.07 0.01 0.06">
+                      </a-entity>
+                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0.002 -0.023 -0.02; lineHorizontalAlign: right; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="-0.09 0.020 -0.067">
+                      </a-entity>
+                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: 0.005 -0.022 0.027; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.058 -0.01 0.055">
+                      </a-entity>
+                    </a-entity>
+                  </a-entity>
+        <a-entity id="right-hand"
+                  brush
+                  networked="template:#right-hand-template;showLocalTemplate:false;"
+                  if-no-vr-headset="visible: false"
+                  paint-controls="hand: right"
+                  teleport-controls="button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
+                  ui>
+                    <a-entity class="vive-tooltips" visible="false">
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
+                                position="0.1 0.025 0.048"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Main menu; width: 0.07; height: 0.03; targetPosition: 0 -0.07 -0.062; lineHorizontalAlign: center; lineVerticalAlign: bottom; src: assets/images/tooltip.png"
+                                position="0 0.015 -0.05"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Press to paint\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0 -0.06 0.067; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                                position="-0.11 -0.055 0.04"
+                                rotation="-90 0 0">
+                      </a-entity>
+                      <a-entity tooltip="text: Undo; width: 0.06; height: 0.03; targetPosition: -0.003 0.046 0.106; src: assets/images/tooltip.png"
+                                position="0.1 -0.005 0.12"
+                                rotation="-90 0 0">
+                      </a-entity>
+                    </a-entity>
+                    <a-entity class="oculus-tooltips" visible="false">
+                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: 0.009 0.0 -0.002; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.066 0.013 0.013">
+                      </a-entity>
+                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: -0.008 0 -0.001; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.059 0.015 -0.028">
+                      </a-entity>
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.07 0.01 0.06">
+                      </a-entity>
+                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: -0.002 -0.023 -0.02; lineHorizontalAlign: left; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.09 0.020 -0.067">
+                      </a-entity>
+                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: -0.005 -0.022 0.027; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.058 -0.01 0.055">
+                      </a-entity>
+                    </a-entity>
+        </a-entity>
+
       </a-entity>
+
+      <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
 
     </a-scene>
     <a href="https://aframe.io/a-painter/"><div id="apainter-logo" class="hidden"></div><div id="apainter-author" style="display:none" class="hidden">authorname</div></a>

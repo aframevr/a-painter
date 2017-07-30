@@ -4,7 +4,6 @@ AFRAME.registerComponent('multiuser-mode', {
 
     if (this.el.isMobile) {
       // Mobile controls.
-      this.el.querySelector('[camera]').setAttribute('spawn-in-circle', {radius: 3});
       this.el.querySelector('[camera]').removeAttribute('look-controls');
       this.el.querySelector('[camera]').setAttribute('orbit-controls', '');
     }
@@ -13,8 +12,11 @@ AFRAME.registerComponent('multiuser-mode', {
       this.el.setAttribute('avatar-replayer', '');
     }
 
-    var webrtc = params.hasOwnProperty('webrtc');
+    if (params.hasOwnProperty('multiuser') && !params.hasOwnProperty('avatar-recording')) {
+      this.el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
+    }
 
+    var webrtc = params.hasOwnProperty('webrtc');
     if (params.multiuser) {
       this.el.setAttribute('networked-scene', {
         app: 'a-painter',

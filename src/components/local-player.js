@@ -1,13 +1,20 @@
-AFRAME.registerComponent('head', {
+AFRAME.registerComponent('local-player', {
+
   init: function() {
     this.scene = document.querySelector('a-scene');
 
+    var forceVr = false;
     if (this.isPlayingAvatarRecording()) {
-      var self = this;
-      setTimeout(function() {
-        self.showAvatar('vr');
-      }, 100);
+      var cameraEl = this.el.querySelector('[camera]');
+      cameraEl.removeAttribute('wasd-controls');
+      cameraEl.removeAttribute('look-controls');
+      forceVr = true;
     }
+
+    var self = this;
+    setTimeout(function() {
+      self.showAvatar(forceVr ? 'vr' : 'non-vr');
+    }, 100); // Wait for template to laod
   },
 
   play: function() {
@@ -41,12 +48,13 @@ AFRAME.registerComponent('head', {
   showAvatar: function (avatar) {
     var vrHead = this.el.querySelector('.head.vr');
     var nonVrhead = this.el.querySelector('.head.non-vr');
-    var hands = document.querySelectorAll('.local-hand .hands');
-    var vr = avatar == 'vr';
+    var body = this.el.querySelector('[body]');
+    var hands = this.el.querySelectorAll('.hands');
 
+    var vr = avatar == 'vr';
     vrHead.setAttribute('visible', vr);
     nonVrhead.setAttribute('visible', !vr);
-
+    body.setAttribute('visible', vr);
     for (var i = 0; i < hands.length; i++) {
       hands[i].setAttribute('visible', vr);
     }
@@ -57,6 +65,13 @@ AFRAME.registerComponent('head', {
       this.urlParams = this.getUrlParams();
     }
     return this.urlParams.hasOwnProperty('avatar-recording');
+  },
+
+  isMultiuser: function() {
+    if (!this.hasOwnProperty('urlParams')) {
+      this.urlParams = this.getUrlParams();
+    }
+    return this.urlParams.hasOwnProperty('multiuser');
   },
 
   getUrlParams: function () {
