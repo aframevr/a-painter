@@ -11,13 +11,9 @@
     .left { position: absolute; top: 0; left: 0; }
     .right { position: absolute; top: 0; right: 0; }
   </style>
-
-
-
 </head>
 <body>
 	<script>
-
 		function makeRandomString() {
 		  var text = "";
 		  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -30,7 +26,6 @@
 
 	  	var randomRoom = makeRandomString();
 	  	document.querySelector('body').innerHTML = '<iframe class="left" src="index.html?multiuser='+randomRoom+'&avatar-recording=recordings/kevin.json"></iframe><iframe class="right" src="index.html?multiuser='+randomRoom+'"></iframe>';
-
   	</script>
 </body>
 </html>
