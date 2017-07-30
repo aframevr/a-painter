@@ -13,11 +13,14 @@ AFRAME.registerComponent('multiuser-mode', {
       this.el.setAttribute('avatar-replayer', '');
     }
 
+    var webrtc = params.hasOwnProperty('webrtc');
+
     if (params.multiuser) {
       this.el.setAttribute('networked-scene', {
         app: 'a-painter',
         room: params.multiuser,
-        signalURL: 'https://haydenlee.io/'
+        signalURL: 'https://haydenlee.io/',
+        webrtc: webrtc
       });
     }
   },
