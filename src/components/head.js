@@ -41,11 +41,15 @@ AFRAME.registerComponent('head', {
   showAvatar: function (avatar) {
     var vrHead = this.el.querySelector('.head.vr');
     var nonVrhead = this.el.querySelector('.head.non-vr');
+    var hands = document.querySelectorAll('.local-hand .hands');
     var vr = avatar == 'vr';
-    console.log('showing vr avatar?', vr);
 
     vrHead.setAttribute('visible', vr);
     nonVrhead.setAttribute('visible', !vr);
+
+    for (var i = 0; i < hands.length; i++) {
+      hands[i].setAttribute('visible', vr);
+    }
   },
 
   isPlayingAvatarRecording: function() {

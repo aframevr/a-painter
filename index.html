@@ -50,6 +50,32 @@
         ]
       };
       NAF.schemas.add(bodySchema);
+
+      var leftLandSchema = {
+        template: '#left-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      };
+      NAF.schemas.add(leftLandSchema);
+
+      var rightHandSchema = {
+        template: '#right-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      };
+      NAF.schemas.add(rightHandSchema);
     </script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
@@ -76,13 +102,13 @@
         </div>
 
         <div id="left-hand-template" type="text/html">
-          <a-entity class="hands">
+          <a-entity class="hands" visible="false">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
         </div>
 
         <div id="right-hand-template" type="text/html">
-          <a-entity class="hands">
+          <a-entity class="hands" visible="false">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
         </div>
@@ -109,7 +135,9 @@
                 geometry="primitive: box; width: 12; height: 0.01; depth: 12"
                 material="shader: flat; src: #floor">
               </a-entity>
+
       <a-entity id="left-hand"
+                class="local-hand"
                 brush
                 networked="template:#left-hand-template;showLocalTemplate:false;"
                 if-no-vr-headset="visible: false"
@@ -153,6 +181,7 @@
                   </a-entity>
                 </a-entity>
       <a-entity id="right-hand"
+                class="local-hand"
                 brush
                 networked="template:#right-hand-template;showLocalTemplate:false;"
                 if-no-vr-headset="visible: false"
