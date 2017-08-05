@@ -2,6 +2,10 @@ AFRAME.registerComponent('multiuser-mode', {
   init: function () {
     var params = this.getUrlParams();
 
+    if (params.room === "") {
+      window.alert('Please add a room name in the URL, eg. ?room=myroom');
+    }
+
     if (this.el.isMobile) {
       // Mobile controls.
       this.el.querySelector('[camera]').removeAttribute('look-controls');
