@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 	window.saveAs = __webpack_require__(1).saveAs;
 
@@ -64,48 +64,41 @@
 	__webpack_require__(16);
 	__webpack_require__(17);
 	__webpack_require__(18);
+
 	__webpack_require__(19);
 	__webpack_require__(20);
 	__webpack_require__(21);
 	__webpack_require__(22);
 	__webpack_require__(23);
-
 	__webpack_require__(24);
-	__webpack_require__(25);
-	__webpack_require__(26);
-	__webpack_require__(27);
-	__webpack_require__(28);
-	__webpack_require__(29);
-
-	__webpack_require__(30);
 
 
-/***/ }),
+/***/ },
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
 	var saveAs=saveAs||function(e){"use strict";if(typeof e==="undefined"||typeof navigator!=="undefined"&&/MSIE [1-9]\./.test(navigator.userAgent)){return}var t=e.document,n=function(){return e.URL||e.webkitURL||e},r=t.createElementNS("http://www.w3.org/1999/xhtml","a"),o="download"in r,i=function(e){var t=new MouseEvent("click");e.dispatchEvent(t)},a=/constructor/i.test(e.HTMLElement),f=/CriOS\/[\d]+/.test(navigator.userAgent),u=function(t){(e.setImmediate||e.setTimeout)(function(){throw t},0)},d="application/octet-stream",s=1e3*40,c=function(e){var t=function(){if(typeof e==="string"){n().revokeObjectURL(e)}else{e.remove()}};setTimeout(t,s)},l=function(e,t,n){t=[].concat(t);var r=t.length;while(r--){var o=e["on"+t[r]];if(typeof o==="function"){try{o.call(e,n||e)}catch(i){u(i)}}}},p=function(e){if(/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(e.type)){return new Blob([String.fromCharCode(65279),e],{type:e.type})}return e},v=function(t,u,s){if(!s){t=p(t)}var v=this,w=t.type,m=w===d,y,h=function(){l(v,"writestart progress write writeend".split(" "))},S=function(){if((f||m&&a)&&e.FileReader){var r=new FileReader;r.onloadend=function(){var t=f?r.result:r.result.replace(/^data:[^;]*;/,"data:attachment/file;");var n=e.open(t,"_blank");if(!n)e.location.href=t;t=undefined;v.readyState=v.DONE;h()};r.readAsDataURL(t);v.readyState=v.INIT;return}if(!y){y=n().createObjectURL(t)}if(m){e.location.href=y}else{var o=e.open(y,"_blank");if(!o){e.location.href=y}}v.readyState=v.DONE;h();c(y)};v.readyState=v.INIT;if(o){y=n().createObjectURL(t);setTimeout(function(){r.href=y;r.download=u;i(r);h();c(y);v.readyState=v.DONE});return}S()},w=v.prototype,m=function(e,t,n){return new v(e,t||e.name||"download",n)};if(typeof navigator!=="undefined"&&navigator.msSaveOrOpenBlob){return function(e,t,n){t=t||e.name||"download";if(!n){e=p(e)}return navigator.msSaveOrOpenBlob(e,t)}}w.abort=function(){};w.readyState=w.INIT=0;w.WRITING=1;w.DONE=2;w.error=w.onwritestart=w.onprogress=w.onwrite=w.onabort=w.onerror=w.onwriteend=null;return m}(typeof self!=="undefined"&&self||typeof window!=="undefined"&&window||this.content);if(typeof module!=="undefined"&&module.exports){module.exports.saveAs=saveAs}else if("function"!=="undefined"&&__webpack_require__(2)!==null&&__webpack_require__(3)!==null){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function(){return saveAs}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}
 
 
-/***/ }),
+/***/ },
 /* 2 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
-/***/ }),
+/***/ },
 /* 3 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
 
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
-/***/ }),
+/***/ },
 /* 4 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals AFRAME Image FileReader */
 	window.addEventListener('load', function (event) {
@@ -204,9 +197,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 5 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals THREE */
 	window.BinaryManager = function (buffer) {
@@ -307,9 +300,9 @@
 	};
 
 
-/***/ }),
+/***/ },
 /* 6 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/**
 	 * @author qiao / https://github.com/qiao
@@ -1325,18 +1318,25 @@
 	} );
 
 
-/***/ }),
+/***/ },
 /* 7 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	Number.prototype.toNumFixed = function (num) {
 	  return parseFloat(this.toFixed(num));
 	}
 
+	Array.prototype.toNumFixed = function (num) {
+	  for (var i = 0; i < this.length; i++) {
+	    this[i] = this[i].toNumFixed(num);
+	  }
+	  return this;
+	}
 
-/***/ }),
+
+/***/ },
 /* 8 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* global Clipboard */
 	window.addEventListener('load', function (event) {
@@ -1368,9 +1368,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 9 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE BinaryManager */
 	var VERSION = 1;
@@ -1411,8 +1411,8 @@
 	      for (var i = 0; i < this.data.points.length; i++) {
 	        var point = this.data.points[i];
 	        points.push({
-	          'orientation': arrayToNumFixed(point.orientation.toArray(), 6),
-	          'position': arrayToNumFixed(point.position.toArray(), 6),
+	          'orientation': point.orientation.toArray().toNumFixed(6),
+	          'position': point.position.toArray().toNumFixed(6),
 	          'pressure': point.pressure.toNumFixed(6),
 	          'timestamp': point.timestamp
 	        });
@@ -1420,9 +1420,8 @@
 
 	      return {
 	        brush: {
-	          id: this.id,
-	          name: this.brushName,
-	          color: arrayToNumFixed(this.data.color.toArray(), 6),
+	          index: system.getUsedBrushes().indexOf(this.brushName),
+	          color: this.data.color.toArray().toNumFixed(6),
 	          size: this.data.size.toNumFixed(6)
 	        },
 	        points: points
@@ -1479,26 +1478,17 @@
 	      }
 	      if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
 	        this.data.numPoints++;
-
-	        var point = {
+	        this.data.points.push({
 	          'position': position.clone(),
 	          'orientation': orientation.clone(),
 	          'pressure': pressure,
 	          'timestamp': timestamp
-	        };
-	        this.data.points.push(point);
+	        });
 
 	        this.data.prevPosition = position.clone();
 	        this.data.prevPointerPosition = pointerPosition.clone();
 	      }
 	    };
-	  }
-
-	  function arrayToNumFixed (array, num) {
-	    for (var i = 0; i < array.length; i++) {
-	      array[i] = array[i].toNumFixed(num);
-	    }
-	    return array;
 	  }
 
 	  var NewBrush = function () {};
@@ -1551,7 +1541,6 @@
 	    this.version = VERSION;
 	    this.clear();
 	    this.controllerName = null;
-	    this.id = this.createStrokeId();
 
 	    var self = this;
 	    this.sceneEl.addEventListener('controllerconnected', function (evt) {
@@ -1593,10 +1582,6 @@
 	    }
 	  },
 	  addNewStroke: function (brushName, color, size) {
-	    var strokeId = this.createStrokeId();
-	    return this.addStroke(strokeId, brushName, color, size);
-	  },
-	  addStroke: function (id, brushName, color, size) {
 	    var Brush = this.getBrushByName(brushName);
 	    if (!Brush) {
 	      var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -1606,7 +1591,6 @@
 
 	    Brush.used = true;
 	    var stroke = new Brush();
-	    stroke.id = id;
 	    stroke.brush = Brush;
 	    stroke.init(color, size);
 	    this.strokes.push(stroke);
@@ -1618,19 +1602,6 @@
 	    stroke.entity = entity;
 
 	    return stroke;
-	  },
-	  createStrokeId: function () {
-	    return Math.random().toString(36).substring(2, 9);
-	  },
-	  addPointToStroke: function (strokeId, data) {
-	    var stroke;
-	    for (var i = 0; i < this.strokes.length; i++) {
-	      if (this.strokes[i].id == strokeId) {
-	        stroke = this.strokes[i];
-	        break;
-	      }
-	    }
-	    stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
 	  },
 	  getJSON: function () {
 	    // Strokes
@@ -1717,8 +1688,7 @@
 	      var brush = strokeData.brush;
 
 	      var stroke = this.addNewStroke(
-	        brush.id,
-	        brush.name,
+	        data.brushes[brush.index],
 	        new THREE.Color().fromArray(brush.color),
 	        brush.size
 	      );
@@ -1796,9 +1766,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 10 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals AFRAME */
 	AFRAME.registerSystem('ui', {
@@ -1830,9 +1800,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/* global AFRAME Blob uploadcare */
 
@@ -2013,9 +1983,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 12 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerComponent('brush', {
@@ -2082,7 +2052,6 @@
 	        } else {
 	          if (self.active) {
 	            self.previousEntity = self.currentEntity;
-	            self.el.emit('stroke-added', {stroke: self.currentStroke});
 	            self.currentStroke = null;
 	          }
 	          self.active = false;
@@ -2110,16 +2079,7 @@
 	        this.obj.matrixWorld.decompose(position, rotation, scale);
 	        var pointerPosition = this.system.getPointerPosition(position, rotation);
 	        this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
-	        this.el.emit('stroke-point-added', {
-	          strokeId: this.currentStroke.id,
-	          position: position,
-	          orientation: rotation,
-	          pointerPosition: pointerPosition,
-	          pressure: this.sizeModifier,
-	          timestamp: time
-	        });
 	      }
-	      this.lastActive = this.active;
 	    };
 	  })(),
 	  startNewStroke: function () {
@@ -2129,9 +2089,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 13 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* global AFRAME */
 	var utils = AFRAME.utils;
@@ -2172,9 +2132,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 14 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 
@@ -2205,165 +2165,9 @@
 	});
 
 
-/***/ }),
+/***/ },
 /* 15 */
-/***/ (function(module, exports) {
-
-	/* globals AFRAME THREE */
-	AFRAME.registerComponent('line', {
-	  schema: {
-	    start: {type: 'vec3', default: '0 0 0'},
-	    end: {type: 'vec3', default: '0 0 0'}
-	  },
-
-	  init: function () {
-	    var material = new THREE.LineBasicMaterial({color: 0xffffff});
-	    var geometry = this.geometry = new THREE.Geometry();
-	    this.line = new THREE.Line(geometry, material);
-	    this.el.setObject3D('line', this.line);
-	  },
-
-	  update: function () {
-	    var vertices = [];
-	    var start = this.data.start;
-	    var end = this.data.end;
-	    var halfX = (start.x + end.x) / 2;
-	    var halfY = (start.y + end.y) / 2;
-	    var halfZ = (start.z + end.z) / 2;
-	    var half = new THREE.Vector3(halfX, halfY, halfZ);
-	    vertices.push(start);
-	    vertices.push(half);
-	    vertices.push(end);
-	    this.geometry.vertices = vertices;
-	    this.geometry.verticesNeedUpdate = true;
-	  }
-
-	});
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-	AFRAME.registerComponent('look-controls-alt', {
-	  dependencies: ['position', 'rotation'],
-
-	  schema: {
-	    enabled: {default: true},
-	    hmdEnabled: {default: true},
-	    standing: {default: true}
-	  },
-
-	  init: function () {
-	    var sceneEl = this.el.sceneEl;
-	    this.previousHMDPosition = new THREE.Vector3();
-	    this.setupHMDControls();
-	  },
-
-	  update: function (oldData) {
-	    var data = this.data;
-	    var hmdEnabled = data.hmdEnabled;
-	    if (!data.enabled || !hmdEnabled || !this.el.sceneEl.is('vr-mode')) { return; }
-	    this.controls.standing = data.standing;
-	    this.controls.update();
-	    this.updateOrientation();
-	    this.updatePosition();
-	  },
-
-	  play: function () {
-	    this.addEventListeners();
-	  },
-
-	  tick: function (t) {
-	    this.update();
-	  },
-
-	  remove: function () {
-	    this.pause();
-	  },
-
-	  setupHMDControls: function () {
-	    this.dolly = new THREE.Object3D();
-	    this.euler = new THREE.Euler();
-	    this.controls = new THREE.VRControls(this.dolly);
-	    this.controls.userHeight = 0.0;
-	  },
-
-	  addEventListeners: function () {
-	    var sceneEl = this.el.sceneEl;
-	    var canvasEl = sceneEl.canvas;
-
-	    // listen for canvas to load.
-	    if (!canvasEl) {
-	      sceneEl.addEventListener('render-target-loaded', this.addEventListeners.bind(this));
-	      return;
-	    }
-	  },
-
-	  updateOrientation: (function () {
-	    var hmdEuler = new THREE.Euler();
-	    return function () {
-	      var hmdQuaternion = this.calculateHMDQuaternion();
-	      var radToDeg = THREE.Math.radToDeg;
-	      var rotation;
-	      hmdEuler.setFromQuaternion(hmdQuaternion, 'YXZ');
-	      if (!this.el.sceneEl.is('vr-mode')) { return; }
-	      rotation = {
-	        x: radToDeg(hmdEuler.x),
-	        y: radToDeg(hmdEuler.y),
-	        z: radToDeg(hmdEuler.z)
-	      };
-	      this.el.setAttribute('rotation', rotation);
-	    };
-	  })(),
-
-	  calculateHMDQuaternion: (function () {
-	    var hmdQuaternion = new THREE.Quaternion();
-	    return function () {
-	      hmdQuaternion.copy(this.dolly.quaternion);
-	      return hmdQuaternion;
-	    };
-	  })(),
-
-	  updatePosition: (function () {
-	    var deltaHMDPosition = new THREE.Vector3();
-	    return function () {
-	      var el = this.el;
-	      var currentPosition = el.getAttribute('position');
-	      var currentHMDPosition;
-	      var previousHMDPosition = this.previousHMDPosition;
-	      var sceneEl = this.el.sceneEl;
-	      currentHMDPosition = this.calculateHMDPosition();
-	      deltaHMDPosition.copy(currentHMDPosition).sub(previousHMDPosition);
-	      if (!sceneEl.is('vr-mode') || this.isNullVector(deltaHMDPosition)) { return; }
-	      previousHMDPosition.copy(currentHMDPosition);
-	      // Do nothing if we have not moved.
-	      if (!sceneEl.is('vr-mode')) { return; }
-	      el.setAttribute('position', {
-	        x: currentPosition.x + deltaHMDPosition.x,
-	        y: currentPosition.y + deltaHMDPosition.y,
-	        z: currentPosition.z + deltaHMDPosition.z
-	      });
-	    };
-	  })(),
-
-	  calculateHMDPosition: function () {
-	    var dolly = this.dolly;
-	    var position = new THREE.Vector3();
-	    dolly.updateMatrix();
-	    position.setFromMatrixPosition(dolly.matrix);
-	    return position;
-	  },
-
-	  isNullVector: function (vector) {
-	    return vector.x === 0 && vector.y === 0 && vector.z === 0;
-	  }
-	});
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 	AFRAME.registerComponent('orbit-controls', {
 	  dependencies: ['camera'],
@@ -2420,23 +2224,6 @@
 	    controls.enableDamping = true;
 	    controls.dampingFactor = 1.0;
 	    controls.enableZoom = true;
-	    controls.zoomSpeed = 2;
-	  },
-
-	  tick: function () {
-	    var camera = this.el.getObject3D('camera');
-	    var worldPos = camera.getWorldPosition();
-	    var worldRot = camera.getWorldRotation();
-	    this.el.components.position.data = {
-	      x: worldPos.x,
-	      y: worldPos.y,
-	      z: worldPos.z
-	    };
-	    this.el.components.rotation.data = {
-	      x: THREE.Math.radToDeg(worldRot.x),
-	      y: THREE.Math.radToDeg(worldRot.y),
-	      z: THREE.Math.radToDeg(worldRot.z)
-	    };
 	  },
 
 	  play: function () {
@@ -2455,9 +2242,9 @@
 	});
 
 
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
 
 	AFRAME.registerSystem('paint-controls', {
 	  numberStrokes: 0
@@ -2671,9 +2458,9 @@
 	});
 
 
-/***/ }),
-/* 19 */
-/***/ (function(module, exports) {
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerComponent('ui', {
@@ -3604,9 +3391,9 @@
 	});
 
 
-/***/ }),
-/* 20 */
-/***/ (function(module, exports) {
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	/**
@@ -3769,137 +3556,9 @@
 	});
 
 
-/***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-	AFRAME.registerComponent('head', {
-	  init: function() {
-	    this.scene = document.querySelector('a-scene');
-	  },
-
-	  play: function() {
-	    this.addEventListeners();
-	  },
-
-	  pause: function() {
-	    this.removeEventListeners();
-	  },
-
-	  addEventListeners: function() {
-	    this.scene.addEventListener('enter-vr', this.enteredVR);
-	  },
-
-	  removeEventListeners: function() {
-	    this.scene.addEventListener('exit-vr', this.exitedVR);
-	  },
-
-	  enteredVR: function () {
-	    this.showAvatar('vr');
-	  },
-
-	  exitedVR: function () {
-	    this.showAvatar('non-vr');
-	  },
-
-	  showAvatar: function (avatar) {
-	    var vrHead = this.el.querySelector('.head.vr');
-	    var nonVrhead = this.el.querySelector('.head.non-vr');
-	    var vr = avatar != 'vr';
-	    console.error('showing vr avatar?', vr);
-
-	    vrHead.setAttribute('visible', vr);
-	    nonVrhead.setAttribute('visible', !vr);
-	  }
-	});
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports) {
-
-	AFRAME.registerComponent('body', {
-	  init: function () {
-	    this.head = this.el.parentNode;
-	    this.scene = document.querySelector('a-scene');
-	  },
-
-	  tick: function (time, delta) {
-	    if (!this.head) return;
-	    var rot = this.head.getAttribute('rotation');
-	    this.el.setAttribute('rotation', {x: -rot.x * 0.3, y: 0, z: -rot.z * 0.3});
-	  },
-
-	  play: function() {
-	    this.addEventListeners();
-	  },
-
-	  pause: function() {
-	    this.removeEventListeners();
-	  },
-
-	  addEventListeners: function() {
-	    this.scene.addEventListener('enter-vr', this.enteredVR);
-	  },
-
-	  removeEventListeners: function() {
-	    this.scene.addEventListener('exit-vr', this.exitedVR);
-	  },
-
-	  enteredVR: function () {
-	    this.el.setAttribute('visible', true);
-	  },
-
-	  exitedVR: function () {
-	    this.el.setAttribute('visible', false);
-	  }
-	});
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-	AFRAME.registerComponent('multiuser-mode', {
-	  init: function () {
-	    var params = this.getUrlParams();
-
-	    if (this.el.isMobile) {
-	      // Mobile controls.
-	      this.el.querySelector('[camera]').setAttribute('spawn-in-circle', {radius: 3});
-	      this.el.querySelector('[camera]').removeAttribute('look-controls');
-	      this.el.querySelector('[camera]').setAttribute('orbit-controls', '');
-	    }
-	    else {
-	      // Don't let replayer interfere with mobile when testing.
-	      this.el.setAttribute('avatar-replayer', '');
-	    }
-
-	    if (params.multiuser) {
-	      this.el.setAttribute('networked-scene', {
-	        room: params.multiuser
-	      });
-	    }
-	  },
-
-	  getUrlParams: function () {
-	    var match;
-	    var pl = /\+/g;  // Regex for replacing addition symbol with a space
-	    var search = /([^&=]+)=?([^&]*)/g;
-	    var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
-	    var query = window.location.search.substring(1);
-	    var urlParams = {};
-
-	    match = search.exec(query);
-	    while (match) {
-	      urlParams[decode(match[1])] = decode(match[2]);
-	      match = search.exec(query);
-	    }
-	    return urlParams;
-	  }
-	});
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports) {
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	(function () {
@@ -4200,9 +3859,9 @@
 	})();
 
 
-/***/ }),
-/* 25 */
-/***/ (function(module, exports) {
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
 
 	/* global AFRAME THREE */
 	(function () {
@@ -4571,9 +4230,9 @@
 	})();
 
 
-/***/ }),
-/* 26 */
-/***/ (function(module, exports) {
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerBrush('spheres',
@@ -4629,9 +4288,9 @@
 	);
 
 
-/***/ }),
-/* 27 */
-/***/ (function(module, exports) {
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerBrush('cubes',
@@ -4663,9 +4322,9 @@
 	);
 
 
-/***/ }),
-/* 28 */
-/***/ (function(module, exports) {
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	(function(){
@@ -4774,9 +4433,9 @@
 	})();
 
 
-/***/ }),
-/* 29 */
-/***/ (function(module, exports) {
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
 
 	/* globals AFRAME THREE */
 	AFRAME.registerBrush('single-sphere',
@@ -4809,57 +4468,5 @@
 	);
 
 
-/***/ }),
-/* 30 */
-/***/ (function(module, exports) {
-
-	AFRAME.registerSystem('sync', {
-	  init: function () {
-	    var brushSystem = this.el.systems.brush;
-	    this.previousStrokes = null;
-
-	    var toVector3 = function (obj) {
-	      return new THREE.Vector3(obj.x, obj.y, obj.z)
-	    }
-
-	    var toQuat = function (obj) {
-	      return new THREE.Vector4(obj._x, obj._y, obj._z, obj._w);
-	    }
-
-	    /* Sending */
-
-	    this.el.addEventListener('stroke-started', function (evt) {
-	      var json = evt.detail.stroke.getJSON(brushSystem);
-	      // console.log('sending new stroke', json);
-	      NAF.connection.broadcastDataGuaranteed('stroke-started', json);
-	    });
-
-	    this.el.addEventListener('stroke-point-added', function(evt) {
-	      // console.log('sending point', evt.detail);
-	      delete evt.detail.target;
-	      NAF.connection.broadcastDataGuaranteed('stroke-point-added', evt.detail);
-	    });
-
-	    /* Receiving */
-
-	    NAF.connection.subscribeToDataChannel('stroke-started', function (senderId, type, data, targetId) {
-	      // brushSystem.loadJSON({version: 1, strokes: [stroke], brushes: brushSystem.brushes});
-	      var brush = data.brush;
-	      var color = new THREE.Color().fromArray(brush.color);
-	      brushSystem.addStroke(brush.id, brush.name, color, brush.size)
-	    });
-
-	    NAF.connection.subscribeToDataChannel('stroke-point-added', function (senderId, type, data, targetId) {
-	      // console.log('receiving point', data);
-	      data.position = toVector3(data.position);
-	      data.pointerPosition = toVector3(data.pointerPosition);
-	      data.orientation = toQuat(data.orientation);
-
-	      brushSystem.addPointToStroke(data.strokeId, data);
-	    });
-	  }
-	});
-
-
-/***/ })
+/***/ }
 /******/ ]);
