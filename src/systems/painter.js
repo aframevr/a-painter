@@ -26,7 +26,7 @@ AFRAME.registerSystem('painter', {
     var urlParams = getUrlParams();
     if (urlParams.url || urlParams.urljson) {
       var isBinary = urlParams.urljson === undefined;
-      var isMultiuser = urlParams.multiuser;
+      var isMultiuser = urlParams.hasOwnProperty('room');
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
       if (!isMultiuser) {

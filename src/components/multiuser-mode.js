@@ -12,15 +12,15 @@ AFRAME.registerComponent('multiuser-mode', {
       this.el.setAttribute('avatar-replayer', '');
     }
 
-    if (params.hasOwnProperty('multiuser') && !params.hasOwnProperty('avatar-recording')) {
+    if (params.hasOwnProperty('room') && !params.hasOwnProperty('avatar-recording')) {
       this.el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
     }
 
     var webrtc = params.hasOwnProperty('webrtc');
-    if (params.multiuser) {
+    if (params.room) {
       this.el.setAttribute('networked-scene', {
         app: 'a-painter',
-        room: params.multiuser,
+        room: params.room,
         signalURL: 'https://haydenlee.io/',
         webrtc: webrtc
       });

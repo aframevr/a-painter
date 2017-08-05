@@ -71,7 +71,7 @@ AFRAME.registerComponent('local-player', {
     if (!this.hasOwnProperty('urlParams')) {
       this.urlParams = this.getUrlParams();
     }
-    return this.urlParams.hasOwnProperty('multiuser');
+    return this.urlParams.hasOwnProperty('room');
   },
 
   getUrlParams: function () {
