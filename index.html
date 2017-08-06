@@ -23,7 +23,7 @@
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <script src="vendor/spawn-in-circle.js"></script>
     <script>
-      var headSchema = {
+      NAF.schemas.add({
         template: '#head-template',
         components: [
           'position',
@@ -37,20 +37,18 @@
             component: 'visible'
           }
         ]
-      };
-      NAF.schemas.add(headSchema);
+      });
 
-      var bodySchema = {
+      NAF.schemas.add({
         template: '#body-template',
         components: [
           'position',
           'rotation',
           'visible'
         ]
-      };
-      NAF.schemas.add(bodySchema);
+      });
 
-      var leftLandSchema = {
+      NAF.schemas.add({
         template: '#left-hand-template',
         components: [
           'position',
@@ -60,10 +58,9 @@
             component: 'visible'
           }
         ]
-      };
-      NAF.schemas.add(leftLandSchema);
+      });
 
-      var rightHandSchema = {
+      NAF.schemas.add({
         template: '#right-hand-template',
         components: [
           'position',
@@ -73,8 +70,7 @@
             component: 'visible'
           }
         ]
-      };
-      NAF.schemas.add(rightHandSchema);
+      });
     </script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
