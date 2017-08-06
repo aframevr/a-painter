@@ -1,3 +1,6 @@
+/**
+ * Setup the Networked-Aframe scene component based on query parameters
+ */
 AFRAME.registerComponent('multiuser-mode', {
   init: function () {
     var params = this.getUrlParams();

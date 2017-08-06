@@ -1,5 +1,7 @@
+/**
+ * Turns on/off entities of the main player entity
+ */
 AFRAME.registerComponent('local-player', {
-
   init: function() {
     this.scene = document.querySelector('a-scene');
 

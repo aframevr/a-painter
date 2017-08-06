@@ -1,3 +1,6 @@
+/**
+ * Angle the body slightly downward so the avatar neck is not stiff
+ */
 AFRAME.registerComponent('body', {
   init: function () {
     this.head = this.el.parentNode;
