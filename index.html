@@ -38,7 +38,6 @@
           }
         ]
       });
-
       NAF.schemas.add({
         template: '#body-template',
         components: [
@@ -47,7 +46,6 @@
           'visible'
         ]
       });
-
       NAF.schemas.add({
         template: '#left-hand-template',
         components: [
@@ -59,7 +57,6 @@
           }
         ]
       });
-
       NAF.schemas.add({
         template: '#right-hand-template',
         components: [
@@ -91,23 +88,19 @@
           <a-entity class="head non-vr" obj-model="obj: #camera-obj; mtl: #camera-mtl" scale="0.3 0.3 0.3" visible="true"></a-entity>
           <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" rotation="0 180 0" visible="false"></a-entity>
         </div>
-
         <div id="body-template" type="text/html">
           <a-entity id="body-debug" class="body vr" gltf-model-next="#avatar1-body-obj" rotation="0 180 0"></a-entity>
         </div>
-
         <div id="left-hand-template" type="text/html">
           <a-entity class="hands" visible="false">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
         </div>
-
         <div id="right-hand-template" type="text/html">
           <a-entity class="hands" visible="false">
             <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
           </a-entity>
         </div>
-
         <div id="empty-template" type="text/html">
           <a-entity></a-entity>
         </div>
@@ -117,11 +110,8 @@
         <a-asset-item id="avatar1-head-mobile-obj" src="assets/avatars/apainter-head-mobile.gltf"></a-asset-item>
         <a-asset-item id="avatar1-body-obj" src="assets/avatars/apainter-body.gltf"></a-asset-item>
         <a-asset-item id="avatar1-hand-obj" src="assets/avatars/apainter-hand-2.gltf"></a-asset-item>
-        <!-- <a-asset-item id="avatar1-hand-right-obj" src="assets/avatars/apainter-hand.gltf"></a-asset-item> -->
-
         <a-asset-item id="camera-obj" src="./assets/avatars/google-blocks-camera/model.obj"></a-asset-item>
         <a-asset-item id="camera-mtl" src="./assets/avatars/google-blocks-camera/materials.mtl"></a-asset-item>
-
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
@@ -136,11 +126,13 @@
               </a-entity>
 
       <a-entity local-player networked="template:#empty-template">
-        
-        <a-entity id="acamera" camera="userHeight: 1.6" networked="template:#head-template;showLocalTemplate:false;" look-controls wasd-controls>
-          <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="acamera"
+                  camera="userHeight: 1.6"
+                  networked="template:#head-template;showLocalTemplate:false;"
+                  look-controls
+                  wasd-controls>
+                    <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
-
         <a-entity id="left-hand"
                   brush
                   networked="template:#left-hand-template;showLocalTemplate:false;"
@@ -227,11 +219,8 @@
                       </a-entity>
                     </a-entity>
         </a-entity>
-
       </a-entity>
-
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
-
     </a-scene>
     <a href="https://aframe.io/a-painter/"><div id="apainter-logo" class="hidden"></div><div id="apainter-author" style="display:none" class="hidden">authorname</div></a>
     <div id="apainter-ui">
