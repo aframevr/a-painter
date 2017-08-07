@@ -1,3 +1,6 @@
+/**
+ * Move the entity to a random point on a circle based on the given radius
+ */
 AFRAME.registerComponent('spawn-in-circle', {
   schema: {
     radius: {type: 'number', default: 1}

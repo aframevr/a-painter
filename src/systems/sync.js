@@ -1,3 +1,6 @@
+/**
+ * Syncs paint strokes to other clients connected via Networked-Aframe
+ */
 AFRAME.registerSystem('sync', {
   init: function () {
     var brushSystem = this.el.systems.brush;

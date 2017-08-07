@@ -36,7 +36,7 @@ Example: [http://aframe.io/a-painter/?sky=&floor=http://i.imgur.com/w9BylL0.jpg&
 
 ## Multiuser
 
-To paint with other people in realtime add the multiuser-room URL parameter with the room name you want to join. Any URL-friendly string will work as a room name. Non-VR and Mobile users can join a room and watch VR users paint.
+To paint with other people in realtime add the room URL parameter with the room name you want to join. Any URL-friendly string will work as a room name. Non-VR and Mobile users can join a room and watch VR users paint.
 
 To try multiuser without VR [see this example](http://aframe.io/a-painter/multiuser-demo.html).
 
