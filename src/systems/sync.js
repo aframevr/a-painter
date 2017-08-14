@@ -4,7 +4,7 @@
 AFRAME.registerSystem('sync', {
   init: function () {
     var brushSystem = this.el.systems.brush;
-    this.previousStrokes = null;
+    var lastStrokes = {};
 
     var toVector3 = function (obj) {
       return new THREE.Vector3(obj.x, obj.y, obj.z)
@@ -31,7 +31,8 @@ AFRAME.registerSystem('sync', {
     NAF.connection.subscribeToDataChannel('stroke-started', function (senderId, type, data, targetId) {
       var brush = data.brush;
       var color = new THREE.Color().fromArray(brush.color);
-      brushSystem.addStroke(brush.id, brush.name, color, brush.size)
+      var stroke = brushSystem.addStroke(brush.name, color, brush.size);
+      lastStrokes[senderId] = stroke;
     });
 
     NAF.connection.subscribeToDataChannel('stroke-point-added', function (senderId, type, data, targetId) {
@@ -39,7 +40,8 @@ AFRAME.registerSystem('sync', {
       data.pointerPosition = toVector3(data.pointerPosition);
       data.orientation = toQuat(data.orientation);
 
-      brushSystem.addPointToStroke(data.strokeId, data);
+      var stroke = lastStrokes[senderId];
+      stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
     });
   }
 });
