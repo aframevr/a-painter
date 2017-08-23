@@ -221,9 +221,17 @@ AFRAME.registerSystem('brush', {
     stroke.init(color, size);
     this.strokes.push(stroke);
 
+    var drawing = document.querySelector('.a-drawing');
+    if (!drawing) {
+      drawing = document.createElement('a-entity');
+      drawing.className = "a-drawing";
+      document.querySelector('a-scene').appendChild(drawing);
+    }
+
     var entity = document.createElement('a-entity');
     entity.className = "a-stroke";
-    document.querySelector('a-scene').appendChild(entity);
+    drawing.appendChild(entity);
+
     entity.setObject3D('mesh', stroke.object3D);
     stroke.entity = entity;
 
