@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>A-Painter</title>
-    <link rel="manifest" href="manifest.webmanifest">
+    <style>html,body{background-color:#030404}</style>
     <link rel="icon" href="img/icon-256.png">
     <meta name="description" content="Paint in VR in your browser. Powered by A-Frame.">
     <script>
@@ -17,15 +17,16 @@
     <script src="vendor/aframe-teleport-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
-    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="manifest.webmanifest">
   </head>
-  <body style="background-color: #030404">
+  <body>
     <a-scene>
       <a-assets>
-        <img id="skymap" src="assets/images/sky.jpg" crossOrigin="anonymous">
-        <img id="uinormal" src="assets/images/ui-normal.png" crossOrigin="anonymous">
-        <img id="floor" src="assets/images/floor.jpg" crossOrigin="anonymous">
+        <img id="skymap" src="assets/images/sky.jpg" crossorigin="anonymous">
+        <img id="uinormal" src="assets/images/ui-normal.png" crossorigin="anonymous">
+        <img id="floor" src="assets/images/floor.jpg" crossorigin="anonymous">
         <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
         <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
