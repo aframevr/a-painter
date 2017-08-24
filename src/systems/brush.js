@@ -37,8 +37,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
         points.push({
-          'orientation': point.orientation.toArray().toNumFixed(6),
-          'position': point.position.toArray().toNumFixed(6),
+          'orientation': arrayToNumFixed(point.orientation.toArray(), 6),
+          'position': arrayToNumFixed(point.position.toArray(), 6),
           'pressure': point.pressure.toNumFixed(6),
           'timestamp': point.timestamp
         });
@@ -46,8 +46,8 @@ AFRAME.registerBrush = function (name, definition, options) {
 
       return {
         brush: {
-          index: system.getUsedBrushes().indexOf(this.brushName),
-          color: this.data.color.toArray().toNumFixed(6),
+          name: this.brushName,
+          color: arrayToNumFixed(this.data.color.toArray(), 6),
           size: this.data.size.toNumFixed(6)
         },
         points: points
@@ -104,17 +104,26 @@ AFRAME.registerBrush = function (name, definition, options) {
       }
       if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
         this.data.numPoints++;
-        this.data.points.push({
+
+        var point = {
           'position': position.clone(),
           'orientation': orientation.clone(),
           'pressure': pressure,
           'timestamp': timestamp
-        });
+        };
+        this.data.points.push(point);
 
         this.data.prevPosition = position.clone();
         this.data.prevPointerPosition = pointerPosition.clone();
       }
     };
+  }
+
+  function arrayToNumFixed (array, num) {
+    for (var i = 0; i < array.length; i++) {
+      array[i] = array[i].toNumFixed(num);
+    }
+    return array;
   }
 
   var NewBrush = function () {};
@@ -207,7 +216,7 @@ AFRAME.registerSystem('brush', {
       }
     }
   },
-  addNewStroke: function (brushName, color, size) {
+  addStroke: function (brushName, color, size) {
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -321,8 +330,8 @@ AFRAME.registerSystem('brush', {
       var strokeData = data.strokes[i];
       var brush = strokeData.brush;
 
-      var stroke = this.addNewStroke(
-        data.brushes[brush.index],
+      var stroke = this.addStroke(
+        brush.name,
         new THREE.Color().fromArray(brush.color),
         brush.size
       );
@@ -367,7 +376,7 @@ AFRAME.registerSystem('brush', {
       var size = binaryManager.readFloat();
       var numPoints = binaryManager.readUint32();
 
-      var stroke = this.addNewStroke(usedBrushes[brushIndex], color, size);
+      var stroke = this.addStroke(usedBrushes[brushIndex], color, size);
 
       for (var i = 0; i < numPoints; i++) {
         var position = binaryManager.readVector3();

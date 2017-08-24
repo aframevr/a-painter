@@ -26,9 +26,15 @@ AFRAME.registerSystem('painter', {
     var urlParams = getUrlParams();
     if (urlParams.url || urlParams.urljson) {
       var isBinary = urlParams.urljson === undefined;
+      var isMultiuser = urlParams.hasOwnProperty('room');
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
-      document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
+      if (!isMultiuser) {
+        var camera = document.getElementById('acamera');
+        camera.setAttribute('orbit-controls', 'position', '0 1.6 3');
+        camera.removeAttribute('look-controls');
+        camera.removeAttribute('wasd-controls');
+      }
       document.getElementById('apainter-logo').classList.remove('hidden');
       //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
     }
