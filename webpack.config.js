@@ -1,8 +1,8 @@
-var webpack = require('webpack');
+const webpack = require('webpack');
 
-var PLUGINS = [];
+let PLUGINS = [];
 if (process.env.NODE_ENV === 'production') {
-  new webpack.optimize.UglifyJsPlugin()
+  PLUGINS.push(new webpack.optimize.UglifyJsPlugin());
 }
 
 module.exports = {
@@ -11,5 +11,8 @@ module.exports = {
     path: __dirname,
     filename: 'build.js'
   },
-  plugins: PLUGINS
+  plugins: PLUGINS,
+  devServer: {
+    disableHostCheck: true
+  }
 };
