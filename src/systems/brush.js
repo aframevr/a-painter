@@ -218,7 +218,9 @@ AFRAME.registerSystem('brush', {
       }
     }
   },
-  addNewStroke: function (brushName, color, size, owner='local', timestamp=Date.now()) {
+  addNewStroke: function (brushName, color, size, owner, timestamp) {
+    owner = owner || 'local';
+    timestamp = timestamp || Date.now();
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
