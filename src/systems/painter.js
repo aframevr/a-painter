@@ -75,6 +75,7 @@ AFRAME.registerSystem('painter', {
 
     // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function (event) {
+      if(event.shiftKey || event.ctrlKey) return;
       if (event.keyCode === 8) {
         // Undo (Backspace)
         self.brushSystem.undo();
