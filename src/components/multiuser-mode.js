@@ -3,30 +3,35 @@
  */
 AFRAME.registerComponent('multiuser-mode', {
   init: function () {
+    var el = this.el;
     var params = this.getUrlParams();
 
     if (params.room === "") {
       window.alert('Please add a room name in the URL, eg. ?room=myroom');
     }
 
-    if (this.el.isMobile) {
+    var isMultiuser = params.hasOwnProperty('room');
+    var isPlayingRecording = params.hasOwnProperty('avatar-recording');
+    var isMobile = el.isMobile;
+
+    if (isMobile) {
       // Mobile controls.
-      this.el.querySelector('[camera]').removeAttribute('look-controls');
-      this.el.querySelector('[camera]').setAttribute('orbit-controls', '');
+      el.querySelector('[camera]').removeAttribute('look-controls');
+      el.querySelector('[camera]').setAttribute('orbit-controls', '');
+
+      if (isMultiuser && !isPlayingRecording) {
+        el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
+      }
     }
     else {
       // Don't let replayer interfere with mobile when testing.
-      this.el.setAttribute('avatar-replayer', '');
-    }
-
-    if (params.hasOwnProperty('room') && !params.hasOwnProperty('avatar-recording')) {
-      this.el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
+      el.setAttribute('avatar-replayer', '');
     }
 
     var webrtc = params.hasOwnProperty('webrtc');
     var voice = params.hasOwnProperty('voice');
-    if (params.room) {
-      this.el.setAttribute('networked-scene', {
+    if (isMultiuser) {
+      el.setAttribute('networked-scene', {
         app: 'a-painter',
         room: params.room,
         signalURL: 'https://haydenlee.io/',
