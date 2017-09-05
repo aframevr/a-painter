@@ -92,6 +92,7 @@ AFRAME.registerComponent('brush', {
         var pointerPosition = this.system.getPointerPosition(position, rotation);
         this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
         this.el.emit('stroke-point-added', {
+          strokeId: this.currentStroke.id,
           position: position,
           orientation: rotation,
           pointerPosition: pointerPosition,
@@ -103,7 +104,7 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
-    this.currentStroke = this.system.addStroke(this.data.brush, this.color, this.data.size);
+    this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     this.el.emit('stroke-started', {entity: this.el, stroke: this.currentStroke});
   }
 });
