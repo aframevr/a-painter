@@ -24,12 +24,14 @@ AFRAME.registerComponent('multiuser-mode', {
     }
 
     var webrtc = params.hasOwnProperty('webrtc');
+    var voice = params.hasOwnProperty('voice');
     if (params.room) {
       this.el.setAttribute('networked-scene', {
         app: 'a-painter',
         room: params.room,
         signalURL: 'https://haydenlee.io/',
-        webrtc: webrtc
+        webrtc: webrtc,
+        webrtcAudio: voice
       });
     }
   },
