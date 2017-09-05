@@ -31,7 +31,7 @@ AFRAME.registerSystem('sync', {
     NAF.connection.subscribeToDataChannel('stroke-started', function (senderId, type, data, targetId) {
       var brush = data.brush;
       var color = new THREE.Color().fromArray(brush.color);
-      brushSystem.addStroke(brush.id, brush.name, color, brush.size)
+      brushSystem.addStroke(brush.id, brush.name, color, brush.size);
     });
 
     NAF.connection.subscribeToDataChannel('stroke-point-added', function (senderId, type, data, targetId) {

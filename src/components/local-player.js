@@ -48,10 +48,11 @@ AFRAME.registerComponent('local-player', {
   },
 
   showAvatar: function (avatar) {
-    var vrHead = this.el.querySelector('.head.vr');
-    var nonVrhead = this.el.querySelector('.head.non-vr');
-    var body = this.el.querySelector('[body]');
-    var hands = this.el.querySelectorAll('.hands');
+    var el = this.el;
+    var vrHead = el.querySelector('.head.vr');
+    var nonVrhead = el.querySelector('.head.non-vr');
+    var body = el.querySelector('[body]');
+    var hands = el.querySelectorAll('.hands');
 
     var vr = avatar == 'vr';
     vrHead.setAttribute('visible', vr);

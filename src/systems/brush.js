@@ -172,6 +172,7 @@ AFRAME.registerSystem('brush', {
     });
 
     this.strokes = [];
+    this.strokesMap = {};
   },
   init: function () {
     this.version = VERSION;
@@ -236,6 +237,7 @@ AFRAME.registerSystem('brush', {
     stroke.brush = Brush;
     stroke.init(color, size);
     this.strokes.push(stroke);
+    this.strokesMap[id] = stroke;
 
     var entity = document.createElement('a-entity');
     entity.className = "a-stroke";
@@ -249,13 +251,7 @@ AFRAME.registerSystem('brush', {
     return Math.random().toString(36).substring(2, 9);
   },
   addPointToStroke: function (strokeId, data) {
-    var stroke;
-    for (var i = 0; i < this.strokes.length; i++) {
-      if (this.strokes[i].id == strokeId) {
-        stroke = this.strokes[i];
-        break;
-      }
-    }
+    var stroke = this.strokesMap[strokeId];
     stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
   },
   getJSON: function () {
