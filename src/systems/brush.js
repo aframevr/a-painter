@@ -246,8 +246,6 @@ AFRAME.registerSystem('brush', {
     this.strokes.push(stroke);
     this.strokesMap[timestamp] = stroke;
 
-    console.error('adding stroke with timestamp:', timestamp, this.strokesMap[timestamp]);
-
     var drawing = document.querySelector('.a-drawing');
     if (!drawing) {
       drawing = document.createElement('a-entity');
