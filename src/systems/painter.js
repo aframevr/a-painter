@@ -81,6 +81,7 @@ AFRAME.registerSystem('painter', {
 
     // @fixme This is just for debug until we'll get some UI
     document.addEventListener('keyup', function (event) {
+      if(event.shiftKey || event.ctrlKey) return;
       if (event.keyCode === 8) {
         // Undo (Backspace)
         self.brushSystem.undo();
@@ -88,6 +89,11 @@ AFRAME.registerSystem('painter', {
       if (event.keyCode === 67) {
         // Clear (c)
         self.brushSystem.clear();
+      }
+      if (event.keyCode === 71) {
+        // Export to GTF (g)
+        var drawing = document.querySelector('.a-drawing');
+        self.sceneEl.systems['gltf-exporter'].export(drawing);
       }
       if (event.keyCode === 78) {
         // Next brush (n)

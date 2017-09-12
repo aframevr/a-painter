@@ -31,7 +31,7 @@ AFRAME.registerSystem('sync', {
     NAF.connection.subscribeToDataChannel('stroke-started', function (senderId, type, data, targetId) {
       var brush = data.brush;
       var color = new THREE.Color().fromArray(brush.color);
-      brushSystem.addStroke(brush.id, brush.name, color, brush.size);
+      brushSystem.addNewStroke(brush.name, color, brush.size, brush.owner, brush.timestamp);
     });
 
     NAF.connection.subscribeToDataChannel('stroke-point-added', function (senderId, type, data, targetId) {
@@ -39,7 +39,7 @@ AFRAME.registerSystem('sync', {
       data.pointerPosition = toVector3(data.pointerPosition);
       data.orientation = toQuat(data.orientation);
 
-      brushSystem.addPointToStroke(data.strokeId, data);
+      brushSystem.addPointToStroke(data);
     });
   }
 });

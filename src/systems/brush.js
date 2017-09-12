@@ -46,10 +46,10 @@ AFRAME.registerBrush = function (name, definition, options) {
 
       return {
         brush: {
-          id: this.id,
           name: this.brushName,
           color: arrayToNumFixed(this.data.color.toArray(), 6),
-          size: this.data.size.toNumFixed(6)
+          size: this.data.size.toNumFixed(6),
+          timestamp: this.data.timestamp
         },
         points: points
       };
@@ -83,7 +83,7 @@ AFRAME.registerBrush = function (name, definition, options) {
   };
 
   function wrapInit (initMethod) {
-    return function init (color, brushSize) {
+    return function init (color, brushSize, owner, timestamp) {
       this.object3D = new THREE.Object3D();
       this.data = {
         points: [],
@@ -91,7 +91,9 @@ AFRAME.registerBrush = function (name, definition, options) {
         prevPosition: null,
         prevPointerPosition: null,
         numPoints: 0,
-        color: color.clone()
+        color: color.clone(),
+        timestamp: timestamp,
+        owner: owner
       };
       initMethod.call(this, color, brushSize);
     };
@@ -152,7 +154,12 @@ AFRAME.registerSystem('brush', {
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
-    var stroke = this.strokes.pop();
+  	var stroke;
+    for(let i = this.strokes.length-1; i >= 0; i--){
+      if(this.strokes[i].data.owner !== 'local') continue;
+      stroke = this.strokes.splice(i, 1)[0];
+      break;
+    }
     if (stroke) {
       var entity = stroke.entity;
       entity.emit('stroke-removed', {entity: entity});
@@ -162,7 +169,9 @@ AFRAME.registerSystem('brush', {
   clear: function () {
     // Remove all the stroke entities
     for (var i = 0; i < this.strokes.length; i++) {
+      if(this.strokes[i].data.owner !== 'local') continue;
       var entity = this.strokes[i].entity;
+      entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
     }
 
@@ -178,7 +187,6 @@ AFRAME.registerSystem('brush', {
     this.version = VERSION;
     this.clear();
     this.controllerName = null;
-    this.id = this.createStrokeId();
 
     var self = this;
     this.sceneEl.addEventListener('controllerconnected', function (evt) {
@@ -201,6 +209,8 @@ AFRAME.registerSystem('brush', {
       var numPoints = parseInt(Math.random() * 500);
 
       var stroke = this.addNewStroke(brushName, color, size);
+      var entity = document.querySelector('#left-hand');
+      entity.emit('stroke-started', {entity, stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
@@ -219,11 +229,9 @@ AFRAME.registerSystem('brush', {
       }
     }
   },
-  addNewStroke: function (brushName, color, size) {
-    var strokeId = this.createStrokeId();
-    return this.addStroke(strokeId, brushName, color, size);
-  },
-  addStroke: function (id, brushName, color, size) {
+  addNewStroke: function (brushName, color, size, owner, timestamp) {
+    owner = owner || 'local';
+    timestamp = timestamp || Date.now();
     var Brush = this.getBrushByName(brushName);
     if (!Brush) {
       var newBrushName = Object.keys(AFRAME.BRUSHES)[0];
@@ -233,25 +241,31 @@ AFRAME.registerSystem('brush', {
 
     Brush.used = true;
     var stroke = new Brush();
-    stroke.id = id;
     stroke.brush = Brush;
-    stroke.init(color, size);
+    stroke.init(color, size, owner, timestamp);
     this.strokes.push(stroke);
-    this.strokesMap[id] = stroke;
+    this.strokesMap[timestamp] = stroke;
+
+    console.error('adding stroke with timestamp:', timestamp, this.strokesMap[timestamp]);
+
+    var drawing = document.querySelector('.a-drawing');
+    if (!drawing) {
+      drawing = document.createElement('a-entity');
+      drawing.className = "a-drawing";
+      document.querySelector('a-scene').appendChild(drawing);
+    }
 
     var entity = document.createElement('a-entity');
     entity.className = "a-stroke";
-    document.querySelector('a-scene').appendChild(entity);
+    drawing.appendChild(entity);
+
     entity.setObject3D('mesh', stroke.object3D);
     stroke.entity = entity;
 
     return stroke;
   },
-  createStrokeId: function () {
-    return Math.random().toString(36).substring(2, 9);
-  },
-  addPointToStroke: function (strokeId, data) {
-    var stroke = this.strokesMap[strokeId];
+  addPointToStroke: function (data) {
+    var stroke = this.strokesMap[data.strokeTimestamp];
     stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
   },
   getJSON: function () {
@@ -339,7 +353,6 @@ AFRAME.registerSystem('brush', {
       var brush = strokeData.brush;
 
       var stroke = this.addNewStroke(
-        brush.id,
         brush.name,
         new THREE.Color().fromArray(brush.color),
         brush.size
