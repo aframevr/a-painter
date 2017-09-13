@@ -1,10 +1,18 @@
-Number.prototype.toNumFixed = function (num) {
-  return parseFloat(this.toFixed(num));
-}
+window.Utils = function() {
+    const DIGITS = 6;
+    function numberToFixed (number) {
+        return parseFloat(number.toFixed(DIGITS));
+    }
 
-Array.prototype.toNumFixed = function (num) {
-  for (var i = 0; i < this.length; i++) {
-    this[i] = this[i].toNumFixed(num);
-  }
-  return this;
+    function arrayNumbersToFixed (array) {
+        for (var i = 0; i < array.length; i++) {
+            array[i] = numberToFixed(array[i]);
+        }
+        return this;
+    }
+
+    return {
+        numberToFixed: numberToFixed,
+        arrayNumbersToFixed: arrayNumbersToFixed
+    }
 }

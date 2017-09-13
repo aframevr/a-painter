@@ -37,9 +37,9 @@ AFRAME.registerBrush = function (name, definition, options) {
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
         points.push({
-          'orientation': point.orientation.toArray().toNumFixed(6),
-          'position': point.position.toArray().toNumFixed(6),
-          'pressure': point.pressure.toNumFixed(6),
+          'orientation': Utils.arrayNumbersToFixed(point.orientation.toArray()),
+          'position': Utils.arrayNumbersToFixed(point.position.toArray()),
+          'pressure': Utils.numberToFixed(point.pressure),
           'timestamp': point.timestamp
         });
       }
@@ -47,8 +47,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       return {
         brush: {
           index: system.getUsedBrushes().indexOf(this.brushName),
-          color: this.data.color.toArray().toNumFixed(6),
-          size: this.data.size.toNumFixed(6)
+          color: Utils.arrayNumbersToFixed(this.data.color.toArray()),
+          size: Utils.numberToFixed(this.data.size),
         },
         points: points
       };
@@ -305,6 +305,10 @@ AFRAME.registerSystem('brush', {
       'oculus-touch-controls': {
         vec: new THREE.Vector3(0, 0, 2.8),
         mult: -0.05
+      },
+      'windows-motion-controls': {
+        vec: new THREE.Vector3(0, 0, 1),
+        mult: -.12
       }
     };
 

@@ -61,6 +61,7 @@ AFRAME.registerComponent('ui', {
     this.controller = null;
 
     var self = this;
+
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
 
@@ -75,6 +76,11 @@ AFRAME.registerComponent('ui', {
         self.rayAngle = 0;
         el.setAttribute('ui-raycaster', {
           rotation: 0
+        });
+      } else if (controllerName === 'windows-motion-controls') {
+        self.rayAngle = 25;
+        el.setAttribute('ui-raycaster', {
+          rotation: -30
         });
       }
 
@@ -452,7 +458,7 @@ AFRAME.registerComponent('ui', {
       } else {
         el.addEventListener('abuttondown', this.toggleMenu);
       }
-    } else if (this.controller.name === 'vive-controls') {
+    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
       el.addEventListener('menudown', this.toggleMenu);
     }
   },
@@ -466,7 +472,7 @@ AFRAME.registerComponent('ui', {
       } else {
         el.removeEventListener('abuttondown', this.toggleMenu);
       }
-    } else if (this.controller.name === 'vive-controls') {
+    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
       el.removeEventListener('menudown', this.toggleMenu);
     }
   },
