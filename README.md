@@ -1,4 +1,4 @@
-# A-Painter
+# Multiuser A-Painter
 
 Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
 
