@@ -154,9 +154,9 @@ AFRAME.registerSystem('brush', {
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
-  	var stroke;
-    for(let i = this.strokes.length-1; i >= 0; i--){
-      if(this.strokes[i].data.owner !== 'local') continue;
+    var stroke;
+    for (var i = this.strokes.length-1; i >= 0; i--) {
+      if (this.strokes[i].data.owner !== 'local') continue;
       stroke = this.strokes.splice(i, 1)[0];
       break;
     }
@@ -210,7 +210,7 @@ AFRAME.registerSystem('brush', {
 
       var stroke = this.addNewStroke(brushName, color, size);
       var entity = document.querySelector('#left-hand');
-      entity.emit('stroke-started', {entity, stroke});
+      entity.emit('stroke-started', {entity: entity, stroke: stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
@@ -343,8 +343,6 @@ AFRAME.registerSystem('brush', {
     if (data.version !== VERSION) {
       console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
-
-    var usedBrushes = [];
 
     for (var i = 0; i < data.strokes.length; i++) {
       var strokeData = data.strokes[i];
