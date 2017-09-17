@@ -1,6 +1,6 @@
 # Multiuser A-Painter
 
-Paint in VR in your browser. [Read more!](https://blog.mozvr.com/a-painter/)
+Paint in VR in your browser with friends. [Read more!](https://blog.mozvr.com/a-painter/)
 
 [![A-Painter logo](https://blog.mozvr.com/content/images/2016/09/logo_a-painter_high-nobrands.jpg)](https://blog.mozvr.com/a-painter/)
 
