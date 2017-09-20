@@ -192,6 +192,12 @@ AFRAME.registerComponent('ui', {
         }
         break;
       }
+      case name === 'erase': {
+        if (!this.pressedObjects[name]) {
+          this.changeBrushToErase(object);
+        }
+        break;
+      }
       case name === 'copy': {
         if (!this.pressedObjects[name]) {
           this.copyBrush();
@@ -225,6 +231,13 @@ AFRAME.registerComponent('ui', {
       }
     }
     this.pressedObjects[name] = object;
+  },
+
+  changeBrushToErase: function (object) {
+    //todo
+    //find object of hand
+    //remove component brush
+    //add component raycaster
   },
 
   copyBrush: function () {

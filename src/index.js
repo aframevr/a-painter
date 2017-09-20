@@ -8,10 +8,12 @@ require('./utils.js');
 require('./ui2d.js');
 
 require('./systems/brush.js');
+require('./systems/raycast-erase.js');
 require('./systems/ui.js');
 require('./systems/painter.js');
 
 require('./components/brush.js');
+require('./components/raycast-erase.js');
 require('./components/if-no-vr-headset.js');
 require('./components/json-model.js');
 require('./components/orbit-controls.js');
