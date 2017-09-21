@@ -4,7 +4,7 @@
   "description": "A-Painter",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
-    "start": "webpack-dev-server --host 0.0.0.0",
+    "start": "webpack-dev-server --host 0.0.0.0 --port 7994",
     "lint": "semistandard -v | snazzy"
   },
   "repository": "aframevr/a-painter",

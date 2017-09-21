@@ -194,7 +194,7 @@ AFRAME.registerComponent('ui', {
       }
       case name === 'erase': {
         if (!this.pressedObjects[name]) {
-          this.changeBrushToErase(object);
+          this.changeBrushToErase();
         }
         break;
       }
@@ -233,12 +233,38 @@ AFRAME.registerComponent('ui', {
     this.pressedObjects[name] = object;
   },
 
-  changeBrushToErase: function (object) {
-    //todo
-    //find object of hand
-    //remove component brush
-    //add component raycaster
+  changeBrushToErase: function () {
+    var hands = [];
+
+    hands.push(document.querySelector('a-entity#right-hand'));
+    hands.push((document.querySelector('a-entity#left-hand'));
+
+    hands.forEach(function (hand) {
+      hand.setAttribute('raycaster', {
+        showLine: true,
+        recursive: false,
+        interval: 1000
+      });
+        hand.setAttribute('line', {
+            color: "orange",
+            opacity: 0.5
+        });
+      hand,removeAttribut('brush');
+    });
   },
+
+  changeEraseToBrush: function () {
+        var hands = [];
+
+        hands.push(document.querySelector('a-entity#right-hand'));
+        hands.push((document.querySelector('a-entity#left-hand'));
+
+        hands.forEach(function (hand) {
+            hand.removeAttribut('raycaster');
+            hand,removeAttribut('line');
+            hand,setAttribut('brush');
+        });
+    },
 
   copyBrush: function () {
     var brush = this.el.getAttribute('brush');
@@ -534,6 +560,7 @@ AFRAME.registerComponent('ui', {
     this.objects.brightnessSlider.geometry.computeBoundingBox();
     this.objects.previousPage = model.getObjectByName('brushprev');
     this.objects.nextPage = model.getObjectByName('brushnext');
+    // this.objects.erase = model.getObjectByName('erase');
 
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
@@ -564,6 +591,10 @@ AFRAME.registerComponent('ui', {
     this.objects.messageError.material = this.messagesMaterial;
 
     var messagesImageUrl = 'assets/images/messages.png';
+
+      console.log(11111111111111111111111111111);
+      console.log(this.objects);
+      console.log(11111111111111111111111111111);
 
     this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
       var material = self.messagesMaterial;
