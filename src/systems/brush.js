@@ -199,7 +199,7 @@ AFRAME.registerSystem('brush', {
 
       var stroke = this.addNewStroke(brushName, color, size);
       var entity = document.querySelector('#left-hand');
-      entity.emit('stroke-started', {entity, stroke});
+      entity.emit('stroke-started', {entity: entity, stroke: stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
       var aux = new THREE.Vector3();
