@@ -36,7 +36,7 @@ AFRAME.registerComponent('paint-controls', {
       var controllerName = evt.detail.name;
       if (controllerName === 'windows-motion-controls') {
         tooltips = Array.prototype.slice.call(document.querySelectorAll('.windows-motion-tooltips'));
-       
+        el.setAttribute('teleport-controls', {button: 'auto', axis: 'auto'});
         el.addEventListener('trackpaddown', function (evt) {
           self.trackpadDown = true;
         });
