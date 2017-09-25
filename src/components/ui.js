@@ -68,7 +68,7 @@ AFRAME.registerComponent('ui', {
       self.controller = {
         name: controllerName,
         hand: evt.detail.component.data.hand
-      }
+      };
 
       if (controllerName === 'oculus-touch-controls') {
         self.uiEl.setAttribute('rotation', '45 0 0');
@@ -88,6 +88,7 @@ AFRAME.registerComponent('ui', {
         self.addToggleEvent();
       }
     });
+
   },
 
   initColorWheel: function () {
@@ -167,7 +168,9 @@ AFRAME.registerComponent('ui', {
 
   handleButtonDown: function (object, position) {
     var name = object.name;
-    if (this.activeWidget && this.activeWidget !== name) { return; }
+    if (this.activeWidget && this.activeWidget !== name) {
+      return;
+    }
     this.activeWidget = name;
     switch (true) {
       case name === 'brightness': {
@@ -233,38 +236,24 @@ AFRAME.registerComponent('ui', {
     this.pressedObjects[name] = object;
   },
 
-  changeBrushToErase: function () {
-    var hands = [];
-
-    hands.push(document.querySelector('a-entity#right-hand'));
-    hands.push((document.querySelector('a-entity#left-hand'));
-
-    hands.forEach(function (hand) {
-      hand.setAttribute('raycaster', {
-        showLine: true,
-        recursive: false,
-        interval: 1000
-      });
-        hand.setAttribute('line', {
-            color: "orange",
-            opacity: 0.5
-        });
-      hand,removeAttribut('brush');
+  changeBrushToErase: function (hand) {
+    hand.setAttribute('raycaster', {
+      showLine: true,
+      recursive: false,
+      interval: 1000
     });
+    hand.setAttribute('line', {
+      color: "orange",
+      opacity: 0.5
+    });
+    hand.removeAttribute('brush');
   },
 
-  changeEraseToBrush: function () {
-        var hands = [];
-
-        hands.push(document.querySelector('a-entity#right-hand'));
-        hands.push((document.querySelector('a-entity#left-hand'));
-
-        hands.forEach(function (hand) {
-            hand.removeAttribut('raycaster');
-            hand,removeAttribut('line');
-            hand,setAttribut('brush');
-        });
-    },
+  changeEraseToBrush: function (hand) {
+    hand.removeAttribute('raycaster');
+    hand.removeAttribute('line');
+    hand.setAttribute('brush');
+  },
 
   copyBrush: function () {
     var brush = this.el.getAttribute('brush');
@@ -296,8 +285,10 @@ AFRAME.registerComponent('ui', {
 
   handlePressedButtons: function () {
     var self = this;
-    if (!this.triggeredPressed) { return; }
-    this.hoveredOnObjects.forEach(function triggerAction (button) {
+    if (!this.triggeredPressed) {
+      return;
+    }
+    this.hoveredOnObjects.forEach(function triggerAction(button) {
       self.handleButtonDown(button.object, button.point);
     });
   },
@@ -308,8 +299,13 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrushDown: function (name) {
+
+    this.changeEraseToBrush(hand);
+
     var brushName = this.brushButtonsMapping[name];
-    if (!brushName) { return; }
+    if (!brushName) {
+      return;
+    }
     this.selectBrushButton(name);
     this.handEl.setAttribute('brush', 'brush', brushName.toLowerCase());
   },
@@ -366,12 +362,36 @@ AFRAME.registerComponent('ui', {
     q = v * (1 - f * s);
     t = v * (1 - (1 - f) * s);
     switch (i % 6) {
-      case 0: r = v; g = t; b = p; break;
-      case 1: r = q; g = v; b = p; break;
-      case 2: r = p; g = v; b = t; break;
-      case 3: r = p; g = q; b = v; break;
-      case 4: r = t; g = p; b = v; break;
-      case 5: r = v; g = p; b = q; break;
+      case 0:
+        r = v;
+        g = t;
+        b = p;
+        break;
+      case 1:
+        r = q;
+        g = v;
+        b = p;
+        break;
+      case 2:
+        r = p;
+        g = v;
+        b = t;
+        break;
+      case 3:
+        r = p;
+        g = q;
+        b = v;
+        break;
+      case 4:
+        r = t;
+        g = p;
+        b = v;
+        break;
+      case 5:
+        r = v;
+        g = p;
+        b = q;
+        break;
     }
     return {
       r: Math.round(r * 255),
@@ -388,15 +408,30 @@ AFRAME.registerComponent('ui', {
     var s = (max === 0 ? 0 : d / max);
     var v = max;
 
-    if (arguments.length === 1) { g = r.g; b = r.b; r = r.r; }
+    if (arguments.length === 1) {
+      g = r.g;
+      b = r.b;
+      r = r.r;
+    }
 
     switch (max) {
-      case min: h = 0; break;
-      case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
-      case g: h = (b - r) + d * 2; h /= 6 * d; break;
-      case b: h = (r - g) + d * 4; h /= 6 * d; break;
+      case min:
+        h = 0;
+        break;
+      case r:
+        h = (g - b) + d * (g < b ? 6 : 0);
+        h /= 6 * d;
+        break;
+      case g:
+        h = (b - r) + d * 2;
+        h /= 6 * d;
+        break;
+      case b:
+        h = (r - g) + d * 4;
+        h /= 6 * d;
+        break;
     }
-    return {h: h, s: s, v: v};
+    return { h: h, s: s, v: v };
   },
 
   onBrightnessDown: function (position) {
@@ -482,7 +517,9 @@ AFRAME.registerComponent('ui', {
       Object.keys(selectedObjects).forEach(function (key) {
         var object = selectedObjects[key];
         var materials = self.highlightMaterials[object.name];
-        if (!materials) { return; }
+        if (!materials) {
+          return;
+        }
         object.material = materials.selected;
       });
     };
@@ -528,7 +565,9 @@ AFRAME.registerComponent('ui', {
     el.addEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.addEventListener('raycaster-intersected', this.onIntersected);
     el.addEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
-    if (!handEl) { return; }
+    if (!handEl) {
+      return;
+    }
     this.addHandListeners();
   },
 
@@ -544,7 +583,9 @@ AFRAME.registerComponent('ui', {
     el.removeEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.removeEventListener('raycaster-intersected', this.onIntersected);
     el.removeEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
-    if (!handEl) { return; }
+    if (!handEl) {
+      return;
+    }
     this.removeHandListeners();
   },
 
@@ -552,7 +593,9 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
     model = evt.detail.model;
-    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) { return; }
+    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) {
+      return;
+    }
 
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
@@ -560,7 +603,19 @@ AFRAME.registerComponent('ui', {
     this.objects.brightnessSlider.geometry.computeBoundingBox();
     this.objects.previousPage = model.getObjectByName('brushprev');
     this.objects.nextPage = model.getObjectByName('brushnext');
-    // this.objects.erase = model.getObjectByName('erase');
+
+    var m = new THREE.MeshPhongMaterial({
+      transparent: false,
+      map: THREE.ImageUtils.loadTexture('./assets/images/erase.png')
+    });
+    var g = new THREE.PlaneGeometry(0.03, 0.03, 0.03);
+    this.objects.erase = new THREE.Mesh(g, m);
+    this.objects.erase.position.x = 0.11;
+    this.objects.erase.position.y = 0;
+    this.objects.erase.position.z = 0.01;
+    this.objects.erase.rotation.x = Math.PI / -2;
+    this.objects.erase.name = 'erase';
+    model.add(this.objects.erase);
 
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
@@ -592,27 +647,23 @@ AFRAME.registerComponent('ui', {
 
     var messagesImageUrl = 'assets/images/messages.png';
 
-      console.log(11111111111111111111111111111);
-      console.log(this.objects);
-      console.log(11111111111111111111111111111);
-
-    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
+    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, { src: messagesImageUrl }, function (texture) {
       var material = self.messagesMaterial;
       material.map = texture;
       material.needsUpdate = true;
     });
 
-    function showMessage (msgObject) {
+    function showMessage(msgObject) {
       msgObject.visible = true;
       var object = { opacity: 0.0 };
       var tween = new AFRAME.TWEEN.Tween(object)
-        .to({opacity: 1.0}, 500)
+        .to({ opacity: 1.0 }, 500)
         .onUpdate(function () {
           self.messagesMaterial.opacity = object.opacity;
         })
         .chain(
           new AFRAME.TWEEN.Tween(object)
-            .to({opacity: 0.0}, 500)
+            .to({ opacity: 0.0 }, 500)
             .delay(3000)
             .onComplete(function () {
               msgObject.visible = false;
@@ -620,7 +671,7 @@ AFRAME.registerComponent('ui', {
             .onUpdate(function () {
               self.messagesMaterial.opacity = object.opacity;
             })
-          );
+        );
 
       tween.start();
     }
@@ -677,7 +728,9 @@ AFRAME.registerComponent('ui', {
       var brushIndex;
       var self = this;
       var i;
-      if (page < 0 || page >= this.brushesPagesNum) { return; }
+      if (page < 0 || page >= this.brushesPagesNum) {
+        return;
+      }
       if (page === 0) {
         this.objects.previousPage.visible = false;
       } else {
@@ -695,20 +748,21 @@ AFRAME.registerComponent('ui', {
         loadBrush(brush, brushNum, thumbnail);
         brushNum += 1;
       }
-      function loadBrush (name, id, thumbnailUrl) {
+      function loadBrush(name, id, thumbnailUrl) {
         var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
         if (thumbnailUrl && !brushesMaterials[brushName]) {
-          self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
+          self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, { src: thumbnailUrl }, onLoadThumbnail);
           return;
         }
         onLoadThumbnail();
-        function onLoadThumbnail (texture) {
+        function onLoadThumbnail(texture) {
           var button = uiEl.getObjectByName('brush' + id);
           self.brushButtonsMapping['brush' + id] = brushName;
           setBrushThumbnail(texture, button);
         }
       }
-      function setBrushThumbnail (texture, button) {
+
+      function setBrushThumbnail(texture, button) {
         var brushName = self.brushButtonsMapping[button.name];
         var material = brushesMaterials[brushName] || new THREE.MeshBasicMaterial();
         if (texture) {
@@ -731,13 +785,17 @@ AFRAME.registerComponent('ui', {
   })(),
 
   nextPage: function () {
-    if (this.brushesPage >= this.brushesPagesNum - 1) { return; }
+    if (this.brushesPage >= this.brushesPagesNum - 1) {
+      return;
+    }
     this.brushesPage++;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
 
   previousPage: function () {
-    if (this.brushesPage === 0) { return; }
+    if (this.brushesPage === 0) {
+      return;
+    }
     this.brushesPage--;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
@@ -780,14 +838,16 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
     var tween;
-    if (!this.closed) { return; }
+    if (!this.closed) {
+      return;
+    }
     this.uiEl.setAttribute('visible', true);
     tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 1, y: 1, z: 1 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+      .to({ x: 1, y: 1, z: 1 }, 100)
+      .onUpdate(function () {
+        uiEl.setAttribute('scale', this);
+      })
+      .easing(AFRAME.TWEEN.Easing.Exponential.Out);
     tween.start();
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
@@ -804,7 +864,9 @@ AFRAME.registerComponent('ui', {
 
   onIntersection: function (evt) {
     var visible = this.closed && this.system.opened;
-    if (this.el.components.brush.active) { return; }
+    if (this.el.components.brush.active) {
+      return;
+    }
     this.rayEl.setAttribute('visible', !!visible);
     this.el.setAttribute('brush', 'enabled', false);
   },
@@ -812,7 +874,9 @@ AFRAME.registerComponent('ui', {
   onIntersected: function (evt) {
     var handEl = evt.detail.el;
     // Remove listeners of previous hand
-    if (this.handEl) { this.removeHandListeners(); }
+    if (this.handEl) {
+      this.removeHandListeners();
+    }
     this.handEl = handEl;
     this.handRayEl = this.handEl.components.ui.rayEl;
     this.menuEls = this.uiEl.object3D.children;
@@ -835,12 +899,16 @@ AFRAME.registerComponent('ui', {
   },
 
   onComponentChanged: function (evt) {
-    if (evt.detail.name === 'brush') { this.syncUI(); }
+    if (evt.detail.name === 'brush') {
+      this.syncUI();
+    }
   },
 
   syncUI: function () {
     var brush;
-    if (!this.handEl || !this.objects) { return; }
+    if (!this.handEl || !this.objects) {
+      return;
+    }
     brush = this.handEl.getAttribute('brush');
     this.updateSizeSlider(brush.size);
     this.updateColorUI(brush.color);
@@ -864,7 +932,9 @@ AFRAME.registerComponent('ui', {
   updateColorHistory: function () {
     var color = this.handEl && this.handEl.getAttribute('brush').color;
     var colorStack = this.colorStack;
-    if (!color) { color = this.el.components.brush.schema.color.default; }
+    if (!color) {
+      color = this.el.components.brush.schema.color.default;
+    }
     this.objects.currentColor.material.color.set(color);
     for (var i = 0; i < colorStack.length; i++) {
       color = colorStack[colorStack.length - i - 1];
@@ -906,7 +976,9 @@ AFRAME.registerComponent('ui', {
     var buttons = Object.keys(this.brushButtonsMapping);
     var brushButtonsMapping = this.brushButtonsMapping;
     buttons.forEach(function (id) {
-      if (brushButtonsMapping[id] !== brush) { return; }
+      if (brushButtonsMapping[id] !== brush) {
+        return;
+      }
       self.selectBrushButton(id);
     });
   },
@@ -918,17 +990,23 @@ AFRAME.registerComponent('ui', {
   },
 
   onIntersectedCleared: function (evt) {
-    if (!this.handEl) { return; }
+    if (!this.handEl) {
+      return;
+    }
     this.handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
   },
 
   onStrokeStarted: function () {
     var color;
     var colorStack = this.colorStack;
-    if (!this.colorHasChanged) { return; }
+    if (!this.colorHasChanged) {
+      return;
+    }
     color = this.handEl.getAttribute('brush').color;
     this.colorHasChanged = false;
-    if (colorStack.length === 7) { colorStack.shift(); }
+    if (colorStack.length === 7) {
+      colorStack.shift();
+    }
     colorStack.push(color);
     this.syncUI();
   },
@@ -960,16 +1038,18 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var coords = { x: 1, y: 1, z: 1 };
     var tween;
-    if (this.closed) { return; }
+    if (this.closed) {
+      return;
+    }
     tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 0, y: 0, z: 0 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .onComplete(function () {
-          uiEl.setAttribute('visible', false);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+      .to({ x: 0, y: 0, z: 0 }, 100)
+      .onUpdate(function () {
+        uiEl.setAttribute('scale', this);
+      })
+      .onComplete(function () {
+        uiEl.setAttribute('visible', false);
+      })
+      .easing(AFRAME.TWEEN.Easing.Exponential.Out);
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
