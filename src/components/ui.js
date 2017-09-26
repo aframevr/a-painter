@@ -11,6 +11,7 @@ AFRAME.registerComponent('ui', {
     this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
+    this.currentHand = {};
     this.highlightMaterials = {};
     this.intersectedObjects = [];
     this.hoveredOffObjects = [];
@@ -19,6 +20,7 @@ AFRAME.registerComponent('ui', {
     this.selectedObjects = {};
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
+    this.currentHand = '';
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
     this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
@@ -89,6 +91,11 @@ AFRAME.registerComponent('ui', {
       }
     });
 
+    var scene = this.uiEl.parentNode.parentNode;
+
+    scene.addEventListener('triggerdown', function(evt) {
+      self.currentHand = evt.detail.target.id;
+    })
   },
 
   initColorWheel: function () {
@@ -236,23 +243,26 @@ AFRAME.registerComponent('ui', {
     this.pressedObjects[name] = object;
   },
 
-  changeBrushToErase: function (hand) {
+  changeBrushToErase: function () {
+    var hand = document.getElementById(this.currentHand);
     hand.setAttribute('raycaster', {
       showLine: true,
-      recursive: false,
-      interval: 1000
+      objects: '.a-stroke',
+      recursive: true
     });
     hand.setAttribute('line', {
-      color: "orange",
+      color: "#FF0000",
       opacity: 0.5
     });
-    hand.removeAttribute('brush');
+    hand.setAttribute('brush', 'eraseEnabled', true);
   },
 
-  changeEraseToBrush: function (hand) {
+  changeEraseToBrush: function () {
+    var hand = document.getElementById(this.currentHand);
+
     hand.removeAttribute('raycaster');
     hand.removeAttribute('line');
-    hand.setAttribute('brush');
+    hand.setAttribute('brush', 'eraseEnabled', false);
   },
 
   copyBrush: function () {
@@ -300,7 +310,7 @@ AFRAME.registerComponent('ui', {
 
   onBrushDown: function (name) {
 
-    this.changeEraseToBrush(hand);
+    this.changeEraseToBrush();
 
     var brushName = this.brushButtonsMapping[name];
     if (!brushName) {
@@ -1050,7 +1060,7 @@ AFRAME.registerComponent('ui', {
         uiEl.setAttribute('visible', false);
       })
       .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();
+    tween.start();S
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
   }

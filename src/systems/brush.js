@@ -48,7 +48,7 @@ AFRAME.registerBrush = function (name, definition, options) {
         brush: {
           index: system.getUsedBrushes().indexOf(this.brushName),
           color: Utils.arrayNumbersToFixed(this.data.color.toArray()),
-          size: Utils.numberToFixed(this.data.size),
+          size: Utils.numberToFixed(this.data.size),S
         },
         points: points
       };
@@ -242,7 +242,8 @@ AFRAME.registerSystem('brush', {
     }
 
     var entity = document.createElement('a-entity');
-    entity.className = "a-stroke erase-raycast";
+    entity.className = "a-stroke";
+    drawing.setAttribute('erase-raycast', '');
     drawing.appendChild(entity);
 
     entity.setObject3D('mesh', stroke.object3D);
