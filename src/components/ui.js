@@ -48,6 +48,7 @@ AFRAME.registerComponent('ui', {
 
     // Ray entity setup
     rayEl.setAttribute('line', '');
+
     //rayEl.setAttribute('visible', false);
     el.appendChild(rayEl);
 
@@ -64,7 +65,7 @@ AFRAME.registerComponent('ui', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
-
+      self.tooltips = Utils.getTooltips(controllerName);
       self.controller = {
         name: controllerName,
         hand: evt.detail.component.data.hand
@@ -79,8 +80,10 @@ AFRAME.registerComponent('ui', {
         });
       } else if (controllerName === 'windows-motion-controls') {
         self.rayAngle = 25;
+        self.rayDistance = 1;
         el.setAttribute('ui-raycaster', {
-          rotation: -30
+          rotation: -30,
+          far: self.rayDistance
         });
       }
 
@@ -726,6 +729,11 @@ AFRAME.registerComponent('ui', {
       this.system.closeAll();
       this.open();
       this.system.opened = this.el;
+      if (!!this.tooltips) {
+        this.tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', false);
+        });
+      }
     } else {
       this.close();
       this.system.opened = undefined;

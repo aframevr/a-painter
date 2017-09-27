@@ -1,4 +1,4 @@
-window.Utils = function() {
+window.Utils = (function() {
     const DIGITS = 6;
     function numberToFixed (number) {
         return parseFloat(number.toFixed(DIGITS));
@@ -11,8 +11,34 @@ window.Utils = function() {
         return this;
     }
 
+    function getTooltips (controllerName) {
+        var tooltips;
+        var tooltipName;
+        switch (controllerName) {
+            case 'windows-motion-controls': {
+                tooltipName = '.windows-motion-tooltips';
+                break;
+            }
+            case 'oculus-touch-controls': {
+                tooltipName = '.oculus-tooltips';
+                break;
+            }
+            case 'vive-controls': {
+                tooltipName = '.vive-tooltips';
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        tooltips = Array.prototype.slice.call(document.querySelectorAll(tooltipName));
+        return tooltips;
+    }
+
     return {
         numberToFixed: numberToFixed,
-        arrayNumbersToFixed: arrayNumbersToFixed
+        arrayNumbersToFixed: arrayNumbersToFixed,
+        getTooltips: getTooltips
     }
-}
+}());
