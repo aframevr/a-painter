@@ -120,7 +120,7 @@ AFRAME.registerComponent('paint-controls', {
         var object = { opacity: 1.0 };
 
         var tween = new AFRAME.TWEEN.Tween(object)
-          .to({opacity: 0.0}, 4000)
+          .to({opacity: 0.0}, 1000)
           .onComplete(function () {
             tooltips.forEach(function (tooltip) {
               tooltip.setAttribute('visible', false);

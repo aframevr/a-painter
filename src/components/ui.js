@@ -8,6 +8,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
+    this.isTooltipPaused = false;
     this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
@@ -729,11 +730,6 @@ AFRAME.registerComponent('ui', {
       this.system.closeAll();
       this.open();
       this.system.opened = this.el;
-      if (!!this.tooltips) {
-        this.tooltips.forEach(function (tooltip) {
-          tooltip.setAttribute('visible', false);
-        });
-      }
     } else {
       this.close();
       this.system.opened = undefined;
@@ -756,6 +752,16 @@ AFRAME.registerComponent('ui', {
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
+
+    if (!!this.tooltips) {
+      var self = this;
+      this.tooltips.forEach(function (tooltip) {
+        if (tooltip.getAttribute('visible') && uiEl.parentEl.id !== tooltip.parentEl.id) {
+          self.isTooltipPaused = true;
+          tooltip.setAttribute('visible', false);
+        }
+      });
+    }
   },
 
   updateIntersections: (function () {
@@ -937,5 +943,12 @@ AFRAME.registerComponent('ui', {
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
+
+    if (!!this.tooltips && this.isTooltipPaused) {
+      this.isTooltipPaused = false;
+      this.tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', true);
+      });
+    }
   }
 });
