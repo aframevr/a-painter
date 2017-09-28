@@ -1,24 +1,29 @@
 AFRAME.registerComponent('erase-raycast', {
   init: function () {
-    this.intersectedElement = '';
+    // this.intersectedEls = [];
     var self = this;
-    var el = this.el;
 
-    this.el.addEventListener('raycaster-intersected', function (evt) {
-      var element = evt.detail.target;
-      self.intersectedElement = element.object3D.uuid;
+    var sel = null;
+
+    this.el.addEventListener('raycaster-intersection', function (evt) {
+      sel = evt.detail.els[0];
     });
 
-    this.el.addEventListener('raycaster-intersected-cleared', function (evt) {
-      this.intersectedElement = '';
+    this.el.addEventListener('raycaster-intersection-cleared', function (evt) {
+      sel = null;
+      self.el.components.raycaster.refreshObjects();
     });
 
     this.el.parentNode.addEventListener('triggerdown', function (evt) {
-      self.remove(self.intersectedElement);
+      if (sel) {
+        self.remove(sel);
+        self.el.components.raycaster.refreshObjects();
+        sel = null;
+      }
     });
   },
 
-  remove: function(element) {
+  remove: function (element) {
     var self = this;
     var el = this.el;
 
@@ -27,8 +32,8 @@ AFRAME.registerComponent('erase-raycast', {
     var brushSystem = el.parentNode.systems.brush;
     var strokes = brushSystem.strokes;
 
-    for(var i = strokes.length-1; i >= 0; i--){
-      if(strokes[i].entity.object3D.uuid !== element) continue;
+    for (var i = strokes.length - 1; i >= 0; i--) {
+      if (strokes[i].entity.object3D.uuid !== element.object3D.uuid) continue;
       stroke = strokes.splice(i, 1)[0];
       break;
     }
@@ -38,5 +43,5 @@ AFRAME.registerComponent('erase-raycast', {
       entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
     }
-  }
+  },
 });

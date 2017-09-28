@@ -29,6 +29,7 @@ AFRAME.registerComponent('ui-raycaster', {
     this.raycaster = new THREE.Raycaster();
     this.updateOriginDirection();
     this.refreshObjects = this.refreshObjects.bind(this);
+
   },
 
   play: function () {

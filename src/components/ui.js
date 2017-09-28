@@ -249,7 +249,9 @@ AFRAME.registerComponent('ui', {
       showLine: true,
       objects: '.a-stroke',
       recursive: true
+      // interval: 25
     });
+    hand.setAttribute('erase-raycast', '');
     hand.setAttribute('line', {
       color: "#FF0000",
       opacity: 0.5
@@ -304,6 +306,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onColorHistoryButtonDown: function (object) {
+    this.changeEraseToBrush();
     var color = object.material.color.getHexString();
     this.handEl.setAttribute('brush', 'color', '#' + color);
   },
@@ -336,6 +339,9 @@ AFRAME.registerComponent('ui', {
   },
 
   onHueDown: function (position) {
+
+    this.changeEraseToBrush();
+
     var hueWheel = this.objects.hueWheel;
     var polarPosition;
     var radius = this.colorWheelSize;
@@ -616,7 +622,7 @@ AFRAME.registerComponent('ui', {
 
     var m = new THREE.MeshPhongMaterial({
       transparent: false,
-      map: THREE.ImageUtils.loadTexture('./assets/images/erase.png')
+      map: THREE.ImageUtils.loadTexture('./assets/images/eraser.png')
     });
     var g = new THREE.PlaneGeometry(0.03, 0.03, 0.03);
     this.objects.erase = new THREE.Mesh(g, m);
@@ -1060,7 +1066,7 @@ AFRAME.registerComponent('ui', {
         uiEl.setAttribute('visible', false);
       })
       .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();S
+    tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
   }

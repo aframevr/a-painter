@@ -243,11 +243,12 @@ AFRAME.registerSystem('brush', {
 
     var entity = document.createElement('a-entity');
     entity.className = "a-stroke";
-    drawing.setAttribute('erase-raycast', '');
     drawing.appendChild(entity);
 
     entity.setObject3D('mesh', stroke.object3D);
     stroke.entity = entity;
+
+    console.log(this.strokes);
 
     return stroke;
   },
