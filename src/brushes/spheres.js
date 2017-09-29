@@ -38,7 +38,6 @@ AFRAME.registerBrush('spheres',
     },
     // This function is called on every frame
     tick: function (time, delta) {
-      return;
       for (var i = 0; i < this.object3D.children.length; i++) {
         var sphere = this.object3D.children[i];
         // Calculate the sine value based on the time and the phase for this sphere
