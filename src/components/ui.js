@@ -718,7 +718,6 @@ AFRAME.registerComponent('ui', {
           setBrushThumbnail(texture, button);
         }
       }
-
       function setBrushThumbnail (texture, button) {
         var brushName = self.brushButtonsMapping[button.name];
         var material = brushesMaterials[brushName] || new THREE.MeshBasicMaterial();
