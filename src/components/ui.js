@@ -554,9 +554,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
     model = evt.detail.model;
-    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) {
-      return;
-    }
+    if (evt.detail.format !== 'obj' || !model.getObjectByName('brightnesscursor')) { return; }
 
     this.objects = {};
     this.objects.brightnessCursor = model.getObjectByName('brightnesscursor');
@@ -608,23 +606,23 @@ AFRAME.registerComponent('ui', {
 
     var messagesImageUrl = 'assets/images/messages.png';
 
-    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, { src: messagesImageUrl }, function (texture) {
+    this.el.sceneEl.systems.material.loadTexture(messagesImageUrl, {src: messagesImageUrl}, function (texture) {
       var material = self.messagesMaterial;
       material.map = texture;
       material.needsUpdate = true;
     });
 
-    function showMessage(msgObject) {
+    function showMessage (msgObject) {
       msgObject.visible = true;
       var object = { opacity: 0.0 };
       var tween = new AFRAME.TWEEN.Tween(object)
-        .to({ opacity: 1.0 }, 500)
+        .to({opacity: 1.0}, 500)
         .onUpdate(function () {
           self.messagesMaterial.opacity = object.opacity;
         })
         .chain(
           new AFRAME.TWEEN.Tween(object)
-            .to({ opacity: 0.0 }, 500)
+            .to({opacity: 0.0}, 500)
             .delay(3000)
             .onComplete(function () {
               msgObject.visible = false;
@@ -689,9 +687,7 @@ AFRAME.registerComponent('ui', {
       var brushIndex;
       var self = this;
       var i;
-      if (page < 0 || page >= this.brushesPagesNum) {
-        return;
-      }
+      if (page < 0 || page >= this.brushesPagesNum) { return; }
       if (page === 0) {
         this.objects.previousPage.visible = false;
       } else {
@@ -709,21 +705,21 @@ AFRAME.registerComponent('ui', {
         loadBrush(brush, brushNum, thumbnail);
         brushNum += 1;
       }
-      function loadBrush(name, id, thumbnailUrl) {
+      function loadBrush (name, id, thumbnailUrl) {
         var brushName = !name ? undefined : (name.charAt(0).toUpperCase() + name.slice(1)).toLowerCase();
         if (thumbnailUrl && !brushesMaterials[brushName]) {
-          self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, { src: thumbnailUrl }, onLoadThumbnail);
+          self.el.sceneEl.systems.material.loadTexture(thumbnailUrl, {src: thumbnailUrl}, onLoadThumbnail);
           return;
         }
         onLoadThumbnail();
-        function onLoadThumbnail(texture) {
+        function onLoadThumbnail (texture) {
           var button = uiEl.getObjectByName('brush' + id);
           self.brushButtonsMapping['brush' + id] = brushName;
           setBrushThumbnail(texture, button);
         }
       }
 
-      function setBrushThumbnail(texture, button) {
+      function setBrushThumbnail (texture, button) {
         var brushName = self.brushButtonsMapping[button.name];
         var material = brushesMaterials[brushName] || new THREE.MeshBasicMaterial();
         if (texture) {
@@ -746,17 +742,13 @@ AFRAME.registerComponent('ui', {
   })(),
 
   nextPage: function () {
-    if (this.brushesPage >= this.brushesPagesNum - 1) {
-      return;
-    }
+    if (this.brushesPage >= this.brushesPagesNum - 1) { return; }
     this.brushesPage++;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
 
   previousPage: function () {
-    if (this.brushesPage === 0) {
-      return;
-    }
+    if (this.brushesPage === 0) { return; }
     this.brushesPage--;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
   },
@@ -799,9 +791,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
     var tween;
-    if (!this.closed) {
-      return;
-    }
+    if (!this.closed) { return; }
     this.uiEl.setAttribute('visible', true);
     tween = new AFRAME.TWEEN.Tween(coords)
       .to({ x: 1, y: 1, z: 1 }, 100)
@@ -825,9 +815,7 @@ AFRAME.registerComponent('ui', {
 
   onIntersection: function (evt) {
     var visible = this.closed && this.system.opened;
-    if (this.el.components.brush.active) {
-      return;
-    }
+    if (this.el.components.brush.active) { return; }
     this.rayEl.setAttribute('visible', !!visible);
     this.el.setAttribute('brush', 'enabled', false);
   },
@@ -835,9 +823,7 @@ AFRAME.registerComponent('ui', {
   onIntersected: function (evt) {
     var handEl = evt.detail.el;
     // Remove listeners of previous hand
-    if (this.handEl) {
-      this.removeHandListeners();
-    }
+    if (this.handEl) { this.removeHandListeners(); }
     this.handEl = handEl;
     this.handRayEl = this.handEl.components.ui.rayEl;
     this.menuEls = this.uiEl.object3D.children;
@@ -860,16 +846,12 @@ AFRAME.registerComponent('ui', {
   },
 
   onComponentChanged: function (evt) {
-    if (evt.detail.name === 'brush') {
-      this.syncUI();
-    }
+    if (evt.detail.name === 'brush') { this.syncUI(); }
   },
 
   syncUI: function () {
     var brush;
-    if (!this.handEl || !this.objects) {
-      return;
-    }
+    if (!this.handEl || !this.objects) { return; }
     brush = this.handEl.getAttribute('brush');
     this.updateSizeSlider(brush.size);
     this.updateColorUI(brush.color);
@@ -893,9 +875,7 @@ AFRAME.registerComponent('ui', {
   updateColorHistory: function () {
     var color = this.handEl && this.handEl.getAttribute('brush').color;
     var colorStack = this.colorStack;
-    if (!color) {
-      color = this.el.components.brush.schema.color.default;
-    }
+    if (!color) { color = this.el.components.brush.schema.color.default; }
     this.objects.currentColor.material.color.set(color);
     for (var i = 0; i < colorStack.length; i++) {
       color = colorStack[colorStack.length - i - 1];
@@ -937,9 +917,7 @@ AFRAME.registerComponent('ui', {
     var buttons = Object.keys(this.brushButtonsMapping);
     var brushButtonsMapping = this.brushButtonsMapping;
     buttons.forEach(function (id) {
-      if (brushButtonsMapping[id] !== brush) {
-        return;
-      }
+      if (brushButtonsMapping[id] !== brush) { return; }
       self.selectBrushButton(id);
     });
   },
@@ -951,23 +929,17 @@ AFRAME.registerComponent('ui', {
   },
 
   onIntersectedCleared: function (evt) {
-    if (!this.handEl) {
-      return;
-    }
+    if (!this.handEl) { return; }
     this.handEl.removeEventListener('triggerchanged', this.onTriggerChanged);
   },
 
   onStrokeStarted: function () {
     var color;
     var colorStack = this.colorStack;
-    if (!this.colorHasChanged) {
-      return;
-    }
+    if (!this.colorHasChanged) { return; }
     color = this.handEl.getAttribute('brush').color;
     this.colorHasChanged = false;
-    if (colorStack.length === 7) {
-      colorStack.shift();
-    }
+    if (colorStack.length === 7) { colorStack.shift(); }
     colorStack.push(color);
     this.syncUI();
   },
@@ -999,9 +971,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl;
     var coords = { x: 1, y: 1, z: 1 };
     var tween;
-    if (this.closed) {
-      return;
-    }
+    if (this.closed) { return; }
     tween = new AFRAME.TWEEN.Tween(coords)
       .to({ x: 0, y: 0, z: 0 }, 100)
       .onUpdate(function () {
