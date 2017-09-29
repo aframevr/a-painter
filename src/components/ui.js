@@ -296,7 +296,7 @@ AFRAME.registerComponent('ui', {
   handlePressedButtons: function () {
     var self = this;
     if (!this.triggeredPressed) { return; }
-    this.hoveredOnObjects.forEach(function triggerAction(button) {
+    this.hoveredOnObjects.forEach(function triggerAction (button) {
       self.handleButtonDown(button.object, button.point);
     });
   },
@@ -393,23 +393,12 @@ AFRAME.registerComponent('ui', {
     if (arguments.length === 1) { g = r.g; b = r.b; r = r.r; }
 
     switch (max) {
-      case min:
-        h = 0;
-        break;
-      case r:
-        h = (g - b) + d * (g < b ? 6 : 0);
-        h /= 6 * d;
-        break;
-      case g:
-        h = (b - r) + d * 2;
-        h /= 6 * d;
-        break;
-      case b:
-        h = (r - g) + d * 4;
-        h /= 6 * d;
-        break;
+      case min: h = 0; break;
+      case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
+      case g: h = (b - r) + d * 2; h /= 6 * d; break;
+      case b: h = (r - g) + d * 4; h /= 6 * d; break;
     }
-    return { h: h, s: s, v: v };
+    return {h: h, s: s, v: v};
   },
 
   onBrightnessDown: function (position) {
@@ -495,9 +484,7 @@ AFRAME.registerComponent('ui', {
       Object.keys(selectedObjects).forEach(function (key) {
         var object = selectedObjects[key];
         var materials = self.highlightMaterials[object.name];
-        if (!materials) {
-          return;
-        }
+        if (!materials) { return; }
         object.material = materials.selected;
       });
     };
@@ -543,9 +530,7 @@ AFRAME.registerComponent('ui', {
     el.addEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.addEventListener('raycaster-intersected', this.onIntersected);
     el.addEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
-    if (!handEl) {
-      return;
-    }
+    if (!handEl) { return; }
     this.addHandListeners();
   },
 
@@ -561,9 +546,7 @@ AFRAME.registerComponent('ui', {
     el.removeEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
     el.removeEventListener('raycaster-intersected', this.onIntersected);
     el.removeEventListener('raycaster-intersected-cleared', this.onIntersectedCleared);
-    if (!handEl) {
-      return;
-    }
+    if (!handEl) { return; }
     this.removeHandListeners();
   },
 
