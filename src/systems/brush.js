@@ -48,7 +48,7 @@ AFRAME.registerBrush = function (name, definition, options) {
         brush: {
           index: system.getUsedBrushes().indexOf(this.brushName),
           color: Utils.arrayNumbersToFixed(this.data.color.toArray()),
-          size: Utils.numberToFixed(this.data.size),S
+          size: Utils.numberToFixed(this.data.size),
         },
         points: points
       };
@@ -247,8 +247,6 @@ AFRAME.registerSystem('brush', {
 
     entity.setObject3D('mesh', stroke.object3D);
     stroke.entity = entity;
-
-    console.log(this.strokes);
 
     return stroke;
   },
