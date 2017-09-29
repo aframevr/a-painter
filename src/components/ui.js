@@ -11,7 +11,6 @@ AFRAME.registerComponent('ui', {
     this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
-    this.currentHand = {};
     this.highlightMaterials = {};
     this.intersectedObjects = [];
     this.hoveredOffObjects = [];
@@ -247,7 +246,6 @@ AFRAME.registerComponent('ui', {
       showLine: true,
       objects: '.a-stroke',
       recursive: true
-      // interval: 25
     });
     hand.setAttribute('erase-raycast', '');
     hand.setAttribute('line', {
@@ -262,6 +260,7 @@ AFRAME.registerComponent('ui', {
 
     hand.removeAttribute('raycaster');
     hand.removeAttribute('line');
+    hand.removeAttribute('erase-raycast');
     hand.setAttribute('brush', 'eraseEnabled', false);
   },
 

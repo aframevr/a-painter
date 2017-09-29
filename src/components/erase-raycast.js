@@ -1,6 +1,5 @@
 AFRAME.registerComponent('erase-raycast', {
   init: function () {
-    // this.intersectedEls = [];
     var self = this;
 
     var sel = null;
