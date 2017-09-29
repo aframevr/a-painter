@@ -70,7 +70,7 @@ AFRAME.registerComponent('ui', {
       self.controller = {
         name: controllerName,
         hand: evt.detail.component.data.hand
-      };
+      }
 
       if (controllerName === 'oculus-touch-controls') {
         self.uiEl.setAttribute('rotation', '45 0 0');
@@ -175,9 +175,7 @@ AFRAME.registerComponent('ui', {
 
   handleButtonDown: function (object, position) {
     var name = object.name;
-    if (this.activeWidget && this.activeWidget !== name) {
-      return;
-    }
+    if (this.activeWidget && this.activeWidget !== name) { return; }
     this.activeWidget = name;
     switch (true) {
       case name === 'brightness': {
@@ -297,9 +295,7 @@ AFRAME.registerComponent('ui', {
 
   handlePressedButtons: function () {
     var self = this;
-    if (!this.triggeredPressed) {
-      return;
-    }
+    if (!this.triggeredPressed) { return; }
     this.hoveredOnObjects.forEach(function triggerAction(button) {
       self.handleButtonDown(button.object, button.point);
     });
@@ -312,13 +308,9 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrushDown: function (name) {
-
     this.changeEraseToBrush();
-
     var brushName = this.brushButtonsMapping[name];
-    if (!brushName) {
-      return;
-    }
+    if (!brushName) { return; }
     this.selectBrushButton(name);
     this.handEl.setAttribute('brush', 'brush', brushName.toLowerCase());
   },
@@ -339,9 +331,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onHueDown: function (position) {
-
     this.changeEraseToBrush();
-
     var hueWheel = this.objects.hueWheel;
     var polarPosition;
     var radius = this.colorWheelSize;
@@ -378,36 +368,12 @@ AFRAME.registerComponent('ui', {
     q = v * (1 - f * s);
     t = v * (1 - (1 - f) * s);
     switch (i % 6) {
-      case 0:
-        r = v;
-        g = t;
-        b = p;
-        break;
-      case 1:
-        r = q;
-        g = v;
-        b = p;
-        break;
-      case 2:
-        r = p;
-        g = v;
-        b = t;
-        break;
-      case 3:
-        r = p;
-        g = q;
-        b = v;
-        break;
-      case 4:
-        r = t;
-        g = p;
-        b = v;
-        break;
-      case 5:
-        r = v;
-        g = p;
-        b = q;
-        break;
+      case 0: r = v; g = t; b = p; break;
+      case 1: r = q; g = v; b = p; break;
+      case 2: r = p; g = v; b = t; break;
+      case 3: r = p; g = q; b = v; break;
+      case 4: r = t; g = p; b = v; break;
+      case 5: r = v; g = p; b = q; break;
     }
     return {
       r: Math.round(r * 255),
@@ -424,11 +390,7 @@ AFRAME.registerComponent('ui', {
     var s = (max === 0 ? 0 : d / max);
     var v = max;
 
-    if (arguments.length === 1) {
-      g = r.g;
-      b = r.b;
-      r = r.r;
-    }
+    if (arguments.length === 1) { g = r.g; b = r.b; r = r.r; }
 
     switch (max) {
       case min:
