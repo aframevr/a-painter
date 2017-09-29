@@ -42,5 +42,5 @@ AFRAME.registerComponent('erase-raycast', {
       entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
     }
-  },
+  }
 });
