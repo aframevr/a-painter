@@ -34,8 +34,8 @@ AFRAME.registerComponent('paint-controls', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
+      tooltips = Utils.getTooltips(controllerName);
       if (controllerName === 'windows-motion-controls') {
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.windows-motion-tooltips'));
         el.setAttribute('teleport-controls', {button: 'auto', axis: 'auto'});
         el.addEventListener('trackpaddown', function (evt) {
           self.trackpadDown = true;
@@ -65,7 +65,6 @@ AFRAME.registerComponent('paint-controls', {
         var hand = evt.detail.component.data.hand;
         el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
         el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.oculus-tooltips'));
         el.addEventListener('axismove', function (evt) {
           onAxisMove(evt);
         });
@@ -73,7 +72,6 @@ AFRAME.registerComponent('paint-controls', {
       } else if (controllerName === 'vive-controls') {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
         el.setAttribute('teleport-controls', {button: 'trackpad'});
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
         el.addEventListener('axismove', function (evt) {
           if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
 
@@ -137,7 +135,7 @@ AFRAME.registerComponent('paint-controls', {
         var object = { opacity: 1.0 };
 
         var tween = new AFRAME.TWEEN.Tween(object)
-          .to({opacity: 0.0}, 4000)
+          .to({opacity: 0.0}, 1000)
           .onComplete(function () {
             tooltips.forEach(function (tooltip) {
               tooltip.setAttribute('visible', false);

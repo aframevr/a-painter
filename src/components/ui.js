@@ -8,6 +8,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
+    this.isTooltipPaused = false;
     this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
@@ -48,6 +49,7 @@ AFRAME.registerComponent('ui', {
 
     // Ray entity setup
     rayEl.setAttribute('line', '');
+
     //rayEl.setAttribute('visible', false);
     el.appendChild(rayEl);
 
@@ -64,7 +66,7 @@ AFRAME.registerComponent('ui', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
-
+      self.tooltips = Utils.getTooltips(controllerName);
       self.controller = {
         name: controllerName,
         hand: evt.detail.component.data.hand
@@ -79,8 +81,10 @@ AFRAME.registerComponent('ui', {
         });
       } else if (controllerName === 'windows-motion-controls') {
         self.rayAngle = 25;
+        self.rayDistance = 1;
         el.setAttribute('ui-raycaster', {
-          rotation: -30
+          rotation: -30,
+          far: self.rayDistance
         });
       }
 
@@ -748,6 +752,16 @@ AFRAME.registerComponent('ui', {
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
+
+    if (!!this.tooltips) {
+      var self = this;
+      this.tooltips.forEach(function (tooltip) {
+        if (tooltip.getAttribute('visible') && uiEl.parentEl.id !== tooltip.parentEl.id) {
+          self.isTooltipPaused = true;
+          tooltip.setAttribute('visible', false);
+        }
+      });
+    }
   },
 
   updateIntersections: (function () {
@@ -929,5 +943,12 @@ AFRAME.registerComponent('ui', {
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
+
+    if (!!this.tooltips && this.isTooltipPaused) {
+      this.isTooltipPaused = false;
+      this.tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', true);
+      });
+    }
   }
 });
