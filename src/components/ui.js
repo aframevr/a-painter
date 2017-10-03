@@ -20,6 +20,7 @@ AFRAME.registerComponent('ui', {
     this.selectedObjects = {};
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
+    this.currentHand = '';
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
     this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
@@ -92,6 +93,12 @@ AFRAME.registerComponent('ui', {
         self.addToggleEvent();
       }
     });
+
+    var scene = this.uiEl.parentNode.parentNode;
+
+    scene.addEventListener('triggerdown', function(evt) {
+      self.currentHand = evt.detail.target.id;
+    })
   },
 
   initColorWheel: function () {
@@ -196,6 +203,12 @@ AFRAME.registerComponent('ui', {
         }
         break;
       }
+      case name === 'erase': {
+        if (!this.pressedObjects[name]) {
+          this.changeBrushToErase();
+        }
+        break;
+      }
       case name === 'copy': {
         if (!this.pressedObjects[name]) {
           this.copyBrush();
@@ -229,6 +242,30 @@ AFRAME.registerComponent('ui', {
       }
     }
     this.pressedObjects[name] = object;
+  },
+
+  changeBrushToErase: function () {
+    var hand = document.getElementById(this.currentHand);
+    hand.setAttribute('raycaster', {
+      showLine: true,
+      objects: '.a-drawing',
+      recursive: true
+    });
+    hand.setAttribute('erase-raycast', '');
+    hand.setAttribute('line', {
+      color: "#FF0000",
+      opacity: 0.5
+    });
+    hand.setAttribute('brush', 'eraseEnabled', true);
+  },
+
+  changeEraseToBrush: function () {
+    var hand = document.getElementById(this.currentHand);
+
+    hand.removeAttribute('raycaster');
+    hand.removeAttribute('line');
+    hand.removeAttribute('erase-raycast');
+    hand.setAttribute('brush', 'eraseEnabled', false);
   },
 
   copyBrush: function () {
@@ -268,11 +305,13 @@ AFRAME.registerComponent('ui', {
   },
 
   onColorHistoryButtonDown: function (object) {
+    this.changeEraseToBrush();
     var color = object.material.color.getHexString();
     this.handEl.setAttribute('brush', 'color', '#' + color);
   },
 
   onBrushDown: function (name) {
+    this.changeEraseToBrush();
     var brushName = this.brushButtonsMapping[name];
     if (!brushName) { return; }
     this.selectBrushButton(name);
@@ -295,6 +334,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onHueDown: function (position) {
+    this.changeEraseToBrush();
     var hueWheel = this.objects.hueWheel;
     var polarPosition;
     var radius = this.colorWheelSize;
@@ -526,6 +566,19 @@ AFRAME.registerComponent('ui', {
     this.objects.previousPage = model.getObjectByName('brushprev');
     this.objects.nextPage = model.getObjectByName('brushnext');
 
+    var m = new THREE.MeshPhongMaterial({
+      transparent: false,
+      map: THREE.ImageUtils.loadTexture('./assets/images/eraser.png')
+    });
+    var g = new THREE.PlaneGeometry(0.03, 0.03, 0.03);
+    this.objects.erase = new THREE.Mesh(g, m);
+    this.objects.erase.position.x = 0.11;
+    this.objects.erase.position.y = 0;
+    this.objects.erase.position.z = 0.01;
+    this.objects.erase.rotation.x = Math.PI / -2;
+    this.objects.erase.name = 'erase';
+    model.add(this.objects.erase);
+
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
     this.objects.hueWheel.geometry.computeBoundingSphere();
@@ -580,7 +633,7 @@ AFRAME.registerComponent('ui', {
             .onUpdate(function () {
               self.messagesMaterial.opacity = object.opacity;
             })
-          );
+        );
 
       tween.start();
     }
@@ -743,11 +796,11 @@ AFRAME.registerComponent('ui', {
     if (!this.closed) { return; }
     this.uiEl.setAttribute('visible', true);
     tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 1, y: 1, z: 1 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+      .to({ x: 1, y: 1, z: 1 }, 100)
+      .onUpdate(function () {
+        uiEl.setAttribute('scale', this);
+      })
+      .easing(AFRAME.TWEEN.Easing.Exponential.Out);
     tween.start();
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
@@ -932,14 +985,14 @@ AFRAME.registerComponent('ui', {
     var tween;
     if (this.closed) { return; }
     tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 0, y: 0, z: 0 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .onComplete(function () {
-          uiEl.setAttribute('visible', false);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
+      .to({ x: 0, y: 0, z: 0 }, 100)
+      .onUpdate(function () {
+        uiEl.setAttribute('scale', this);
+      })
+      .onComplete(function () {
+        uiEl.setAttribute('visible', false);
+      })
+      .easing(AFRAME.TWEEN.Easing.Exponential.Out);
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;

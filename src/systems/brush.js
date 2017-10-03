@@ -105,6 +105,12 @@ AFRAME.registerBrush = function (name, definition, options) {
         return;
       }
       if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
+        // The next statement is for raycasting
+        this.object3D.traverse(function bindEl (child) {
+          if (!child.el) {
+            child.el = child.parent.el;
+          }
+        });
         this.data.numPoints++;
         this.data.points.push({
           'position': position.clone(),
@@ -143,26 +149,42 @@ AFRAME.registerSystem('brush', {
   getBrushByName: function (name) {
     return AFRAME.BRUSHES[name];
   },
-  undo: function () {
-  	var stroke;
-    for (var i = this.strokes.length - 1; i >= 0; i--) {
-      if (this.strokes[i].data.owner !== 'local') continue;
+  removeStroke: function (stroke) {
+    if (stroke.data.owner !== 'local') return false;
+    for (var i = this.strokes.length-1; i >= 0; i--) {
+      if (this.strokes[i] !== stroke) continue;
       stroke = this.strokes.splice(i, 1)[0];
-      break;
     }
     if (stroke) {
       var entity = stroke.entity;
       entity.emit('stroke-removed', {entity: entity});
       entity.parentNode.removeChild(entity);
+      return true;
+    }
+    return false;
+  },
+  removeStrokeEntity: function (stroke) {
+    if (stroke.data.owner !== 'local') return false;
+    var entity = stroke.entity;
+    entity.emit('stroke-removed', {entity: entity});
+    entity.parentNode.removeChild(entity);
+    return true;
+  },
+  undo: function () {
+  	var stroke;
+    for (var i = this.strokes.length-1; i >= 0; i--) {
+      if (this.strokes[i].data.owner !== 'local') continue;
+      stroke = this.strokes.splice(i, 1)[0];
+      break;
+    }
+    if (stroke) {
+      this.removeStrokeEntity(stroke);
     }
   },
   clear: function () {
     // Remove all the stroke entities
     for (var i = 0; i < this.strokes.length; i++) {
-      if(this.strokes[i].data.owner !== 'local') continue;
-      var entity = this.strokes[i].entity;
-      entity.emit('stroke-removed', {entity: entity});
-      entity.parentNode.removeChild(entity);
+      this.removeStrokeEntity(this.strokes[i]);
     }
 
     // Reset the used brushes

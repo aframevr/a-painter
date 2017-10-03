@@ -51,6 +51,7 @@ AFRAME.registerComponent('brush', {
 
     this.el.addEventListener('buttonchanged', function (evt) {
       if (!self.data.enabled) { return; }
+      if (self.data.eraseEnabled) { return; }
       // Trigger
       if (evt.detail.id === 1) {
         var value = evt.detail.state.value;

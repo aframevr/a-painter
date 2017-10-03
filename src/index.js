@@ -12,6 +12,7 @@ require('./systems/ui.js');
 require('./systems/painter.js');
 
 require('./components/brush.js');
+require('./components/erase-raycast.js');
 require('./components/if-no-vr-headset.js');
 require('./components/json-model.js');
 require('./components/orbit-controls.js');
