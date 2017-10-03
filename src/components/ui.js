@@ -405,6 +405,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrightnessDown: function (position) {
+    this.changeEraseToBrush();
     var slider = this.objects.brightnessSlider;
     var sliderBoundingBox = slider.geometry.boundingBox;
     var sliderHeight = sliderBoundingBox.max.z - sliderBoundingBox.min.z;
@@ -420,6 +421,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrushSizeBackgroundDown: function (position) {
+    this.changeEraseToBrush();
     var slider = this.objects.sizeSlider;
     var sliderBoundingBox = slider.geometry.boundingBox;
     var sliderWidth = sliderBoundingBox.max.x - sliderBoundingBox.min.x;
