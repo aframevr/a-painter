@@ -401,6 +401,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrightnessDown: function (position) {
+    this.changeEraseToBrush();
     var slider = this.objects.brightnessSlider;
     var sliderBoundingBox = slider.geometry.boundingBox;
     var sliderHeight = sliderBoundingBox.max.z - sliderBoundingBox.min.z;
@@ -416,6 +417,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onBrushSizeBackgroundDown: function (position) {
+    this.changeEraseToBrush();
     var slider = this.objects.sizeSlider;
     var sliderBoundingBox = slider.geometry.boundingBox;
     var sliderWidth = sliderBoundingBox.max.x - sliderBoundingBox.min.x;
@@ -452,31 +454,66 @@ AFRAME.registerComponent('ui', {
       // Remove hover highlights
       this.hoveredOffObjects.forEach(function (obj) {
         var object = obj.object;
-        object.material = self.highlightMaterials[object.name].normal;
+
+        if(object.name === 'erase') {
+          var textureLoader = new THREE.TextureLoader();
+          textureLoader.load('./assets/images/eraser.png', function(texture) {
+            var map = texture;
+            object.material.map = map;
+          });
+        } else {
+          object.material = self.highlightMaterials[object.name].normal;
+        }
       });
       // Add highlight to newly intersected objects
       this.hoveredOnObjects.forEach(function (obj) {
         var object = obj.object;
         point.copy(obj.point);
-        if (!self.highlightMaterials[object.name]) {
-          self.initHighlightMaterial(object);
-        }
+          if (!self.highlightMaterials[object.name]) {
+            self.initHighlightMaterial(object);
+          }
         // Update ray
         self.handRayEl.object3D.worldToLocal(point);
         self.handRayEl.setAttribute('line', 'end', point);
-        object.material = self.highlightMaterials[object.name].hover;
+        if (object.name === 'erase') {
+          var textureLoader = new THREE.TextureLoader();
+          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
+            var map = texture;
+            object.material.map = map;
+          });
+        } else {
+          object.material = self.highlightMaterials[object.name].hover;
+        }
       });
       // Pressed Material
       Object.keys(pressedObjects).forEach(function (key) {
         var object = pressedObjects[key];
         var materials = self.highlightMaterials[object.name];
-        object.material = materials.pressed || object.material;
+
+        if (object.name === 'erase') {
+          var textureLoader = new THREE.TextureLoader();
+          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
+            var map = texture;
+            object.material.map = map;
+          });
+        } else {
+          object.material = materials.pressed || object.material;
+        }
       });
       // Unpressed Material
       Object.keys(unpressedObjects).forEach(function (key) {
         var object = unpressedObjects[key];
         var materials = self.highlightMaterials[object.name];
-        object.material = materials.normal;
+
+        if (object.name === 'erase') {
+          var textureLoader = new THREE.TextureLoader();
+          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
+            var map = texture;
+            object.material.map = map;
+          });
+        } else {
+          object.material = materials.normal;
+        }
         delete unpressedObjects[key];
       });
       // Selected material
@@ -484,7 +521,16 @@ AFRAME.registerComponent('ui', {
         var object = selectedObjects[key];
         var materials = self.highlightMaterials[object.name];
         if (!materials) { return; }
-        object.material = materials.selected;
+
+        if (object.name === 'erase') {
+          var textureLoader = new THREE.TextureLoader();
+          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
+            var map = texture;
+            object.material.map = map;
+          });
+        } else {
+          object.material = materials.selected;
+        }
       });
     };
   })(),

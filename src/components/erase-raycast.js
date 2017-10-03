@@ -23,6 +23,9 @@ AFRAME.registerComponent('erase-raycast', {
   },
 
   remove: function (element) {
+    if(!element) {
+      return;
+    }
     var self = this;
     var el = this.el;
 
