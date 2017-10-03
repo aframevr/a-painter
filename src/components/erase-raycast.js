@@ -9,28 +9,38 @@ AFRAME.registerComponent('erase-raycast', {
     var self = this;
     var sel = null;
 
-    this.el.addEventListener('raycaster-intersection', function (evt) {
+    this.eventHandlerIntersection = function (evt) {
       self.removeHighlightLine(sel);
       sel = evt.detail.els[0];
       var intersection = evt.detail.intersections[0];
       self.addHighlightLine(intersection.object);
-    });
+    };
 
-    this.el.addEventListener('raycaster-intersection-cleared', function (evt) {
+    this.eventHandlerIntersectionCleared = function (evt) {
       self.removeHighlightLine(sel);
       sel = null;
       self.el.components.raycaster.refreshObjects();
-    });
+    };
 
-    this.el.parentNode.addEventListener('triggerdown', function (evt) {
+    this.eventHandlerTriggerDown = function (evt) {
       if (sel) {
-        self.remove(sel);
+        self.removeStroke(sel);
         sel = null;
       }
-    });
+    };
+
+    this.el.addEventListener('raycaster-intersection', this.eventHandlerIntersection);
+    this.el.addEventListener('raycaster-intersection-cleared', this.eventHandlerIntersectionCleared);
+    this.el.addEventListener('triggerdown', this.eventHandlerTriggerDown);
   },
 
-  remove: function (element) {
+  remove: function() {
+    this.el.removeEventListener('raycaster-intersection', this.eventHandlerIntersection);
+    this.el.removeEventListener('raycaster-intersection-cleared', this.eventHandlerIntersectionCleared);
+    this.el.removeEventListener('triggerdown', this.eventHandlerTriggerDown);
+  },
+
+  removeStroke: function (element) {
     this.removeHighlightLine(element);
 
     var brushSystem = this.el.sceneEl.systems.brush;
