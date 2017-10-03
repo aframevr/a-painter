@@ -454,66 +454,31 @@ AFRAME.registerComponent('ui', {
       // Remove hover highlights
       this.hoveredOffObjects.forEach(function (obj) {
         var object = obj.object;
-
-        if(object.name === 'erase') {
-          var textureLoader = new THREE.TextureLoader();
-          textureLoader.load('./assets/images/eraser.png', function(texture) {
-            var map = texture;
-            object.material.map = map;
-          });
-        } else {
-          object.material = self.highlightMaterials[object.name].normal;
-        }
+        object.material = self.highlightMaterials[object.name].normal;
       });
       // Add highlight to newly intersected objects
       this.hoveredOnObjects.forEach(function (obj) {
         var object = obj.object;
         point.copy(obj.point);
-          if (!self.highlightMaterials[object.name]) {
-            self.initHighlightMaterial(object);
-          }
+        if (!self.highlightMaterials[object.name]) {
+          self.initHighlightMaterial(object);
+        }
         // Update ray
         self.handRayEl.object3D.worldToLocal(point);
         self.handRayEl.setAttribute('line', 'end', point);
-        if (object.name === 'erase') {
-          var textureLoader = new THREE.TextureLoader();
-          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
-            var map = texture;
-            object.material.map = map;
-          });
-        } else {
-          object.material = self.highlightMaterials[object.name].hover;
-        }
+        object.material = self.highlightMaterials[object.name].hover;
       });
       // Pressed Material
       Object.keys(pressedObjects).forEach(function (key) {
         var object = pressedObjects[key];
         var materials = self.highlightMaterials[object.name];
-
-        if (object.name === 'erase') {
-          var textureLoader = new THREE.TextureLoader();
-          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
-            var map = texture;
-            object.material.map = map;
-          });
-        } else {
-          object.material = materials.pressed || object.material;
-        }
+        object.material = materials.pressed || object.material;
       });
       // Unpressed Material
       Object.keys(unpressedObjects).forEach(function (key) {
         var object = unpressedObjects[key];
         var materials = self.highlightMaterials[object.name];
-
-        if (object.name === 'erase') {
-          var textureLoader = new THREE.TextureLoader();
-          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
-            var map = texture;
-            object.material.map = map;
-          });
-        } else {
-          object.material = materials.normal;
-        }
+        object.material = materials.normal;
         delete unpressedObjects[key];
       });
       // Selected material
@@ -521,16 +486,7 @@ AFRAME.registerComponent('ui', {
         var object = selectedObjects[key];
         var materials = self.highlightMaterials[object.name];
         if (!materials) { return; }
-
-        if (object.name === 'erase') {
-          var textureLoader = new THREE.TextureLoader();
-          textureLoader.load('./assets/images/eraser-hover.png', function(texture) {
-            var map = texture;
-            object.material.map = map;
-          });
-        } else {
-          object.material = materials.selected;
-        }
+        object.material = materials.selected;
       });
     };
   })(),
@@ -596,6 +552,7 @@ AFRAME.registerComponent('ui', {
   },
 
   onModelLoaded: function (evt) {
+    var self = this;
     var uiEl = this.uiEl;
     var model = uiEl.getObject3D('mesh');
     model = evt.detail.model;
@@ -608,17 +565,39 @@ AFRAME.registerComponent('ui', {
     this.objects.previousPage = model.getObjectByName('brushprev');
     this.objects.nextPage = model.getObjectByName('brushnext');
 
-    var m = new THREE.MeshPhongMaterial({
+    // add eraser to the menu
+    var eraserName = 'erase';
+    var eraseImageUrl = 'assets/images/eraser.png';
+    var eraseHoverImageUrl = 'assets/images/eraser-hover.png';
+    var eraseMaterial = new THREE.MeshBasicMaterial({
       transparent: false,
-      map: THREE.ImageUtils.loadTexture('./assets/images/eraser.png')
+      map: null
     });
-    var g = new THREE.PlaneGeometry(0.03, 0.03, 0.03);
-    this.objects.erase = new THREE.Mesh(g, m);
-    this.objects.erase.position.x = 0.11;
-    this.objects.erase.position.y = 0;
-    this.objects.erase.position.z = 0.01;
+    var eraseHoverMaterial = new THREE.MeshBasicMaterial({
+      transparent: false,
+      map: null
+    });
+    this.objects.erase = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.03, 0.03, 0.03),
+      eraseMaterial
+    );
+    this.highlightMaterials[eraserName] = {
+      normal: eraseMaterial,
+      hover: eraseHoverMaterial,
+      pressed: eraseHoverMaterial,
+      selected: eraseHoverMaterial
+    };
+    this.el.sceneEl.systems.material.loadTexture(eraseImageUrl, {src: eraseImageUrl}, function (texture) {
+      eraseMaterial.map = texture;
+      eraseMaterial.needsUpdate = true;
+    });
+    this.el.sceneEl.systems.material.loadTexture(eraseHoverImageUrl, {src: eraseHoverImageUrl}, function (texture) {
+      eraseHoverMaterial.map = texture;
+      eraseHoverMaterial.needsUpdate = true;
+    });
+    this.objects.erase.position.set(0.11, 0, 0.01);
     this.objects.erase.rotation.x = Math.PI / -2;
-    this.objects.erase.name = 'erase';
+    this.objects.erase.name = eraserName;
     model.add(this.objects.erase);
 
     this.objects.hueCursor = model.getObjectByName('huecursor');
@@ -639,8 +618,6 @@ AFRAME.registerComponent('ui', {
     model.getObjectByName('bb').material = new THREE.MeshBasicMaterial(
       { color: 0x248f24, alphaTest: 0, visible: false });
     // Hide objects
-    var self = this;
-
     this.messagesMaterial = new THREE.MeshBasicMaterial({ map: null, transparent: true, opacity: 0.0 });
     this.objects.messageSave = model.getObjectByName('msg_save');
     this.objects.messageSave.material = this.messagesMaterial;
