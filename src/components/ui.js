@@ -244,7 +244,7 @@ AFRAME.registerComponent('ui', {
     var hand = document.getElementById(this.currentHand);
     hand.setAttribute('raycaster', {
       showLine: true,
-      objects: '.a-stroke',
+      objects: '.a-drawing',
       recursive: true
     });
     hand.setAttribute('erase-raycast', '');
