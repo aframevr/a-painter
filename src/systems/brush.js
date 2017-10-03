@@ -172,8 +172,8 @@ AFRAME.registerSystem('brush', {
   },
   undo: function () {
   	var stroke;
-    for(var i = this.strokes.length-1; i >= 0; i--){
-      if(this.strokes[i].data.owner !== 'local') continue;
+    for (var i = this.strokes.length-1; i >= 0; i--) {
+      if (this.strokes[i].data.owner !== 'local') continue;
       stroke = this.strokes.splice(i, 1)[0];
       break;
     }
