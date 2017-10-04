@@ -10,8 +10,12 @@ AFRAME.registerComponent('erase-raycast', {
     var sel = null;
 
     this.eventHandlerIntersection = function (evt) {
+      var el = evt.detail.els[0];
+      if (!el.classList.contains('a-stroke')) {
+        return;
+      }
       self.removeHighlightLine(sel);
-      sel = evt.detail.els[0];
+      sel = el;
       var intersection = evt.detail.intersections[0];
       self.addHighlightLine(intersection.object);
     };
