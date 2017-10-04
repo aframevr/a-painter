@@ -4,7 +4,8 @@ AFRAME.registerComponent('brush', {
     color: {type: 'color', default: '#ef2d5e'},
     size: {default: 0.01, min: 0.001, max: 0.3},
     brush: {default: 'flat'},
-    enabled: { default: true }
+    enabled: { default: true },
+    eraseEnabled: { default: false }
   },
   init: function () {
     var data = this.data;
