@@ -20,7 +20,6 @@ AFRAME.registerComponent('ui', {
     this.selectedObjects = {};
     this.unpressedObjects = {};
     this.brushButtonsMapping = {};
-    this.currentHand = '';
     this.brushRegexp = /^(?!.*(fg|bg)$)brush[0-9]+/;
     this.colorHistoryRegexp = /^(?!.*(fg|bg)$)colorhistory[0-9]+$/;
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
@@ -93,12 +92,6 @@ AFRAME.registerComponent('ui', {
         self.addToggleEvent();
       }
     });
-
-    var scene = this.uiEl.parentNode.parentNode;
-
-    scene.addEventListener('triggerdown', function(evt) {
-      self.currentHand = evt.detail.target.id;
-    })
   },
 
   initColorWheel: function () {
@@ -245,27 +238,24 @@ AFRAME.registerComponent('ui', {
   },
 
   changeBrushToErase: function () {
-    var hand = document.getElementById(this.currentHand);
-    hand.setAttribute('raycaster', {
+    this.handEl.setAttribute('raycaster', {
       showLine: true,
       objects: '.a-drawing',
       recursive: true
     });
-    hand.setAttribute('erase-raycast', '');
-    hand.setAttribute('line', {
+    this.handEl.setAttribute('erase-raycast', '');
+    this.handEl.setAttribute('line', {
       color: "#FF0000",
       opacity: 0.5
     });
-    hand.setAttribute('brush', 'eraseEnabled', true);
+    this.handEl.setAttribute('brush', 'eraseEnabled', true);
   },
 
   changeEraseToBrush: function () {
-    var hand = document.getElementById(this.currentHand);
-
-    hand.removeAttribute('raycaster');
-    hand.removeAttribute('line');
-    hand.removeAttribute('erase-raycast');
-    hand.setAttribute('brush', 'eraseEnabled', false);
+    this.handEl.removeAttribute('raycaster');
+    this.handEl.removeAttribute('line');
+    this.handEl.removeAttribute('erase-raycast');
+    this.handEl.setAttribute('brush', 'eraseEnabled', false);
   },
 
   copyBrush: function () {
