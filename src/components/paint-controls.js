@@ -15,19 +15,20 @@ AFRAME.registerComponent('paint-controls', {
     var self = this;
     var highLightTextureUrl = 'assets/images/controller-pressed.png';
     var tooltips = null;
+    const TRACKPAD_DOWN_POSITION = 1;
+    const TRACKPAD_UP_POSITION = -1;
+    const EPSILON = 0.3;
     this.controller = null;
     this.modelLoaded = false;
-
+    this.trackpadDown = false;
     this.onModelLoaded = this.onModelLoaded.bind(this);
     el.addEventListener('model-loaded', this.onModelLoaded);
 
     var onAxisMove = function(evt) {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
-
       var delta = evt.detail.axis[1] / 300;
       var size = el.components.brush.schema.size;
       var value = THREE.Math.clamp(self.el.getAttribute('brush').size - delta, size.min, size.max);
-
       self.el.setAttribute('brush', 'size', value);
     }
 
@@ -35,16 +36,30 @@ AFRAME.registerComponent('paint-controls', {
       var controllerName = evt.detail.name;
       tooltips = Utils.getTooltips(controllerName);
       if (controllerName === 'windows-motion-controls') {
-        el.setAttribute('teleport-controls', {button: 'trackpad'});
+        el.setAttribute('teleport-controls', {button: 'auto', axis: 'auto'});
+        el.addEventListener('trackpaddown', function (evt) {
+          self.trackpadDown = true;
+        });
+
         el.addEventListener('axismove', function (evt) {
-          onAxisMove(evt);
-        });
+          var isUpDirection = undefined;
+          if (self.trackpadDown) {
+            if (Math.abs(evt.detail.axis[3] - TRACKPAD_DOWN_POSITION) < EPSILON) {
+              isUpDirection = false;
+            }
+            else if(Math.abs(evt.detail.axis[3] - TRACKPAD_UP_POSITION) < EPSILON) {
+              isUpDirection = true;
+            }
 
-        el.addEventListener('trackpadtouchstart', function () {
-          self.touchStarted = true;
+            if (isUpDirection !== undefined) {
+              self.trackpadDown = false;
+              var delta = isUpDirection ? 0.01 : -0.01;
+              var size = el.components.brush.schema.size;
+              var value = THREE.Math.clamp(self.el.getAttribute('brush').size + delta, size.min, size.max);
+              self.el.setAttribute('brush', 'size', value);
+            }
+          }
         });
-
-        self.touchStarted = false;
 
       } else if (controllerName === 'oculus-touch-controls') {
         var hand = evt.detail.component.data.hand;
