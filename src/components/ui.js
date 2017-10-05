@@ -559,41 +559,6 @@ AFRAME.registerComponent('ui', {
     this.objects.previousPage = model.getObjectByName('brushprev');
     this.objects.nextPage = model.getObjectByName('brushnext');
 
-    // add eraser to the menu
-    var eraserName = 'erase';
-    var eraseImageUrl = 'assets/images/eraser.png';
-    var eraseHoverImageUrl = 'assets/images/eraser-hover.png';
-    var eraseMaterial = new THREE.MeshBasicMaterial({
-      transparent: false,
-      map: null
-    });
-    var eraseHoverMaterial = new THREE.MeshBasicMaterial({
-      transparent: false,
-      map: null
-    });
-    this.objects.erase = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.03, 0.03, 0.03),
-      eraseMaterial
-    );
-    this.highlightMaterials[eraserName] = {
-      normal: eraseMaterial,
-      hover: eraseHoverMaterial,
-      pressed: eraseHoverMaterial,
-      selected: eraseHoverMaterial
-    };
-    this.el.sceneEl.systems.material.loadTexture(eraseImageUrl, {src: eraseImageUrl}, function (texture) {
-      eraseMaterial.map = texture;
-      eraseMaterial.needsUpdate = true;
-    });
-    this.el.sceneEl.systems.material.loadTexture(eraseHoverImageUrl, {src: eraseHoverImageUrl}, function (texture) {
-      eraseHoverMaterial.map = texture;
-      eraseHoverMaterial.needsUpdate = true;
-    });
-    this.objects.erase.position.set(0.11, 0, 0.01);
-    this.objects.erase.rotation.x = Math.PI / -2;
-    this.objects.erase.name = eraserName;
-    model.add(this.objects.erase);
-
     this.objects.hueCursor = model.getObjectByName('huecursor');
     this.objects.hueWheel = model.getObjectByName('hue');
     this.objects.hueWheel.geometry.computeBoundingSphere();
