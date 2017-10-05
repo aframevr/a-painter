@@ -57,12 +57,12 @@ AFRAME.registerComponent('orbit-controls', {
 
   play: function () {
     if (!this.controls) { return; }
-    this.controls.enable = true;
+    this.controls.enabled = true;
   },
 
   pause: function () {
     if (!this.controls) { return; }
-    this.controls.enable = false;
+    this.controls.enabled = false;
   },
 
   remove: function () {
