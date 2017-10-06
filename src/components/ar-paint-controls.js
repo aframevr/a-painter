@@ -26,6 +26,10 @@ AFRAME.registerComponent('ar-paint-controls', {
     window.addEventListener('mousedown', this.paintStart.bind(this));
     window.addEventListener('mousemove', this.paintMove.bind(this));
     window.addEventListener('mouseup', this.paintEnd.bind(this));
+
+    document.querySelector('[ar]').addEventListener('poseLost', function (event) {
+      self.paintEnd.bind(self);
+    });
   },
   paintStart: function (e) {
     var el = this.el;
