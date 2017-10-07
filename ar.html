@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Painter</title>
+    <style>html,body{background-color:#030404}</style>
+    <link rel="icon" href="img/icon-256.png">
+    <meta name="description" content="Paint in VR in your browser. Powered by A-Frame.">
+    <script>
+      UPLOADCARE_LOCALE = 'en';
+      UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
+    </script>
+    <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
+    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
+    <script src="vendor/aframe-v0.7.0.min.js"></script>
+    <!-- AR vendor scripts.  -->
+    <script src="https://rawgit.com/google-ar/three.ar.js/master/dist/three.ar.js"></script>
+
+    <script src="build.js"></script>
+    <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
+    <script src="vendor/aframe-tooltip-component.min.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <a-scene ar>
+        <a-assets>
+          <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
+          <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
+        </a-assets>
+      <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
+      <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
+      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
+
+      <a-entity id="cameraRig">
+        <!-- camera -->
+        <a-entity id="acamera" camera look-controls ar-ui></a-entity>
+        <!-- ar-gaze controls -->
+        <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.016;radiusOuter:0.024"
+        material="shader:flat;color:#ef2d5e"
+        position="0 0 -0.75">
+        </a-entity>
+      </a-entity>
+    </a-scene>
+    <a href="https://aframe.io/a-painter/"><div id="apainter-logo" class="hidden"></div><div id="apainter-author" style="display:none" class="hidden">authorname</div></a>
+    <div id="apainter-ui">
+      <div class="progress hide">
+        Saving painting...
+        <div class="bar"></div>
+      </div>
+      <div class="share hide">
+        <div class="help">
+          <h1>Painting saved!</h1>
+          <p>Your painting was saved in the following URL.<br>You can use it to continue your work later or to share your masterpiece in social media.</p>
+        </div>
+        <div class="form">
+        <input id="apainter-share-url" type="text" value="" readonly/>
+        <div id="copy-toclipboard" data-clipboard-target="#apainter-share-url" class="button copy">COPY URL</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="vendor/ga.js"></script>
+
+  </body>
+</html>

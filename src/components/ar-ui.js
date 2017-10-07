@@ -1,40 +1,42 @@
 AFRAME.registerComponent('ar-ui', {
   dependencies: ['raycaster'],
   init: function () {
-
+    var el = this.el;
     var self = this;
-    this.size = this.el.sceneEl.renderer.getSize();
+    this.size = el.sceneEl.renderer.getSize();
     this.pointer = new THREE.Vector2();
     // normalized device coordinates position
     this.pointerNdc = new THREE.Vector2();
 
     this.intersection = null;
 
-    this.height = this.visibleHeightAtZDepth(this.depth, this.el.sceneEl.camera);
-    this.width = this.visibleWidthAtZDepth(this.depth, this.el.sceneEl.camera);
+    this.height = this.visibleHeightAtZDepth(this.depth, el.sceneEl.camera);
+    this.width = this.visibleWidthAtZDepth(this.depth, el.sceneEl.camera);
     this.depth = -0.1;
     this.paddingTop = this.depth / 20;
     this.paddingBottom = this.depth / 20;
 
     this.arModeButton = document.createElement('a-entity');
+    this.arModeButton.id = 'passthroughBtn';
     this.arModeButton.setAttribute('geometry', {
-      primitive: 'ring',
-      radiusInner: 0.004,
-      radiusOuter: 0.006
+      primitive: 'plane',
+      width: 0.01,
+      height: 0.01
     });
-    this.arModeButton.setAttribute('material', 'color', 'white');
+    this.arModeButton.setAttribute('material', {
+      shader: 'flat',
+      fog: false
+    });
 
     document.querySelector('[ar]').addEventListener('poseLost', function (event) {
-      // console.log('Position lost', event.detail.lastPosition);
       self.arModeButton.object3D.visible = false;
     });
     document.querySelector('[ar]').addEventListener('poseFound', function (event) {
       // console.log('found');
       self.arModeButton.object3D.visible = true;
     });
-    // this.el.sceneEl.renderer.autoClear = false;
-    // this.arModeButton.object3D.renderOrder = 1000;
-    // this.arModeButton.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
+    this.arModeButton.object3D.renderOrder = 10000;
+    this.arModeButton.object3D.onBeforeRender = function () { el.sceneEl.renderer.clearDepth(); };
 
     var cameraEl = document.querySelector('[camera]');
     cameraEl.appendChild(this.arModeButton);
@@ -46,9 +48,12 @@ AFRAME.registerComponent('ar-ui', {
       self.onWindowResize();
     }, 500);
 
-    this.raycaster = this.el.components.raycaster.raycaster;
-    window.addEventListener('touchstart', this.tap.bind(this));
-    window.addEventListener('mousedown', this.tap.bind(this));
+    this.raycaster = el.components.raycaster.raycaster;
+    if (el.sceneEl.isMobile) {
+      window.addEventListener('touchstart', this.tap.bind(this));
+    } else {
+      window.addEventListener('mousedown', this.tap.bind(this));
+    }
     window.addEventListener('mousemove', this.mousemove.bind(this));
   },
   tick: function (t, dt) {
@@ -61,14 +66,14 @@ AFRAME.registerComponent('ar-ui', {
     this.pointerNdc.x = (e.clientX / this.size.width) * 2 - 1;
     this.pointerNdc.y = -(e.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.pointerNdc, this.el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.pointerNdc, el.sceneEl.camera);
     var intersections = this.raycaster.intersectObjects([this.arModeButton.object3D.children[0]]);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null){
       // console.log('---',this.intersection.point);
-      this.el.sceneEl.canvas.style.cursor = 'pointer';
+      el.sceneEl.canvas.style.cursor = 'pointer';
     } else {
-      this.el.sceneEl.canvas.style.cursor = null;
+      el.sceneEl.canvas.style.cursor = null;
     }
   },
   tap: function (e) {
@@ -82,17 +87,26 @@ AFRAME.registerComponent('ar-ui', {
     this.pointerNdc.x = (t.clientX / this.size.width) * 2 - 1;
     this.pointerNdc.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.pointerNdc, this.el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.pointerNdc, el.sceneEl.camera);
     var intersections = this.raycaster.intersectObjects([this.arModeButton.object3D.children[0]]);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null) {
-      console.log(this.intersection.object);
+      // Provisional > testing tap events
+      this.onclick(this.intersection.object.el.id);
+    }
+  },
+  onclick: function (id) {
+    switch (id) {
+      case 'passthroughBtn':
+        document.querySelector('a-scene').getAttribute('ar').passthrough ^= true;
+        break;
     }
   },
   onWindowResize: function (e) {
-    this.size = this.el.sceneEl.canvas.getBoundingClientRect();
-    this.width = this.visibleWidthAtZDepth(this.depth, this.el.sceneEl.camera);
-    this.height = this.visibleHeightAtZDepth(this.depth, this.el.sceneEl.camera);
+    var el = this.el;
+    this.size = el.sceneEl.canvas.getBoundingClientRect();
+    this.width = this.visibleWidthAtZDepth(this.depth, el.sceneEl.camera);
+    this.height = this.visibleHeightAtZDepth(this.depth, el.sceneEl.camera);
     this.placeBottom(this.arModeButton, this.width, this.height);
   },
   placeTop: function (obj, w, h) {
