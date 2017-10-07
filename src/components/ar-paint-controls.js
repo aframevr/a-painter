@@ -7,29 +7,30 @@ AFRAME.registerComponent('ar-paint-controls', {
   dependencies: ['brush', 'raycaster'],
 
   init: function () {
+    var el = this.el;
     this.controller = null;
 
-    this.size = this.el.sceneEl.renderer.getSize();
+    this.size = el.sceneEl.renderer.getSize();
     this.pointer = new THREE.Vector2();
     // normalized device coordinates position
     this.pointerNdc = new THREE.Vector2();
 
     this.numberStrokes = 0;
 
-    this.raycaster = this.el.components.raycaster.raycaster;
+    this.raycaster = el.components.raycaster.raycaster;
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
 
-    window.addEventListener('touchstart', this.paintStart.bind(this));
-    window.addEventListener('touchmove', this.paintMove.bind(this));
-    window.addEventListener('touchend', this.paintEnd.bind(this));
-    window.addEventListener('mousedown', this.paintStart.bind(this));
-    window.addEventListener('mousemove', this.paintMove.bind(this));
-    window.addEventListener('mouseup', this.paintEnd.bind(this));
-
-    document.querySelector('[ar]').addEventListener('poseLost', function (event) {
-      self.paintEnd.bind(self);
-    });
+    if (el.sceneEl.isMobile) {
+      window.addEventListener('touchstart', this.paintStart.bind(this));
+      window.addEventListener('touchmove', this.paintMove.bind(this));
+      window.addEventListener('touchend', this.paintEnd.bind(this));
+    } else {
+      window.addEventListener('mousedown', this.paintStart.bind(this));
+      window.addEventListener('mousemove', this.paintMove.bind(this));
+      window.addEventListener('mouseup', this.paintEnd.bind(this));
+    }
+    el.object3D.visible = false;
   },
   paintStart: function (e) {
     var el = this.el;
@@ -39,6 +40,7 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.startNewStroke();
       el.components.brush.active = true;
     }
+    el.object3D.visible = true;
   },
   paintMove: function (e) {
     var el = this.el;
@@ -63,6 +65,7 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.currentStroke = null;
       el.components.brush.active = false;
     }
+    el.object3D.visible = false;
   },
   play: function () {
   },
