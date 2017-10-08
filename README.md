@@ -29,19 +29,7 @@ Then, load [`http://localhost:8080`](http://localhost:8080) in your browser.
   * **sky** (image url) Changes the sky texture (empty to remove sky)
   * **floor** (image url) Changes the floor texture (empty to remove)
   * **bgcolor** (Hex color without the #) Background color
-  * **room** (string) Join a 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  user room to paint with others in realtime
+  * **room** (string) Join a user room to paint with others in realtime
 
 Example: [http://aframe.io/a-painter/?sky=&floor=http://i.imgur.com/w9BylL0.jpg&bgcolor=24caff&url=https://ucarecdn.com/0b45b93b-e651-42d8-ba49-b2df907575f3/](http://aframe.io/a-painter/?sky=&floor=http://i.imgur.com/w9BylL0.jpg&bgcolor=24caff&url=https://ucarecdn.com/0b45b93b-e651-42d8-ba49-b2df907575f3/)
 
@@ -50,7 +38,7 @@ Example: [http://aframe.io/a-painter/?sky=&floor=http://i.imgur.com/w9BylL0.jpg&
 
 To paint with other people in realtime add the room URL parameter with the room name you want to join. Any URL-friendly string will work as a room name. Non-VR and Mobile users can join a room and watch VR users paint.
 
-To try multiuser without VR [see this example](http://aframe.io/a-painter/multiuser-demo.html).
+To try multiuser without VR [see this example](https://haydenlee.io/networked-aframe/a-painter/multiuser-demo.html).
 
 ## Brush API
 
