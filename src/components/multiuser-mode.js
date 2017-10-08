@@ -29,14 +29,16 @@ AFRAME.registerComponent('multiuser-mode', {
     }
 
     var webrtc = params.hasOwnProperty('webrtc');
+    var adapter = webrtc ? 'easyrtc' : 'wseasyrtc';
+
     var voice = params.hasOwnProperty('voice');
     if (isMultiuser) {
       var networked = {
         app: 'a-painter',
         room: params.room,
-        signalURL: 'https://haydenlee.io/',
-        webrtc: webrtc,
-        webrtcAudio: voice
+        serverURL: 'https://haydenlee.io/',
+        adapter: adapter,
+        audio: voice
       };
       console.info('Init networked-aframe with settings:', networked);
       el.setAttribute('networked-scene', networked);
