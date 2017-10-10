@@ -8,7 +8,6 @@ AFRAME.registerComponent('ar', {
     this.poseQuaternion = new THREE.Quaternion();
     this.poseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
     this.poseRotation = new THREE.Vector3();
-
     this.poseLost = true;
 
     this.defaultPosition = new THREE.Vector3(0, 1.6, 0.1);
@@ -28,31 +27,27 @@ AFRAME.registerComponent('ar', {
 
   },
   arConnected: function (display) {
-    // var cameraEl = document.querySelector('[camera]');
-    // cameraEl.removeAttribute('orbit-controls');
-    
     this.el.sceneEl.renderer.autoClear = false;
     this.arDisplay = display;
+
     if (this.data.debug) {
       // Turn on the debugging panel
       var arDebug = new THREE.ARDebug(this.arDisplay);
       arDebug.showPlanes = true;
       document.body.appendChild(arDebug.getElement());
     }
-
     this.arView = new THREE.ARView(display, this.el.sceneEl.renderer);
   },
   tick: function (t, dt) {
     if (!this.arDisplay || !this.arDisplay.getFrameData) { return; }
     if (this.data.passthrough) {
-      this.arView.render();
+        this.arView.render();
     }
-    this.el.sceneEl.camera.updateProjectionMatrix();
     this.el.sceneEl.renderer.clearDepth();
     if (!this.frameData) { this.frameData = new VRFrameData(); }
     this.arDisplay.getFrameData(this.frameData);
+
     if (this.frameData.pose.position[0] === 0 && this.frameData.pose.position[1] === 0 && this.frameData.pose.position[2] === 0) {
-      // this.el.emit('poseLost', {lastPosition: this.posePosition}, false);
       this.el.emit('poseLost', false);
       this.poseLost = true;
       // TODO > Force to get polyfilled pose
@@ -72,5 +67,8 @@ AFRAME.registerComponent('ar', {
       this.el.sceneEl.camera.el.setAttribute('position', this.posePosition.add(this.defaultPosition));
       this.el.sceneEl.camera.el.setAttribute('rotation', this.poseRotation);
     }
+
+    this.el.sceneEl.camera.projectionMatrix.fromArray(this.frameData.leftProjectionMatrix);
+    this.el.sceneEl.camera.updateProjectionMatrix();
   }
 });

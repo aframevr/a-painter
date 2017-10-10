@@ -70,7 +70,6 @@ AFRAME.registerComponent('ar-ui', {
     var intersections = this.raycaster.intersectObjects([this.arModeButton.object3D.children[0]]);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null){
-      // console.log('---',this.intersection.point);
       el.sceneEl.canvas.style.cursor = 'pointer';
     } else {
       el.sceneEl.canvas.style.cursor = null;
