@@ -57,7 +57,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.02,
       height: 0.02,
-      onClick: this.enterPainterMode
+      onClick: this.enterPainterMode.bind(this)
     });
     this.addButton({
       id: 'closeBtn',
@@ -66,7 +66,27 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.0075,
       height: 0.0075,
-      onClick: this.exitPainterMode
+      onClick: this.exitPainterMode.bind(this)
+    });
+    this.addButton({
+      id: 'undoBtn',
+      layout: 'bottom-left',
+      visible: false,
+      enabled: false,
+      width: 0.0075,
+      height: 0.0075,
+      padding: [0, 0, 0.005, 0],
+      onClick: this.undo.bind(this)
+    });
+    this.addButton({
+      id: 'saveBtn',
+      layout: 'bottom-left',
+      visible: false,
+      enabled: false,
+      width: 0.0075,
+      height: 0.0075,
+      padding: [0, 0, 0.0175, 0],
+      onClick: this.save.bind(this)
     });
   },
   initUI: function () {
@@ -89,9 +109,11 @@ AFRAME.registerComponent('ar-ui', {
   },
   addButton: function (params) {
     this.objects[params.id] = document.createElement('a-entity');
-
     var uiEl = this.objects[params.id];
+
+    uiEl.padding = params.padding || [0, 0, 0, 0];
     uiEl.id = params.id;
+    uiEl.class = 'ar-ui';
     uiEl.layout = params.layout;
     uiEl.onClick = params.onClick;
 
@@ -118,6 +140,39 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.object3D.renderOrder = 10000;
     uiEl.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
     this.el.appendChild(uiEl);
+  },
+  showEl: function (self, id, delay) {
+    var uiEntity = self.objects[ id ];
+    uiEntity.object3D.scale.set(0.01, 0.01, 0.01);
+    uiEntity.setAttribute('visible', true);
+    new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
+      x: 1,
+      y: 1,
+      z: 1
+    }, 500)
+      .delay(delay || 0)
+      .easing(AFRAME.TWEEN.Easing.Back.Out)
+      .onStart(function () {
+        self.place(uiEntity, self.width, self.height);
+      })
+      .onComplete(function () {
+        uiEntity.setAttribute('enabled', true);
+      })
+      .start();
+  },
+  hideEl: function (self, id, delay){
+    var uiEntity = self.objects[ id ];
+    uiEntity.setAttribute('enabled', false);
+    new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
+      x: 0,
+      y: 0
+    }, 500)
+      .delay(delay || 0)
+      .easing(AFRAME.TWEEN.Easing.Back.In)
+      .onComplete(function () {
+        uiEntity.setAttribute('visible', false);
+      })
+      .start();
   },
   mousemove: function (e) {
     var el = this.el;
@@ -228,14 +283,18 @@ AFRAME.registerComponent('ar-ui', {
     var positionTmp = {x: 0, y: 0, z: this.depth};
     switch (obj.layout) {
       case 'bottom-center':
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom;
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom + obj.padding[2];
         break;
       case 'top-center':
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop;
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop - obj.padding[0];
         break;
       case 'top-right':
-        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingRight;
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop;
+        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingRight - obj.padding[1];
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop - obj.padding[0];
+        break;
+      case 'bottom-left':
+        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingRight + obj.padding[1];
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom + obj.padding[2];
         break;
       default:
         positionTmp = {x: 0, y: 0, z: 10000};
@@ -261,65 +320,45 @@ AFRAME.registerComponent('ar-ui', {
     return height * camera.aspect;
   },
   // end codepen based code
-  enterPainterMode: function (aruiEntity) {
+  enterPainterMode: function () {
     var self = this;
-    aruiEntity.el.emit('activate', false);
+    this.el.emit('activate', false);
     // Hide a-painter button
-    this.object3D.originalPosition = this.object3D.position.clone();
-    this.setAttribute('enabled', false);
-    new AFRAME.TWEEN.Tween(this.object3D.position).to({
-      y: -(aruiEntity.height / 2) - this.object3D.children[0].geometry.boundingSphere.radius
+    this.objects.apainterBtn.object3D.originalPosition = this.objects.apainterBtn.object3D.position.clone();
+    this.objects.apainterBtn.setAttribute('enabled', false);
+    new AFRAME.TWEEN.Tween(this.objects.apainterBtn.object3D.position).to({
+      y: -(this.height / 2) - this.objects.apainterBtn.object3D.children[0].geometry.boundingSphere.radius
     }, 500)
       .easing(AFRAME.TWEEN.Easing.Back.In)
       .onComplete(function () {
-        self.setAttribute('visible', false);
+        self.objects.apainterBtn.setAttribute('visible', false);
       })
       .start();
     // Show and activate close button
-    aruiEntity.objects.closeBtn.object3D.scale.set(0.01, 0.01, 0.01);
-    aruiEntity.objects.closeBtn.setAttribute('visible', true);
-    new AFRAME.TWEEN.Tween(aruiEntity.objects.closeBtn.object3D.scale).to({
-      x: 1,
-      y: 1,
-      z: 1
-    }, 500)
-      .delay(500)
-      .easing(AFRAME.TWEEN.Easing.Back.Out)
-      .onStart(function () {
-        aruiEntity.place(aruiEntity.objects.closeBtn, aruiEntity.width, aruiEntity.height);
-      })
-      .onComplete(function () {
-        aruiEntity.objects.closeBtn.setAttribute('enabled', true);
-      })
-      .start();
+    this.showEl(this, 'closeBtn', 500);
+    this.showEl(this, 'undoBtn', 600);
+    this.showEl(this, 'saveBtn', 700);
   },
-  exitPainterMode: function (aruiEntity) {
+  exitPainterMode: function () {
     var self = this;
-    aruiEntity.el.emit('deactivate', false);
-    // Hide close button 
-    this.setAttribute('enabled', false);
-    new AFRAME.TWEEN.Tween(this.object3D.scale).to({
-      x: 0,
-      y: 0
-    }, 500)
-      .easing(AFRAME.TWEEN.Easing.Back.In)
-      .onComplete(function () {
-        self.setAttribute('visible', false);
-      })
-      .start();
+    this.el.emit('deactivate', false);
+    // Hide close buttons
+    this.hideEl(this, 'closeBtn');
+    this.hideEl(this, 'undoBtn', 200);
+    this.hideEl(this, 'saveBtn', 300);
     // Show and activate a-painter button
-    new AFRAME.TWEEN.Tween(aruiEntity.objects.apainterBtn.object3D.position).to({
-      x: aruiEntity.objects.apainterBtn.object3D.originalPosition.x,
-      y: aruiEntity.objects.apainterBtn.object3D.originalPosition.y,
-      z: aruiEntity.objects.apainterBtn.object3D.originalPosition.z
+    new AFRAME.TWEEN.Tween(this.objects.apainterBtn.object3D.position).to({
+      x: this.objects.apainterBtn.object3D.originalPosition.x,
+      y: this.objects.apainterBtn.object3D.originalPosition.y,
+      z: this.objects.apainterBtn.object3D.originalPosition.z
     }, 500)
       .delay(500)
       .easing(AFRAME.TWEEN.Easing.Back.Out)
       .onStart(function () {
-        aruiEntity.objects.apainterBtn.setAttribute('visible', true);
+        self.objects.apainterBtn.setAttribute('visible', true);
       })
       .onComplete(function () {
-        aruiEntity.objects.apainterBtn.setAttribute('enabled', true);
+        self.objects.apainterBtn.setAttribute('enabled', true);
       })
       .start();
   },
@@ -327,10 +366,13 @@ AFRAME.registerComponent('ar-ui', {
 
   },
   undo: function () {
-
+    // console.log('undo', this);
+    // this.el.sceneEl.systems.brush.clear();
+    this.el.sceneEl.systems.brush.undo();
   },
   save: function () {
-
+    // console.log('save', this);
+    // this.el.sceneEl.systems.painter.upload();
   },
   dragStroke: function () {
 
