@@ -454,31 +454,11 @@ AFRAME.registerComponent('ui', {
   })(),
 
   addToggleEvent: function () {
-    var el = this.el;
-
-    if (this.controller.name === 'oculus-touch-controls') {
-      if (this.controller.hand === 'left') {
-        el.addEventListener('xbuttondown', this.toggleMenu);
-      } else {
-        el.addEventListener('abuttondown', this.toggleMenu);
-      }
-    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
-      el.addEventListener('menudown', this.toggleMenu);
-    }
+    this.el.addEventListener('toggleMenu', this.toggleMenu);
   },
 
   removeToggleEvent: function () {
-    var el = this.el;
-
-    if (this.controller.name === 'oculus-touch-controls') {
-      if (this.controller.hand === 'left') {
-        el.removeEventListener('xbuttondown', this.toggleMenu);
-      } else {
-        el.removeEventListener('abuttondown', this.toggleMenu);
-      }
-    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
-      el.removeEventListener('menudown', this.toggleMenu);
-    }
+    this.el.removeEventListener('toggleMenu', this.toggleMenu);
   },
 
   play: function () {
