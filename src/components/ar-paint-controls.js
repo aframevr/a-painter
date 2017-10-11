@@ -20,6 +20,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.raycaster = el.components.raycaster.raycaster;
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
+    this.intersection = null;
 
     el.object3D.visible = false;
 
@@ -54,12 +55,23 @@ AFRAME.registerComponent('ar-paint-controls', {
   paintStart: function (e) {
     var el = this.el;
     this.paintMove(e);
+    if (this.intersection !== null) {
+      return;
+    }
     if (!el.components.brush.active) {
       el.components.brush.sizeModifier = 1;
       el.components.brush.startNewStroke();
       el.components.brush.active = true;
     }
     el.object3D.visible = true;
+  },
+  getIntersectObjects: function () {
+    var intersectObjects = [];
+    for (var i = 0; i < document.querySelector('[ar-ui]').children.length; i++) {
+      var element = document.querySelector('[ar-ui]').children[i];
+      intersectObjects.push(element.object3D);
+    }
+    return intersectObjects;
   },
   paintMove: function (e) {
     var el = this.el;
@@ -73,6 +85,13 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.pointerNdc.y = -(t.clientY / this.size.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.pointerNdc, this.el.sceneEl.camera);
+
+    var intersections = this.raycaster.intersectObjects(this.getIntersectObjects(), true);
+    this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
+    if (this.intersection !== null) {
+      return;
+    }
+
     el.object3D.position.copy(this.ray.direction);
     el.object3D.position.multiplyScalar(0.75);
     el.object3D.position.add(this.ray.origin);
