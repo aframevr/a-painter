@@ -1,18 +1,17 @@
 AFRAME.registerComponent('ar', {
   schema: {
     passthrough: { default: true },
-    debug: { default: true }
+    debug: { default: false }
   },
   init: function () {
     this.posePosition = new THREE.Vector3();
     this.poseQuaternion = new THREE.Quaternion();
     this.poseEuler = new THREE.Euler(0, 0, 0, 'YXZ');
     this.poseRotation = new THREE.Vector3();
-    this.poseLost = true;
+    this.poseIsLost = true;
 
     this.defaultPosition = new THREE.Vector3(0, 1.6, 0.1);
     this.el.sceneEl.camera.el.setAttribute('position', this.defaultPosition);
-
     this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: false});
 
     var self = this;
@@ -30,10 +29,17 @@ AFRAME.registerComponent('ar', {
     this.el.sceneEl.renderer.autoClear = false;
     this.arDisplay = display;
 
+    // To show camera on iOS devices
+    document.documentElement.style.backgroundColor = 'transparent';
+    document.body.style.backgroundColor = 'transparent';
+
     if (this.data.debug) {
       // Turn on the debugging panel
-      var arDebug = new THREE.ARDebug(this.arDisplay);
-      arDebug.showPlanes = true;
+      var arDebug = new THREE.ARDebug(this.arDisplay, this.el.sceneEl.object3D, {
+        showLastHit: false,
+        showPoseStatus: true,
+        showPlanes: false
+      });
       document.body.appendChild(arDebug.getElement());
     }
     this.arView = new THREE.ARView(display, this.el.sceneEl.renderer);
@@ -46,15 +52,13 @@ AFRAME.registerComponent('ar', {
     this.el.sceneEl.renderer.clearDepth();
     if (!this.frameData) { this.frameData = new VRFrameData(); }
     this.arDisplay.getFrameData(this.frameData);
-
     if (this.frameData.pose.position[0] === 0 && this.frameData.pose.position[1] === 0 && this.frameData.pose.position[2] === 0) {
       this.el.emit('poseLost', false);
-      this.poseLost = true;
-      // TODO > Force to get polyfilled pose
+      this.poseIsLost = true;
     } else {
-      if (this.poseLost) {
+      if (this.poseIsLost) {
         this.el.emit('poseFound');
-        this.poseLost = false;
+        this.poseIsLost = false;
       }
       // Get the pose information.
       this.posePosition.fromArray(this.frameData.pose.position);

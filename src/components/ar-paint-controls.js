@@ -21,16 +21,35 @@ AFRAME.registerComponent('ar-paint-controls', {
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
 
-    if (el.sceneEl.isMobile) {
-      window.addEventListener('touchstart', this.paintStart.bind(this));
-      window.addEventListener('touchmove', this.paintMove.bind(this));
-      window.addEventListener('touchend', this.paintEnd.bind(this));
-    } else {
-      window.addEventListener('mousedown', this.paintStart.bind(this));
-      window.addEventListener('mousemove', this.paintMove.bind(this));
-      window.addEventListener('mouseup', this.paintEnd.bind(this));
-    }
     el.object3D.visible = false;
+
+    document.querySelector('[ar-ui]').addEventListener('activate', this.activate.bind(this));
+    document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
+  },
+  activate: function () {
+    this.startHandler = this.paintStart.bind(this);
+    this.moveHandler = this.paintMove.bind(this);
+    this.endHandler = this.paintEnd.bind(this);
+    if (this.el.sceneEl.isMobile) {
+      window.addEventListener('touchstart', this.startHandler);
+      window.addEventListener('touchmove', this.moveHandler);
+      window.addEventListener('touchend', this.endHandler);
+    } else {
+      window.addEventListener('mousedown', this.startHandler);
+      window.addEventListener('mousemove', this.moveHandler);
+      window.addEventListener('mouseup', this.endHandler);
+    }
+  },
+  deactivate: function () {
+    if (this.el.sceneEl.isMobile) {
+      window.removeEventListener('touchstart', this.startHandler);
+      window.removeEventListener('touchmove', this.moveHandler);
+      window.removeEventListener('touchend', this.endHandler);
+    } else {
+      window.removeEventListener('mousedown', this.startHandler);
+      window.removeEventListener('mousemove', this.moveHandler);
+      window.removeEventListener('mouseup', this.endHandler);
+    }
   },
   paintStart: function (e) {
     var el = this.el;
