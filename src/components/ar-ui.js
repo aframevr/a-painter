@@ -50,6 +50,30 @@ AFRAME.registerComponent('ar-ui', {
     }
   },
   addUIElements: function () {
+    var soundEl = document.createElement('a-sound');
+    var iOSSuffix = '';
+    if (Utils.isiOS()) {
+      iOSSuffix = '_iOS';
+    }
+    soundEl.setAttribute('src', '#ui_click0' + iOSSuffix);
+    soundEl.setAttribute('id', 'uiClick0');
+    this.el.appendChild(soundEl);
+
+    soundEl = document.createElement('a-sound');
+    soundEl.setAttribute('src', '#ui_click1' + iOSSuffix);
+    soundEl.setAttribute('id', 'uiClick1');
+    this.el.appendChild(soundEl);
+
+    soundEl = document.createElement('a-sound');
+    soundEl.setAttribute('src', '#ui_menu' + iOSSuffix);
+    soundEl.setAttribute('id', 'uiMenu');
+    this.el.appendChild(soundEl);
+
+    soundEl = document.createElement('a-sound');
+    soundEl.setAttribute('src', '#ui_undo' + iOSSuffix);
+    soundEl.setAttribute('id', 'uiUndo');
+    this.el.appendChild(soundEl);
+
     this.addButton({
       id: 'apainterBtn',
       layout: 'bottom-center',
@@ -57,7 +81,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.02,
       height: 0.02,
-      onClick: this.enterPainterMode.bind(this)
+      onclick: this.enterPainterMode.bind(this)
     });
     this.addButton({
       id: 'closeBtn',
@@ -66,7 +90,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.0075,
       height: 0.0075,
-      onClick: this.exitPainterMode.bind(this)
+      onclick: this.exitPainterMode.bind(this)
     });
     this.addButton({
       id: 'undoBtn',
@@ -76,7 +100,7 @@ AFRAME.registerComponent('ar-ui', {
       width: 0.0075,
       height: 0.0075,
       padding: [0, 0, 0.005, 0],
-      onClick: this.undo.bind(this)
+      onclick: this.undo.bind(this)
     });
     this.addButton({
       id: 'saveBtn',
@@ -86,7 +110,7 @@ AFRAME.registerComponent('ar-ui', {
       width: 0.0075,
       height: 0.0075,
       padding: [0, 0, 0.0175, 0],
-      onClick: this.save.bind(this)
+      onclick: this.save.bind(this)
     });
   },
   initUI: function () {
@@ -115,7 +139,7 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.id = params.id;
     uiEl.class = 'ar-ui';
     uiEl.layout = params.layout;
-    uiEl.onClick = params.onClick;
+    uiEl.onclick = params.onclick;
 
     uiEl.setAttribute('geometry', {
       primitive: 'plane',
@@ -126,7 +150,7 @@ AFRAME.registerComponent('ar-ui', {
       shader: 'flat',
       transparent: true,
       fog: false,
-      src: '#arui',
+      src: '#ar_ui',
       repeat: {x: this.atlas.images[uiEl.id].w / this.atlas.total.w, y: this.atlas.images[uiEl.id].h / this.atlas.total.h},
       offset: {x: this.atlas.total.w - this.atlas.images[uiEl.id].x / this.atlas.total.w, y: this.atlas.images[uiEl.id].y / this.atlas.total.h}
     });
@@ -137,8 +161,10 @@ AFRAME.registerComponent('ar-ui', {
     });
     uiEl.setAttribute('visible', params.visible);
     uiEl.setAttribute('enabled', params.enabled);
+
     uiEl.object3D.renderOrder = 10000;
     uiEl.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
+
     this.el.appendChild(uiEl);
   },
   showEl: function (self, id, delay) {
@@ -189,19 +215,19 @@ AFRAME.registerComponent('ar-ui', {
       // Only for 2D Screens
       if (this.objOver) {
         if (this.objOver.el.id !== this.intersection.object.el.id) {
-          this.onOut(this.objOver);
-          this.onOver(this.intersection.object);
+          this.onout(this.objOver);
+          this.onover(this.intersection.object);
           this.objOver = this.intersection.object;
         }
       } else {
-        this.onOver(this.intersection.object);
+        this.onover(this.intersection.object);
         this.objOver = this.intersection.object;
       }
     } else {
       el.sceneEl.canvas.style.cursor = null;
       // Only for 2D Screens
       if (this.objOver) {
-        this.onOut(this.objOver);
+        this.onout(this.objOver);
         this.objOver = null;
       }
     }
@@ -232,11 +258,11 @@ AFRAME.registerComponent('ar-ui', {
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null) {
       // Provisional > testing tap events
-      this.onOut(this.intersection.object);
-      this.onClick(this.intersection.object.el.id);
+      this.onout(this.intersection.object);
+      this.onclick(this.intersection.object.el.id);
     }
   },
-  onOver: function (obj) {
+  onover: function (obj) {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
@@ -249,7 +275,7 @@ AFRAME.registerComponent('ar-ui', {
     .easing(AFRAME.TWEEN.Easing.Quadratic.In);
     tween.start();
   },
-  onOut: function (obj) {
+  onout: function (obj) {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
@@ -262,9 +288,9 @@ AFRAME.registerComponent('ar-ui', {
     .easing(AFRAME.TWEEN.Easing.Quadratic.Out);
     tween.start();
   },
-  onClick: function (id) {
+  onclick: function (id) {
     if (this.objects[id]) {
-      this.objects[id].onClick(this);
+      this.objects[id].onclick(this);
     }
   },
   onWindowResize: function (e) {
@@ -338,6 +364,7 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'closeBtn', 500);
     this.showEl(this, 'undoBtn', 600);
     this.showEl(this, 'saveBtn', 700);
+    this.playSound('#uiClick0');
   },
   exitPainterMode: function () {
     var self = this;
@@ -361,6 +388,13 @@ AFRAME.registerComponent('ar-ui', {
         self.objects.apainterBtn.setAttribute('enabled', true);
       })
       .start();
+    this.playSound('#uiClick1');
+  },
+  playSound: function (id){
+    var el = document.querySelector(id);
+    if (!el) { return; }
+    el.components.sound.stopSound();
+    el.components.sound.playSound();
   },
   openModal: function () {
 
@@ -369,6 +403,7 @@ AFRAME.registerComponent('ar-ui', {
     // console.log('undo', this);
     // this.el.sceneEl.systems.brush.clear();
     this.el.sceneEl.systems.brush.undo();
+    this.playSound('#uiUndo');
   },
   save: function () {
     // console.log('save', this);

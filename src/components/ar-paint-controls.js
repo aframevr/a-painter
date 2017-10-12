@@ -24,6 +24,15 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     el.object3D.visible = false;
 
+    var soundEl = document.createElement('a-sound');
+    var iOSSuffix = '';
+    if (Utils.isiOS()) {
+      iOSSuffix = '_iOS';
+    }
+    soundEl.setAttribute('src', '#ui_paint' + iOSSuffix);
+    soundEl.setAttribute('id', 'uiPaint');
+    this.el.appendChild(soundEl);
+
     document.querySelector('[ar-ui]').addEventListener('activate', this.activate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
   },
@@ -62,8 +71,15 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.sizeModifier = 1;
       el.components.brush.startNewStroke();
       el.components.brush.active = true;
+      this.playSound('#uiPaint');
     }
     el.object3D.visible = true;
+  },
+  playSound: function (id){
+    var el = document.querySelector(id);
+    if (!el) { return; }
+    el.components.sound.stopSound();
+    el.components.sound.playSound();
   },
   getIntersectObjects: function () {
     var intersectObjects = [];
