@@ -141,6 +141,8 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.layout = params.layout;
     uiEl.onclick = params.onclick;
 
+    uiEl.setAttribute('scaleFactor', 1);
+
     uiEl.setAttribute('geometry', {
       primitive: 'plane',
       width: params.width,
@@ -169,29 +171,31 @@ AFRAME.registerComponent('ar-ui', {
   },
   showEl: function (self, id, delay) {
     var uiEntity = self.objects[ id ];
-    uiEntity.object3D.scale.set(0.01, 0.01, 0.01);
     uiEntity.setAttribute('visible', true);
-    new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
-      x: 1,
-      y: 1,
-      z: 1
-    }, 500)
-      .delay(delay || 0)
-      .easing(AFRAME.TWEEN.Easing.Back.Out)
-      .onStart(function () {
-        self.place(uiEntity, self.width, self.height);
-      })
-      .onComplete(function () {
-        uiEntity.setAttribute('enabled', true);
-      })
-      .start();
+    // Hack to have time to create boundingBox to make the place and get scaleFactor
+    setTimeout ( function () {
+      self.place(uiEntity, self.width, self.height);
+      uiEntity.object3D.scale.set(0.01, 0.01, 0.01);
+      new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
+        x: 1 * uiEntity.getAttribute('scaleFactor'),
+        y: 1 * uiEntity.getAttribute('scaleFactor'),
+        z: 1 * uiEntity.getAttribute('scaleFactor')
+      }, 500)
+        .delay(delay || 0)
+        .easing(AFRAME.TWEEN.Easing.Back.Out)
+        .onComplete(function () {
+          uiEntity.setAttribute('enabled', true);
+        })
+        .start();
+    }, 500);
   },
   hideEl: function (self, id, delay){
     var uiEntity = self.objects[ id ];
     uiEntity.setAttribute('enabled', false);
     new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
-      x: 0,
-      y: 0
+      x: 0.01,
+      y: 0.01,
+      z: 0.01
     }, 500)
       .delay(delay || 0)
       .easing(AFRAME.TWEEN.Easing.Back.In)
@@ -266,9 +270,10 @@ AFRAME.registerComponent('ar-ui', {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
-    var coords = { x: 1, y: 1, z: 1 };
+    var scaleFactor = obj.el.getAttribute('scaleFactor');
+    var coords = { x: 1 * scaleFactor, y: 1 * scaleFactor, z: 1 * scaleFactor };
     var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: 1.1, y: 1.1, z: 1.1 }, 150)
+    .to({ x: 1.1 * scaleFactor, y: 1.1 * scaleFactor, z: 1.1 * scaleFactor }, 150)
     .onUpdate(function () {
       obj.el.setAttribute('scale', this);
     })
@@ -279,9 +284,10 @@ AFRAME.registerComponent('ar-ui', {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
-    var coords = { x: 1.1, y: 1.1, z: 1.1 };
+    var scaleFactor = obj.el.getAttribute('scaleFactor');
+    var coords = { x: 1.1 * scaleFactor, y: 1.1 * scaleFactor, z: 1.1 * scaleFactor };
     var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: 1, y: 1, z: 1 }, 150)
+    .to({ x: 1 * scaleFactor, y: 1 * scaleFactor, z: 1 * scaleFactor }, 150)
     .onUpdate(function () {
       obj.el.setAttribute('scale', this);
     })
@@ -306,21 +312,26 @@ AFRAME.registerComponent('ar-ui', {
     });
   },
   place: function (obj, w, h) {
+    var scaleFactor = Math.max (1, (this.width / Math.abs(this.depth)) / 2);
+    obj.object3D.scale.set (scaleFactor, scaleFactor, scaleFactor);
+    // var scaleTmp = {x: scaleFactor, y: scaleFactor, z: scaleFactor};
+    obj.setAttribute('scaleFactor', scaleFactor);
+
     var positionTmp = {x: 0, y: 0, z: this.depth};
     switch (obj.layout) {
       case 'bottom-center':
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom + obj.padding[2];
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
         break;
       case 'top-center':
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop - obj.padding[0];
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
         break;
       case 'top-right':
-        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingRight - obj.padding[1];
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop - obj.padding[0];
+        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
         break;
       case 'bottom-left':
-        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingRight + obj.padding[1];
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom + obj.padding[2];
+        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingRight * scaleFactor + obj.padding[1] * scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
         break;
       default:
         positionTmp = {x: 0, y: 0, z: 10000};
