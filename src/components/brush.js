@@ -41,32 +41,27 @@ AFRAME.registerComponent('brush', {
       self.el.setAttribute('brush', 'size', size);
     });
 */
-    this.el.addEventListener('buttondown', function (evt) {
+    this.el.addEventListener('undo', function(evt) {
       if (!self.data.enabled) { return; }
-      // Grip
-      if (evt.detail.id === 2) {
-        self.system.undo();
-      }
+      self.system.undo();
     });
 
-    this.el.addEventListener('buttonchanged', function (evt) {
+    this.el.addEventListener('paint', function (evt) {
       if (!self.data.enabled) { return; }
       // Trigger
-      if (evt.detail.id === 1) {
-        var value = evt.detail.state.value;
-        self.sizeModifier = value;
-        if (value > 0.1) {
-          if (!self.active) {
-            self.startNewStroke();
-            self.active = true;
-          }
-        } else {
-          if (self.active) {
-            self.previousEntity = self.currentEntity;
-            self.currentStroke = null;
-          }
-          self.active = false;
+      var value = evt.detail.value;
+      self.sizeModifier = value;
+      if (value > 0.1) {
+        if (!self.active) {
+          self.startNewStroke();
+          self.active = true;
         }
+      } else {
+        if (self.active) {
+          self.previousEntity = self.currentEntity;
+          self.currentStroke = null;
+        }
+        self.active = false;
       }
     });
   },

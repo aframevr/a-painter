@@ -4,6 +4,52 @@ var saveAs = require('../../vendor/saveas.js').saveAs;
 
 AFRAME.registerSystem('painter', {
   init: function () {
+
+    var mappings = {
+      default: {
+        common: {
+          gripdown: 'undo',
+          triggerchanged: 'paint'
+        },
+
+        'vive-controls': {
+          axismove: 'changeBrushSizeInc',
+          trackpadtouchstart: 'startChangeBrushSize',
+          menudown: 'toggleMenu',
+
+          // Teleport
+          trackpaddown: 'aim',
+          trackpadup: 'teleport'
+        },
+
+        'oculus-touch-controls': {
+          axismove: 'changeBrushSizeAbs',
+          abuttondown: 'toggleMenu',
+          xbuttondown: 'toggleMenu',
+
+          // Teleport
+          ybuttondown: 'aim',
+          ybuttonup: 'teleport',
+
+          bbuttondown: 'aim',
+          bbuttonup: 'teleport'
+        },
+
+        'windows-motion-controls': {
+          axismove: 'changeBrushSizeAbs',
+          menudown: 'toggleMenu',
+
+          // Teleport
+          trackpaddown: 'aim',
+          trackpadup: 'teleport'
+        },
+      }
+    };
+
+    this.sceneEl.addEventListener('loaded', function() {
+      AFRAME.registerInputMappings(mappings);
+    });
+
     this.version = '1.1';
     this.brushSystem = this.sceneEl.systems.brush;
     this.showTemplateItems = true;
