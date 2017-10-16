@@ -14,6 +14,7 @@ require('./systems/painter.js');
 require('./components/ar.js');
 require('./components/ar-paint-controls.js');
 require('./components/ar-ui.js');
+require('./components/ar-ui-modal-material.js');
 require('./components/brush.js');
 require('./components/if-no-vr-headset.js');
 require('./components/json-model.js');
