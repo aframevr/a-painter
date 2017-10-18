@@ -33,9 +33,14 @@ AFRAME.registerComponent('ar-paint-controls', {
     soundEl.setAttribute('id', 'uiPaint');
     this.el.appendChild(soundEl);
 
+    this.onStrokeStarted = this.onStrokeStarted.bind(this);
     document.querySelector('[ar-ui]').addEventListener('activate', this.activate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('onBrushChanged', this.onBrushChanged.bind(this));
+    this.el.addEventListener('stroke-started', this.onStrokeStarted);
+  },
+  onStrokeStarted: function () {
+    this.el.emit('brush-started');
   },
   activate: function () {
     this.startHandler = this.paintStart.bind(this);

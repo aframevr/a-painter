@@ -45,6 +45,7 @@ AFRAME.registerComponent('ar-ui', {
     this.onPoseFound = this.onPoseFound.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onComponentChanged = this.onComponentChanged.bind(this);
+    this.onStrokeStarted = this.onStrokeStarted.bind(this);
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
@@ -71,6 +72,8 @@ AFRAME.registerComponent('ar-ui', {
     }
     this.el.addEventListener('model-loaded', this.onModelLoaded);
     this.el.addEventListener('componentchanged', this.onComponentChanged);
+    // this.el.addEventListener('stroke-started', this.onStrokeStarted);
+    document.querySelector('[ar-paint-controls]').addEventListener('brush-started', this.onStrokeStarted);
   },
   addUIElements: function () {
     this.addSounds();
@@ -570,6 +573,16 @@ AFRAME.registerComponent('ar-ui', {
   },
   onComponentChanged: function (evt) {
     if (evt.detail.name === 'brush') { this.syncUI(); }
+  },
+  onStrokeStarted: function () {
+    var color;
+    var colorStack = this.colorStack;
+    if (!this.colorHasChanged) { return; }
+    color = this.el.getAttribute('brush').color;
+    this.colorHasChanged = false;
+    if (colorStack.length === 7) { colorStack.shift(); }
+    colorStack.push(color);
+    this.syncUI();
   },
   syncUI: function () {
     var brush;
