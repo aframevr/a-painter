@@ -35,6 +35,7 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     document.querySelector('[ar-ui]').addEventListener('activate', this.activate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
+    document.querySelector('[ar-ui]').addEventListener('onBrushChanged', this.onBrushChanged.bind(this));
   },
   activate: function () {
     this.startHandler = this.paintStart.bind(this);
@@ -60,6 +61,23 @@ AFRAME.registerComponent('ar-paint-controls', {
       window.removeEventListener('mousemove', this.moveHandler);
       window.removeEventListener('mouseup', this.endHandler);
     }
+  },
+  onBrushChanged: function (evt) {
+    this.el.setAttribute('material', 'color', evt.detail.color);
+    this.getGazeScale(evt.detail.size);
+    this.el.setAttribute('brush', 'color', evt.detail.color);
+    this.el.setAttribute('brush', 'brush', evt.detail.brush);
+    this.el.setAttribute('brush', 'size', evt.detail.size);
+  },
+  getGazeScale: function (size) {
+    var sizeData = this.el.components.brush.schema.size;
+    var scale = 1;
+    if (size > sizeData.default) {
+      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 1, 4);
+    } else {
+      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.min, 1, 0.25);
+    }
+    this.el.object3D.scale.set(scale, scale, scale);
   },
   paintStart: function (e) {
     var el = this.el;

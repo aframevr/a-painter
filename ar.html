@@ -17,6 +17,7 @@
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
     <script src="vendor/aframe-v0.7.0.min.js"></script>
+    <script src="vendor/aframe-input-mapping-component.min.js"></script>
     <!-- AR vendor scripts.  -->
     <script src="https://rawgit.com/google-ar/three.ar.js/master/dist/three.ar.js"></script>
 
@@ -33,6 +34,8 @@
         <a-assets>
           <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
           <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
+          <img id="uinormal" src="assets/images/ui-normal.png" crossorigin="anonymous">
+          <a-asset-item id="aruiobj" src="assets/models/ar-ui-settings.obj"></a-asset-item>
           <img id="ar_ui" src="assets/images/ar-ui.png" crossorigin="anonymous">
           <!-- Audio for iOS -->
           <audio id="ui_click0_iOS" src="assets/sounds/ui_click0.mp3"></audio>
@@ -55,7 +58,7 @@
         <!-- camera -->
         <a-entity id="acamera" camera look-controls ar-ui></a-entity>
         <!-- ar-gaze controls -->
-        <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
+        <a-entity id="ar-gaze" brush ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
         material="shader:flat;color:#ef2d5e"
         position="0 0 -0.25"></a-entity>
       </a-entity>
