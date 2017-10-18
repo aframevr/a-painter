@@ -100,7 +100,7 @@ AFRAME.registerComponent('ar-ui', {
     // Add sounds
     var soundEl = document.createElement('a-sound');
     var iOSSuffix = '';
-    if (Utils.isiOS()) {
+    if (AFRAME.utils.device.isIOS()) {
       iOSSuffix = '_iOS';
     }
     soundEl.setAttribute('src', '#ui_click0' + iOSSuffix);

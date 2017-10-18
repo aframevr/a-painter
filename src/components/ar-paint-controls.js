@@ -26,7 +26,7 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     var soundEl = document.createElement('a-sound');
     var iOSSuffix = '';
-    if (Utils.isiOS()) {
+    if (AFRAME.utils.device.isIOS()) {
       iOSSuffix = '_iOS';
     }
     soundEl.setAttribute('src', '#ui_paint' + iOSSuffix);

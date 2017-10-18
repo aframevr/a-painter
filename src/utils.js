@@ -36,14 +36,9 @@ window.Utils = (function() {
         return tooltips;
     }
 
-    function isiOS () {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-
     return {
         numberToFixed: numberToFixed,
         arrayNumbersToFixed: arrayNumbersToFixed,
-        getTooltips: getTooltips,
-        isiOS: isiOS
+        getTooltips: getTooltips
     }
 }());
