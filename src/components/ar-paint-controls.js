@@ -1,6 +1,4 @@
-AFRAME.registerSystem('ar-paint-controls', {
-  numberStrokes: 0
-});
+AFRAME.registerSystem('ar-paint-controls');
 
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ar-paint-controls', {
@@ -13,9 +11,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.size = el.sceneEl.renderer.getSize();
     this.pointer = new THREE.Vector2();
     // normalized device coordinates position
-    this.pointerNdc = new THREE.Vector2();
-
-    this.numberStrokes = 0;
+    this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
 
     this.raycaster = el.components.raycaster.raycaster;
     // this.el.components.raycaster.showLine = true;
@@ -120,10 +116,10 @@ AFRAME.registerComponent('ar-paint-controls', {
       t = e.touches[0];
     }
     this.pointer.set(t.clientX, t.clientY);
-    this.pointerNdc.x = (t.clientX / this.size.width) * 2 - 1;
-    this.pointerNdc.y = -(t.clientY / this.size.height) * 2 + 1;
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.pointerNdc, this.el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
 
     var intersections = this.raycaster.intersectObjects(this.getIntersectObjects(), true);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
