@@ -41,11 +41,25 @@ AFRAME.registerComponent('ar-ui', {
 
   },
   bindMethods: function () {
+    this.onWindowResize = this.onWindowResize.bind(this);
+    this.tap = this.tap.bind(this);
+    this.touchmove = this.touchmove.bind(this);
+    this.tapend = this.tapend.bind(this);
+    this.mousemove = this.mousemove.bind(this);
+
     this.onPoseLost = this.onPoseLost.bind(this);
     this.onPoseFound = this.onPoseFound.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onComponentChanged = this.onComponentChanged.bind(this);
     this.onStrokeStarted = this.onStrokeStarted.bind(this);
+
+    this.enterPainterMode = this.enterPainterMode.bind(this);
+    this.exitPainterMode = this.exitPainterMode.bind(this);
+
+    this.undo = this.undo.bind(this);
+    this.save = this.save.bind(this);
+
+    this.brushBtnClicked = this.brushBtnClicked.bind(this);
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
@@ -60,26 +74,25 @@ AFRAME.registerComponent('ar-ui', {
     this.paddingTop = this.paddingBottom = this.paddingRight = this.paddingLeft = this.depth / 20;
   },
   addEvents: function () {
-    window.addEventListener('resize', this.onWindowResize.bind(this));
+    window.addEventListener('resize', this.onWindowResize);
     if (this.el.sceneEl.isMobile) {
-      window.addEventListener('touchstart', this.tap.bind(this));
-      window.addEventListener('touchmove', this.touchmove.bind(this));
-      window.addEventListener('touchend', this.tapend.bind(this));
+      window.addEventListener('touchstart', this.tap);
+      window.addEventListener('touchmove', this.touchmove);
+      window.addEventListener('touchend', this.tapend);
     } else {
-      window.addEventListener('mousemove', this.mousemove.bind(this));
-      window.addEventListener('mousedown', this.tap.bind(this));
-      window.addEventListener('mouseup', this.tapend.bind(this));
+      window.addEventListener('mousemove', this.mousemove);
+      window.addEventListener('mousedown', this.tap);
+      window.addEventListener('mouseup', this.tapend);
     }
     this.el.addEventListener('model-loaded', this.onModelLoaded);
     this.el.addEventListener('componentchanged', this.onComponentChanged);
-    // this.el.addEventListener('stroke-started', this.onStrokeStarted);
     document.querySelector('[ar-paint-controls]').addEventListener('brush-started', this.onStrokeStarted);
   },
   addUIElements: function () {
     this.addSounds();
     this.addInitEl();
     this.addPaintingEl();
-    this.addFaderEl();
+    this.addCommonEl();
     this.addSettingsEl();
     this.addTrackingLostEl();
   },
@@ -118,7 +131,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.02,
       height: 0.02,
-      onclick: this.enterPainterMode.bind(this)
+      onclick: this.enterPainterMode
     });
   },
   addPaintingEl: function () {
@@ -130,7 +143,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.0075,
       height: 0.0075,
-      onclick: this.exitPainterMode.bind(this)
+      onclick: this.exitPainterMode
     });
     this.addButton({
       id: 'undoBtn',
@@ -140,17 +153,7 @@ AFRAME.registerComponent('ar-ui', {
       width: 0.0075,
       height: 0.0075,
       padding: [0, 0, 0.005, 0],
-      onclick: this.undo.bind(this)
-    });
-    this.addButton({
-      id: 'brushBtn',
-      layout: 'bottom-center',
-      visible: false,
-      enabled: false,
-      width: 0.015,
-      height: 0.015,
-      padding: [0, 0, 0, 0],
-      onclick: this.openBrushSettings.bind(this)
+      onclick: this.undo
     });
     this.addButton({
       id: 'saveBtn',
@@ -160,16 +163,41 @@ AFRAME.registerComponent('ar-ui', {
       width: 0.0075,
       height: 0.0075,
       padding: [0, 0, 0.0175, 0],
-      onclick: this.save.bind(this)
+      onclick: this.save
     });
   },
-  addFaderEl: function () {
-     // Add fader for modals
+  addCommonEl: function () {
+     // Add fader for settings modal
      this.addFader({
-      id: 'fader',
+      id: 'fader-brushSettings',
       visible: false,
       enabled: false
     });
+    this.addButton({
+      id: 'brushBtn',
+      layout: 'bottom-center',
+      visible: false,
+      enabled: false,
+      width: 0.015,
+      height: 0.015,
+      onclick: this.brushBtnClicked
+    });
+    // this.addButton({
+    //   id: 'strokeDragBar',
+    //   layout: 'bottom-right',
+    //   visible: false,
+    //   width: 0.04,
+    //   height: 0.005,
+    //   renderOrder: this.renderOrderModal
+    // });
+    // this.addButton({
+    //   id: 'strokeDragDot',
+    //   layout: 'bottom-right',
+    //   visible: false,
+    //   width: 0.005,
+    //   height: 0.005,
+    //   renderOrder: this.renderOrderModal
+    // });
   },
   addSettingsEl: function () {
     // Add 'settings' section elements
@@ -181,18 +209,6 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.0075,
       height: 0.0075,
-      onclick: this.closeBrushSettings.bind(this),
-      renderOrder: this.renderOrderModal
-    });
-    this.addButton({
-      id: 'brushSettingsBtn',
-      atlasId: 'brushBtn',
-      layout: 'bottom-center',
-      visible: false,
-      enabled: false,
-      width: 0.015,
-      height: 0.015,
-      padding: [0, 0, 0, 0],
       onclick: this.closeBrushSettings.bind(this),
       renderOrder: this.renderOrderModal
     });
@@ -560,9 +576,8 @@ AFRAME.registerComponent('ar-ui', {
     this.el.emit('onBrushChanged', this.el.getAttribute('brush'));
   },
   updateBrushButtons: function () {
-    // console.log('---', this.objects.brushBtn, this.objects.brushSettingsBtn);
+    // console.log('---', this.objects.brushBtn);
     this.addBrushToButton(this.objects.brushBtn);
-    this.addBrushToButton(this.objects.brushSettingsBtn);
   },
   addBrushToButton: function (obj) {
     var buttonObj = obj.getObject3D('mesh');
@@ -594,6 +609,12 @@ AFRAME.registerComponent('ar-ui', {
   },
   // End settings UI code
   addTrackingLostEl: function (){
+    // Add fader for trackingLost modal
+    this.addFader({
+      id: 'fader-trackingLost',
+      visible: false,
+      enabled: false
+    });
     // Add 'tracking lost' modal elements
     this.addImage({
       id: 'trackingLost',
@@ -934,20 +955,29 @@ AFRAME.registerComponent('ar-ui', {
     obj.object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
     obj.setAttribute('scaleFactor', scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
+    if (!obj.object3D.children[0].geometry.boundingBox) {
+      obj.object3D.children[0].geometry.computeBoundingBox();
+      obj.object3D.children[0].geometry.width = obj.object3D.children[0].geometry.boundingBox.max.x - obj.object3D.children[0].geometry.boundingBox.min.x;
+      obj.object3D.children[0].geometry.height = obj.object3D.children[0].geometry.boundingBox.max.y - obj.object3D.children[0].geometry.boundingBox.min.y;
+    }
     switch (obj.layout) {
       case 'bottom-center':
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.width / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
         break;
       case 'top-center':
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.height / 2 * scaleFactor + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
         break;
       case 'top-right':
-        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.boundingSphere.radius + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
+        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.width / 2 * scaleFactor + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
+        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.height / 2 * scaleFactor + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
         break;
       case 'bottom-left':
-        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingRight * scaleFactor + obj.padding[1] * scaleFactor;
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.boundingSphere.radius - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
+        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.width / 2 * scaleFactor - this.paddingRight * scaleFactor + obj.padding[1] * scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.height / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
+        break;
+      case 'bottom-right':
+        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.width / 2 * scaleFactor + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.height / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
         break;
       case 'fader':
         positionTmp = {x: 0, y: 0, z: this.depth};
@@ -1005,6 +1035,8 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'closeBtn', true, 500);
     this.showEl(this, 'undoBtn', true, 600);
     this.showEl(this, 'saveBtn', true, 700);
+    // this.showEl(this, 'strokeDragBar', true, 800);
+    // this.showEl(this, 'strokeDragDot', true, 850);
     this.showEl(this, 'brushBtn', true, 900);
     this.playSound('#uiClick0');
   },
@@ -1015,6 +1047,8 @@ AFRAME.registerComponent('ar-ui', {
     this.el.emit('deactivate', false);
     // Hide close buttons
     this.hideEl(this, 'closeBtn', true);
+    // this.hideEl(this, 'strokeDragDot', true, 25);
+    // this.hideEl(this, 'strokeDragBar', true, 50);
     this.hideEl(this, 'brushBtn', true, 100);
     this.hideEl(this, 'undoBtn', true, 200);
     this.hideEl(this, 'saveBtn', true, 300);
@@ -1042,10 +1076,9 @@ AFRAME.registerComponent('ar-ui', {
     el.components.sound.playSound();
   },
   openModal: function (id, callback) {
-    this.modalOpened = id;
     var self = this;
-    var uiEl = document.querySelector('#fader');
-    
+    this.modalOpened = id;
+    var uiEl = document.querySelector('#fader-' + id);
     this.camera.setAttribute('look-controls', {enabled: false});
     // var uiEl = this.objects.fader;
     uiEl.setAttribute('visible', true);
@@ -1069,13 +1102,14 @@ AFRAME.registerComponent('ar-ui', {
       uiEl.setAttribute('ar-ui-modal-material', {steps: this});
     })
     .onComplete(function () {
+      self.objects.brushBtn.setAttribute('enabled', true);
     })
     .start();
 
     switch (id) {
       case 'saving':
         break;
-      case 'trakingLost':
+      case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', false);
         this.objects.saveBtn.setAttribute('enabled', false);
         this.objects.undoBtn.setAttribute('enabled', false);
@@ -1089,7 +1123,6 @@ AFRAME.registerComponent('ar-ui', {
         this.objects.undoBtn.setAttribute('enabled', false);
         this.objects.brushBtn.setAttribute('enabled', false);
         this.showEl(this, 'closeSettingsBtn', true, 100);
-        this.showEl(this, 'brushSettingsBtn', true, 300);
         this.settingsUI.setAttribute('visible', true);
         break;
     }
@@ -1098,17 +1131,17 @@ AFRAME.registerComponent('ar-ui', {
   },
   closeModal: function (id, callback) {
     var self = this;
-    var uiEl = document.querySelector('#fader');
+    var uiEl = document.querySelector('#fader-' + id);
 
     this.camera.setAttribute('look-controls', {enabled: true});
     switch (id) {
       case 'saving':
         break;
-      case 'trakingLost':
+      case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', true);
         this.objects.saveBtn.setAttribute('enabled', true);
         this.objects.undoBtn.setAttribute('enabled', true);
-        this.objects.brushBtn.setAttribute('enabled', true);
+        this.objects.brushBtn.setAttribute('enabled', false);
         self.hideEl(self, 'trackingDevice', false);
         self.hideEl(self, 'trackingLost', false, 100);
         break;
@@ -1116,9 +1149,8 @@ AFRAME.registerComponent('ar-ui', {
         this.objects.closeBtn.setAttribute('enabled', true);
         this.objects.saveBtn.setAttribute('enabled', true);
         this.objects.undoBtn.setAttribute('enabled', true);
-        this.objects.brushBtn.setAttribute('enabled', true);
+        this.objects.brushBtn.setAttribute('enabled', false);
         this.hideEl(this, 'closeSettingsBtn', true);
-        this.hideEl(this, 'brushSettingsBtn', true, 100);
         this.settingsUI.setAttribute('visible', false);
         break;
     }
@@ -1141,6 +1173,7 @@ AFRAME.registerComponent('ar-ui', {
     .onComplete(function () {
       self.modalOpened = null;
       uiEl.setAttribute('visible', false);
+      self.objects.brushBtn.setAttribute('enabled', true);
     })
     .start();
   },
@@ -1163,24 +1196,35 @@ AFRAME.registerComponent('ar-ui', {
   },
   onPoseLost: function () {
     if (this.modalOpened === null){
-      this.openModal('trakingLost');
+      this.openModal('trackingLost');
     }
   },
   onPoseFound: function () {
     if (this.modalOpened !== null){
-      this.closeModal('trakingLost');
+      this.closeModal('trackingLost');
     }
   },
   openBrushSettings: function () {
+    document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
+    document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
     if (this.modalOpened === null){
       this.openModal('brushSettings');
       this.playSound('#uiClick0');
     }
   },
   closeBrushSettings: function () {
+    document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
+    document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
     if (this.modalOpened !== null){
       this.closeModal('brushSettings');
       this.playSound('#uiClick1');
+    }
+  },
+  brushBtnClicked: function () {
+    if (!this.modalOpened){
+      this.openBrushSettings();
+    } else {
+      this.closeBrushSettings();
     }
   }
 });
