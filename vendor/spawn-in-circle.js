@@ -22,7 +22,7 @@ AFRAME.registerComponent('spawn-in-circle', {
   },
 
   getRandomAngleInRadians: function() {
-    return Math.random()*Math.PI*2;
+    return (Math.random()*Math.PI*2 - Math.PI) / 6 + Math.PI / 2;
   },
 
   randomPointOnCircle: function (radius, angleRad) {
