@@ -44,14 +44,15 @@ AFRAME.registerComponent('ar-ui-modal-material', {
         opacity: { value: this.data.opacity }
       },
       transparent: true,
-      vertexShader,
-      fragmentShader
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader
     });
 
     this.applyToMesh();
-    this.el.addEventListener('model-loaded', () => this.applyToMesh());
+    this.el.addEventListener('model-loaded', function () {
+      this.applyToMesh();
+    });
   },
-
 
   /**
    * Update the ShaderMaterial when component data changes.
@@ -78,4 +79,4 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     // this.material.uniforms.time.value = t / 1000;
   }
 
-})
+});
