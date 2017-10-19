@@ -11,7 +11,6 @@ require('./systems/brush.js');
 require('./systems/ui.js');
 require('./systems/painter.js');
 
-require('./components/ar.js');
 require('./components/ar-paint-controls.js');
 require('./components/ar-ui.js');
 require('./components/ar-ui-modal-material.js');
@@ -22,6 +21,9 @@ require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
+require('./components/local-player.js');
+require('./components/body.js');
+require('./components/multiuser-mode.js');
 
 require('./brushes/line.js');
 require('./brushes/stamp.js');
@@ -29,3 +31,5 @@ require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
 require('./brushes/single-sphere.js');
+
+require('./systems/sync.js');

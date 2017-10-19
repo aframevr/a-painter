@@ -49,9 +49,8 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     });
 
     this.applyToMesh();
-    this.el.addEventListener('model-loaded', function () {
-      this.applyToMesh();
-    });
+    var self = this;
+    this.el.addEventListener('model-loaded', function() { self.applyToMesh(); });
   },
 
   /**

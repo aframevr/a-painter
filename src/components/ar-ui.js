@@ -71,6 +71,9 @@ AFRAME.registerComponent('ar-ui', {
   },
   setLayoutSettings: function () {
     this.depth = -0.1;
+    this.depthOffset = -0.04;
+    this.settingsUIDepthOffset = this.depthOffset + 0.002;
+    this.faderDepthOffset = this.depthOffset;
     this.paddingTop = this.paddingBottom = this.paddingRight = this.paddingLeft = this.depth / 20;
   },
   addEvents: function () {
@@ -226,7 +229,7 @@ AFRAME.registerComponent('ar-ui', {
       fog: false,
       src: '#uinormal'
     });
-    this.settingsUI.setAttribute('position', '0 -0.02 -0.098');
+    this.settingsUI.setAttribute('position', '0 -0.02 ' + (this.depth + this.settingsUIDepthOffset));
     
     this.settingsUI.setAttribute('scale', '0.4 0.4 0.4');
     this.settingsUI.setAttribute('visible', false);
@@ -954,7 +957,7 @@ AFRAME.registerComponent('ar-ui', {
     var scaleFactor = Math.max(1, (this.width / Math.abs(this.depth)) / 2);
     obj.object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
     obj.setAttribute('scaleFactor', scaleFactor);
-    var positionTmp = {x: 0, y: 0, z: this.depth};
+    var positionTmp = {x: 0, y: 0, z: this.depth + this.depthOffset};
     if (!obj.object3D.children[0].geometry.boundingBox) {
       obj.object3D.children[0].geometry.computeBoundingBox();
       obj.object3D.children[0].geometry.width = obj.object3D.children[0].geometry.boundingBox.max.x - obj.object3D.children[0].geometry.boundingBox.min.x;
@@ -980,7 +983,7 @@ AFRAME.registerComponent('ar-ui', {
         positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.height / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
         break;
       case 'fader':
-        positionTmp = {x: 0, y: 0, z: this.depth};
+        positionTmp = {x: 0, y: 0, z: this.depth + this.faderDepthOffset};
         var faderScaleFactor = scaleFactor * this.width / this.height;
         obj.object3D.scale.set(faderScaleFactor, scaleFactor, scaleFactor);
         break;
