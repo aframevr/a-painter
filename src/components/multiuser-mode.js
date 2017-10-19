@@ -16,16 +16,19 @@ AFRAME.registerComponent('multiuser-mode', {
 
     if (isMobile) {
       // Mobile controls.
-      el.querySelector('[camera]').removeAttribute('look-controls');
-      el.querySelector('[camera]').setAttribute('orbit-controls', '');
+      //el.querySelector('[camera]').removeAttribute('look-controls');
+      //el.querySelector('[camera]').setAttribute('orbit-controls', '');
 
       if (isMultiuser && !isPlayingRecording) {
-        el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
+        //el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
       }
     }
     else {
       // Don't let replayer interfere with mobile when testing.
       el.setAttribute('avatar-replayer', '');
+      if (isMultiuser && !isPlayingRecording) {
+        el.querySelector('[local-player]').setAttribute('spawn-in-circle', {radius: 2});
+      }
     }
 
     var webrtc = params.hasOwnProperty('webrtc');

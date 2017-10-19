@@ -1,0 +1,14 @@
+<html>
+  <body>    
+    <iframe width="50%" height="100%" style="position:absolute;left:0;top:0">
+    </iframe>
+    <iframe width="50%" height="100%" style="position:absolute;left:50%;top:0">
+    </iframe>
+
+    <script>
+      Array.prototype.slice.call(document.querySelectorAll('iframe')).forEach(function(frame) {
+        frame.src = "ar.html" + window.location.search;
+      });
+    </script>
+  </body>
+</html>
