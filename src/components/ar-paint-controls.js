@@ -1,4 +1,3 @@
-AFRAME.registerSystem('ar-paint-controls');
 
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ar-paint-controls', {
