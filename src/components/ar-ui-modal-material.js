@@ -53,7 +53,6 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     this.el.addEventListener('model-loaded', function() { self.applyToMesh(); });
   },
 
-
   /**
    * Update the ShaderMaterial when component data changes.
    */
@@ -79,4 +78,4 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     // this.material.uniforms.time.value = t / 1000;
   }
 
-})
+});
