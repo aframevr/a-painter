@@ -84,7 +84,7 @@
     <link rel="manifest" href="manifest.webmanifest">
   </head>
   <body>
-    <a-scene ar multiuser-mode>
+    <a-scene ar="cameraUserHeight:true" multiuser-mode>
         <a-assets>
           <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
           <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
@@ -140,7 +140,7 @@
 
       <a-entity id="cameraRig" local-player networked="template:#empty-template">
         <!-- camera -->
-        <a-entity id="acamera" camera look-controls wasd-controls ar-ui
+        <a-entity id="acamera" camera="userHeight:1.6" look-controls wasd-controls ar-ui
             networked="template:#head-template;showLocalTemplate:false;">
             <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
