@@ -37,18 +37,19 @@ AFRAME.registerBrush = function (name, definition, options) {
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
         points.push({
-          'orientation': Utils.arrayNumbersToFixed(point.orientation.toArray()),
-          'position': Utils.arrayNumbersToFixed(point.position.toArray()),
-          'pressure': Utils.numberToFixed(point.pressure),
+          'orientation': arrayToNumFixed(point.orientation.toArray(), 6),
+          'position': arrayToNumFixed(point.position.toArray(), 6),
+          'pressure': point.pressure.toNumFixed(6),
           'timestamp': point.timestamp
         });
       }
 
       return {
         brush: {
-          index: system.getUsedBrushes().indexOf(this.brushName),
-          color: Utils.arrayNumbersToFixed(this.data.color.toArray()),
-          size: Utils.numberToFixed(this.data.size),
+          name: this.brushName,
+          color: arrayToNumFixed(this.data.color.toArray(), 6),
+          size: this.data.size.toNumFixed(6),
+          timestamp: this.data.timestamp
         },
         points: points
       };
@@ -106,17 +107,26 @@ AFRAME.registerBrush = function (name, definition, options) {
       }
       if (addPointMethod.call(this, position, orientation, pointerPosition, pressure, timestamp)) {
         this.data.numPoints++;
-        this.data.points.push({
+
+        var point = {
           'position': position.clone(),
           'orientation': orientation.clone(),
           'pressure': pressure,
           'timestamp': timestamp
-        });
+        };
+        this.data.points.push(point);
 
         this.data.prevPosition = position.clone();
         this.data.prevPointerPosition = pointerPosition.clone();
       }
     };
+  }
+
+  function arrayToNumFixed (array, num) {
+    for (var i = 0; i < array.length; i++) {
+      array[i] = array[i].toNumFixed(num);
+    }
+    return array;
   }
 
   var NewBrush = function () {};
@@ -144,8 +154,8 @@ AFRAME.registerSystem('brush', {
     return AFRAME.BRUSHES[name];
   },
   undo: function () {
-  	var stroke;
-    for (var i = this.strokes.length - 1; i >= 0; i--) {
+    var stroke;
+    for (var i = this.strokes.length-1; i >= 0; i--) {
       if (this.strokes[i].data.owner !== 'local') continue;
       stroke = this.strokes.splice(i, 1)[0];
       break;
@@ -171,6 +181,7 @@ AFRAME.registerSystem('brush', {
     });
 
     this.strokes = [];
+    this.strokesMap = {};
   },
   init: function () {
     this.version = VERSION;
@@ -233,6 +244,7 @@ AFRAME.registerSystem('brush', {
     stroke.brush = Brush;
     stroke.init(color, size, owner, timestamp);
     this.strokes.push(stroke);
+    this.strokesMap[timestamp] = stroke;
 
     var drawing = document.querySelector('.a-drawing');
     if (!drawing) {
@@ -249,6 +261,10 @@ AFRAME.registerSystem('brush', {
     stroke.entity = entity;
 
     return stroke;
+  },
+  addPointToStroke: function (data) {
+    var stroke = this.strokesMap[data.strokeTimestamp];
+    stroke.addPoint(data.position, data.orientation, data.pointerPosition, data.pressure, data.timestamp);
   },
   getJSON: function () {
     // Strokes
@@ -332,14 +348,12 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
 
-    var usedBrushes = [];
-
     for (var i = 0; i < data.strokes.length; i++) {
       var strokeData = data.strokes[i];
       var brush = strokeData.brush;
 
       var stroke = this.addNewStroke(
-        data.brushes[brush.index],
+        brush.name,
         new THREE.Color().fromArray(brush.color),
         brush.size
       );

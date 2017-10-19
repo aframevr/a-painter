@@ -44,12 +44,13 @@ AFRAME.registerComponent('ar-ui-modal-material', {
         opacity: { value: this.data.opacity }
       },
       transparent: true,
-      vertexShader,
-      fragmentShader
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader
     });
 
     this.applyToMesh();
-    this.el.addEventListener('model-loaded', () => this.applyToMesh());
+    var self = this;
+    this.el.addEventListener('model-loaded', function() { self.applyToMesh(); });
   },
 
 
