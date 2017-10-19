@@ -14,17 +14,70 @@
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
     <script src="vendor/aframe-v0.7.0.min.js"></script>
     <script src="vendor/aframe-input-mapping-component.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="vendor/easyrtc.js"></script>
     <script src="build.js"></script>
+    <script src="https://unpkg.com/networked-aframe@^0.3.1/dist/networked-aframe.js"></script>
+    <script src="https://unpkg.com/aframe-motion-capture-components@^0.1.6/dist/aframe-motion-capture-components.min.js"></script>
+    <script src="vendor/aframe-extras.loaders.js"></script>
     <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
     <script src="vendor/aframe-teleport-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
+    <script src="vendor/spawn-in-circle.js"></script>
+    <script>
+      NAF.schemas.add({
+        template: '#head-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head.vr',
+            component: 'visible'
+          },
+          {
+            selector: '.head.non-vr',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#body-template',
+        components: [
+          'position',
+          'rotation',
+          'visible'
+        ]
+      });
+      NAF.schemas.add({
+        template: '#left-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#right-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+    </script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="manifest.webmanifest">
   </head>
-  <body>
-    <a-scene>
+  <body style="background-color: #030404">
+    <a-scene multiuser-mode>
       <a-assets>
         <img id="skymap" src="assets/images/sky.jpg" crossorigin="anonymous">
         <img id="uinormal" src="assets/images/ui-normal.png" crossorigin="anonymous">
@@ -33,13 +86,40 @@
         <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
         <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
+
+        <div id="head-template" type="text/html">
+          <a-entity class="head non-vr" obj-model="obj: #camera-obj; mtl: #camera-mtl" scale="0.3 0.3 0.3" visible="true"></a-entity>
+          <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" position="0 -0.175 0" rotation="0 180 0" visible="false"></a-entity>
+        </div>
+        <div id="body-template" type="text/html">
+          <a-entity class="body vr" gltf-model-next="#avatar1-body-obj" position="0 -0.175 0" rotation="0 180 0"></a-entity>
+        </div>
+        <div id="left-hand-template" type="text/html">
+          <a-entity class="hands" visible="false">
+            <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+          </a-entity>
+        </div>
+        <div id="right-hand-template" type="text/html">
+          <a-entity class="hands" visible="false">
+            <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+          </a-entity>
+        </div>
+        <div id="empty-template" type="text/html">
+          <a-entity></a-entity>
+        </div>
+
+        <img src="assets/avatars/avatar-diffuse.png">
+        <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
+        <a-asset-item id="avatar1-head-mobile-obj" src="assets/avatars/apainter-head-mobile.gltf"></a-asset-item>
+        <a-asset-item id="avatar1-body-obj" src="assets/avatars/apainter-body.gltf"></a-asset-item>
+        <a-asset-item id="avatar1-hand-obj" src="assets/avatars/apainter-hand-2.gltf"></a-asset-item>
+        <a-asset-item id="camera-obj" src="./assets/avatars/google-blocks-camera/model.obj"></a-asset-item>
+        <a-asset-item id="camera-mtl" src="./assets/avatars/google-blocks-camera/materials.mtl"></a-asset-item>
       </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
-      <!--geometry="primitive: circle; radius: 12;"
-      rotation="-90 0 0"-->
       <a-entity id="hitEntityLeft" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
       <a-entity id="hitEntityRight" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
 
@@ -47,12 +127,19 @@
                 geometry="primitive: box; width: 12; height: 0.01; depth: 12"
                 material="shader: flat; src: #floor">
               </a-entity>
-      <a-entity id="cameraRig">
+      <a-entity id="cameraRig" local-player networked="template:#empty-template">
         <!-- camera -->
-        <a-entity id="acamera" camera look-controls orbit-controls></a-entity>
+        <a-entity id="acamera"
+                  camera="userHeight: 1.6"
+                  networked="template:#head-template;showLocalTemplate:false;"
+                  look-controls
+                  wasd-controls>
+                    <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
+        </a-entity>
         <!-- hand controls -->
         <a-entity id="left-hand"
                   brush
+                  networked="template:#left-hand-template;showLocalTemplate:false;"
                   if-no-vr-headset="visible: false"
                   paint-controls="hand: left"
                   teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
@@ -113,6 +200,7 @@
         </a-entity>
         <a-entity id="right-hand"
                   brush
+                  networked="template:#right-hand-template;showLocalTemplate:false;"
                   if-no-vr-headset="visible: false"
                   paint-controls="hand: right"
                   teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
