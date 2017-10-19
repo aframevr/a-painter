@@ -15,6 +15,8 @@ AFRAME.registerComponent('local-player', {
 
     var self = this;
     setTimeout(function() {
+      var threear = self.scene.components['three-ar'];
+      if (threear && threear.arDisplay) { forceVr = true; }
       self.showAvatar(forceVr ? 'vr' : 'non-vr');
     }, 100); // Wait for template to laod
   },
