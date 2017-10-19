@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A-Painter</title>
+    <style>html,body{
+      background-color:#000000;
+      -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
+      }
+    </style>
+    <link rel="icon" href="img/icon-256.png">
+    <meta name="description" content="Paint in VR in your browser. Powered by A-Frame.">
+    <script>
+      UPLOADCARE_LOCALE = 'en';
+      UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
+    </script>
+    <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
+    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
+    <script src="vendor/aframe-v0.7.0.min.js"></script>
+    <script src="vendor/aframe-input-mapping-component.min.js"></script>
+    <!-- AR vendor scripts.  -->
+    <script src="https://rawgit.com/google-ar/three.ar.js/master/dist/three.ar.js"></script>
+    <script src="https://rawgit.com/chenzlabs/aframe-ar/master/dist/aframe-ar.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="vendor/easyrtc.js"></script>
+    <script src="build.js"></script>
+    <script src="https://unpkg.com/networked-aframe@^0.3.1/dist/networked-aframe.js"></script>
+    <script src="https://unpkg.com/aframe-motion-capture-components@^0.1.6/dist/aframe-motion-capture-components.min.js"></script>
+    <script src="vendor/aframe-extras.loaders.js"></script>
+    <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
+    <script src="vendor/aframe-tooltip-component.min.js"></script>
+    <script src="vendor/spawn-in-circle.js"></script>
+    <script>
+      NAF.schemas.add({
+        template: '#head-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head.vr',
+            component: 'visible'
+          },
+          {
+            selector: '.head.non-vr',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#body-template',
+        components: [
+          'position',
+          'rotation',
+          'visible'
+        ]
+      });
+      NAF.schemas.add({
+        template: '#left-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#right-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+    </script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <a-scene ar multiuser-mode>
+        <a-assets>
+          <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
+          <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
+          <img id="skymap" src="assets/images/sky.jpg" crossorigin="anonymous">
+          <img id="uinormal" src="assets/images/ui-normal.png" crossorigin="anonymous">
+          <a-asset-item id="aruiobj" src="assets/models/ar-ui-settings.obj"></a-asset-item>
+          <img id="ar_ui" src="assets/images/ar-ui.png" crossorigin="anonymous">
+          <!-- Audio for iOS -->
+          <audio id="ui_click0_iOS" src="assets/sounds/ui_click0.mp3"></audio>
+          <audio id="ui_click1_iOS" src="assets/sounds/ui_click1.mp3"></audio>
+          <audio id="ui_menu_iOS" src="assets/sounds/ui_menu.mp3"></audio>
+          <audio id="ui_paint_iOS" src="assets/sounds/ui_paint.mp3"></audio>
+          <audio id="ui_undo_iOS" src="assets/sounds/ui_undo.mp3"></audio>
+          <!-- Audios for the rest of browsers -->
+          <audio id="ui_click0" src="assets/sounds/ui_click0.ogg"></audio>
+          <audio id="ui_click1" src="assets/sounds/ui_click1.ogg"></audio>
+          <audio id="ui_menu" src="assets/sounds/ui_menu.ogg"></audio>
+          <audio id="ui_paint" src="assets/sounds/ui_paint.ogg"></audio>
+          <audio id="ui_undo" src="assets/sounds/ui_undo.ogg"></audio>
+          
+            <div id="head-template" type="text/html">
+              <a-entity class="head non-vr" obj-model="obj: #camera-obj; mtl: #camera-mtl" scale="0.3 0.3 0.3" visible="true"></a-entity>
+              <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" position="0 -0.175 0" rotation="0 180 0" visible="false"></a-entity>
+            </div>
+            <div id="body-template" type="text/html">
+              <a-entity class="body vr" gltf-model-next="#avatar1-body-obj" position="0 -0.175 0" rotation="0 180 0"></a-entity>
+            </div>
+            <div id="left-hand-template" type="text/html">
+              <a-entity class="hands" visible="false">
+                <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+              </a-entity>
+            </div>
+            <div id="right-hand-template" type="text/html">
+              <a-entity class="hands" visible="false">
+                <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+              </a-entity>
+            </div>
+            <div id="empty-template" type="text/html">
+              <a-entity></a-entity>
+            </div>
+
+            <img src="assets/avatars/avatar-diffuse.png">
+            <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-head-mobile-obj" src="assets/avatars/apainter-head-mobile.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-body-obj" src="assets/avatars/apainter-body.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-hand-obj" src="assets/avatars/apainter-hand-2.gltf"></a-asset-item>
+            <a-asset-item id="camera-obj" src="./assets/avatars/google-blocks-camera/model.obj"></a-asset-item>
+            <a-asset-item id="camera-mtl" src="./assets/avatars/google-blocks-camera/materials.mtl"></a-asset-item>
+        </a-assets>
+      <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
+      <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
+      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
+
+      <a-entity id="cameraRig" local-player networked="template:#empty-template">
+        <!-- camera -->
+        <a-entity id="acamera" camera look-controls wasd-controls ar-ui
+            networked="template:#head-template;showLocalTemplate:false;">
+            <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
+        </a-entity>
+        <!-- ar-gaze controls -->
+        <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
+        material="shader:flat;color:#ef2d5e"
+        position="0 0 -0.25"></a-entity>
+      </a-entity>
+    </a-scene>
+    <script src="vendor/ga.js"></script>
+
+  </body>
+</html>
