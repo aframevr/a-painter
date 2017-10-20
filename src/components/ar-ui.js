@@ -23,6 +23,7 @@ AFRAME.registerComponent('ar-ui', {
     this.pressedObjects = {};
     this.selectedObjects = {};
 
+    this.pressure = 1;
     this.tapped = false;
     this.strokeNormalized = 0.5;
     this.scaleFactor = 1;
@@ -35,6 +36,7 @@ AFRAME.registerComponent('ar-ui', {
 
     this.objects = {};
 
+    this.setPressure();
     this.bindMethods();
     this.initRaycaster();
     this.setLayoutSettings();
@@ -48,6 +50,18 @@ AFRAME.registerComponent('ar-ui', {
   },
   tick: function (t, dt) {
 
+  },
+  setPressure: function () {
+    var self = this;
+    Pressure.set(this.el.sceneEl.canvas, {
+      change: function (force, event) {
+        if (event.touches && event.touches[0].touchType === 'stylus') {
+          self.pressure = force;
+          self.onBrushChanged();
+        }
+      }
+    },
+    {only: 'touch'});
   },
   bindMethods: function () {
     this.onWindowResize = this.onWindowResize.bind(this);
@@ -296,7 +310,6 @@ AFRAME.registerComponent('ar-ui', {
     }
     this.objectsSettings.currentColor = model.getObjectByName('currentcolor');
 
-    this.adjustRenderOrder();
     // if (this.el.components.brush.active) { return; }
     this.el.setAttribute('brush', 'enabled', false);
     this.updateBrushButton();
@@ -308,23 +321,23 @@ AFRAME.registerComponent('ar-ui', {
     this.initBrushesMenu();
     this.setCursorTransparency();
     this.updateColorUI(this.el.getAttribute('brush').color);
+    this.adjustRenderOrder();
   },
   adjustRenderOrder: function () {
     var self = this;
     this.el.object3D.traverse(function (obj) {
       if (obj.renderOrder) {
         if (obj.children.length) {
-            obj.children[0].renderOrder = obj.renderOrder;
-            obj.children[0].onBeforeRender = function () {
-              self.el.sceneEl.renderer.clearDepth();
-            };
+          obj.children[0].renderOrder = obj.renderOrder;
+          obj.children[0].onBeforeRender = function () {
+            self.el.sceneEl.renderer.clearDepth();
+          };
         }
       }
     });
   },
   initColorWheel: function () {
     var colorWheel = this.objectsSettings.hueWheel;
-
     var vertexShader = '\
       varying vec2 vUv;\
       void main() {\
@@ -358,7 +371,8 @@ AFRAME.registerComponent('ar-ui', {
     var material = new THREE.ShaderMaterial({
       uniforms: { brightness: { type: 'f', value: this.hsv.v } },
       vertexShader: vertexShader,
-      fragmentShader: fragmentShader
+      fragmentShader: fragmentShader,
+      transparent: true
     });
     colorWheel.material = material;
   },
@@ -629,7 +643,7 @@ AFRAME.registerComponent('ar-ui', {
   },
   onBrushChanged: function () {
     this.updateBrushButton();
-    this.el.emit('onBrushChanged', this.el.getAttribute('brush'));
+    this.el.emit('onBrushChanged', {brush: this.el.getAttribute('brush'), pressure: this.pressure});
     this.strokeOnButton.setAttribute('material', 'color', this.el.getAttribute('brush').color);
   },
   updateBrushButton: function () {
@@ -1266,6 +1280,9 @@ AFRAME.registerComponent('ar-ui', {
     var pointerOverBarAbsMapLinear = THREE.Math.mapLinear(pointerOverBarPosition, -this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, 0, 1);
     var pointerOverBarAbsPosition = THREE.Math.clamp(pointerOverBarAbsMapLinear, 0, 1);
     this.strokeNormalized = pointerOverBarAbsPosition;
+    this.placeStrokeDragDot();
+  },
+  placeStrokeDragDot: function () {
     this.place(this.objects.strokeDragDot);
     var scale = THREE.Math.mapLinear(this.strokeNormalized, 0, 1, 0.2, 1.5);
     this.strokeOnButton.setAttribute('scale', new THREE.Vector3(scale, scale, scale));
