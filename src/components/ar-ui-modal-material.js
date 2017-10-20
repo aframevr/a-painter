@@ -37,7 +37,7 @@ AFRAME.registerComponent('ar-ui-modal-material', {
   },
   init: function () {
     var data = this.data;
-    this.material  = new THREE.ShaderMaterial({
+    this.material = new THREE.ShaderMaterial({
       uniforms: {
         // time: { value: 0.0 },
         steps: { value: this.data.steps },
@@ -49,9 +49,6 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     });
 
     this.applyToMesh();
-    this.el.addEventListener('model-loaded', function () {
-      this.applyToMesh();
-    });
   },
 
   /**

@@ -2,7 +2,12 @@ AFRAME.registerComponent('ar-ui', {
   dependencies: ['raycaster'],
   init: function () {
     var self = this;
+
+    this.depth = -0.1;
+
     this.camera = document.querySelector('[camera]');
+    // this.camera.object3D.children[0].near = -this.depth;
+    // console.log('--',this.camera.object3D.children[0].near);
 
     var logo = document.querySelector('#logo');
     logo.setAttribute('visible', false);
@@ -18,6 +23,11 @@ AFRAME.registerComponent('ar-ui', {
     this.pressedObjects = {};
     this.selectedObjects = {};
 
+    this.pressure = 1;
+    this.tapped = false;
+    this.strokeNormalized = 0.5;
+    this.scaleFactor = 1;
+
     this.renderOrderUI = 10000;
     this.renderOrderModal = 10001;
 
@@ -26,6 +36,7 @@ AFRAME.registerComponent('ar-ui', {
 
     this.objects = {};
 
+    this.setPressure();
     this.bindMethods();
     this.initRaycaster();
     this.setLayoutSettings();
@@ -40,12 +51,23 @@ AFRAME.registerComponent('ar-ui', {
   tick: function (t, dt) {
 
   },
+  setPressure: function () {
+    var self = this;
+    Pressure.set(this.el.sceneEl.canvas, {
+      change: function (force, event) {
+        if (event.touches && event.touches[0].touchType === 'stylus') {
+          self.pressure = force;
+          self.onBrushChanged();
+        }
+      }
+    },
+    {only: 'touch'});
+  },
   bindMethods: function () {
     this.onWindowResize = this.onWindowResize.bind(this);
     this.tap = this.tap.bind(this);
-    this.touchmove = this.touchmove.bind(this);
     this.tapend = this.tapend.bind(this);
-    this.mousemove = this.mousemove.bind(this);
+    this.onmove = this.onmove.bind(this);
 
     this.onPoseLost = this.onPoseLost.bind(this);
     this.onPoseFound = this.onPoseFound.bind(this);
@@ -60,28 +82,28 @@ AFRAME.registerComponent('ar-ui', {
     this.save = this.save.bind(this);
 
     this.brushBtnClicked = this.brushBtnClicked.bind(this);
+    this.dragStroke = this.dragStroke.bind(this);
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
     this.pointer = new THREE.Vector2();
     // normalized device coordinates position
-    this.pointerNdc = new THREE.Vector2();
+    this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
     this.intersection = null;
     this.objOver;
   },
   setLayoutSettings: function () {
-    this.depth = -0.1;
     this.paddingTop = this.paddingBottom = this.paddingRight = this.paddingLeft = this.depth / 20;
   },
   addEvents: function () {
     window.addEventListener('resize', this.onWindowResize);
     if (this.el.sceneEl.isMobile) {
       window.addEventListener('touchstart', this.tap);
-      window.addEventListener('touchmove', this.touchmove);
+      window.addEventListener('touchmove', this.onmove);
       window.addEventListener('touchend', this.tapend);
     } else {
-      window.addEventListener('mousemove', this.mousemove);
       window.addEventListener('mousedown', this.tap);
+      window.addEventListener('mousemove', this.onmove);
       window.addEventListener('mouseup', this.tapend);
     }
     this.el.addEventListener('model-loaded', this.onModelLoaded);
@@ -182,22 +204,54 @@ AFRAME.registerComponent('ar-ui', {
       height: 0.015,
       onclick: this.brushBtnClicked
     });
-    // this.addButton({
-    //   id: 'strokeDragBar',
-    //   layout: 'bottom-right',
-    //   visible: false,
-    //   width: 0.04,
-    //   height: 0.005,
-    //   renderOrder: this.renderOrderModal
-    // });
-    // this.addButton({
-    //   id: 'strokeDragDot',
-    //   layout: 'bottom-right',
-    //   visible: false,
-    //   width: 0.005,
-    //   height: 0.005,
-    //   renderOrder: this.renderOrderModal
-    // });
+    this.addImage({
+      id: 'strokeDragBar',
+      layout: 'bottom-right',
+      visible: false,
+      width: 0.03,
+      height: 0.00375,
+      padding: [0, 0, 0.005, 0],
+      renderOrder: this.renderOrderModal
+    });
+    this.addButton({
+      id: 'strokeDragDot',
+      layout: 'stroke-drag',
+      visible: false,
+      width: 0.01,
+      height: 0.01,
+      padding: [0, 0, 0.00175, 0],
+      renderOrder: this.renderOrderModal
+    });
+    this.addStrokeOnButton();
+  },
+  addStrokeOnButton: function () {
+    var uiEl = document.createElement('a-entity');
+    this.strokeOnButton = uiEl;
+
+    uiEl.setAttribute('geometry', {
+      primitive: 'circle',
+      radius: 0.002
+    });
+    uiEl.setAttribute('position', '0 0 0.00001');
+    uiEl.setAttribute('material', {
+      shader: 'flat',
+      transparent: true,
+      color: 'red'
+    });
+
+    var ringEl = document.createElement('a-entity');
+    ringEl.setAttribute('geometry', {
+      primitive: 'circle',
+      radius: 0.00225
+    });
+    ringEl.setAttribute('material', {
+      shader: 'flat',
+      transparent: true,
+      color: 0xcccccc
+    });
+    uiEl.appendChild(ringEl);
+
+    this.objects.strokeDragDot.appendChild(uiEl);
   },
   addSettingsEl: function () {
     // Add 'settings' section elements
@@ -258,17 +312,32 @@ AFRAME.registerComponent('ar-ui', {
 
     // if (this.el.components.brush.active) { return; }
     this.el.setAttribute('brush', 'enabled', false);
-    this.updateBrushButtons();
+    this.updateBrushButton();
+    this.setStrokeBar(this.el.getAttribute('brush').size);
+    this.strokeOnButton.setAttribute('material', 'color', this.el.getAttribute('brush').color);
 
     this.initColorWheel();
     this.initColorHistory();
     this.initBrushesMenu();
     this.setCursorTransparency();
     this.updateColorUI(this.el.getAttribute('brush').color);
+    this.adjustRenderOrder();
+  },
+  adjustRenderOrder: function () {
+    var self = this;
+    this.el.object3D.traverse(function (obj) {
+      if (obj.renderOrder) {
+        if (obj.children.length) {
+          obj.children[0].renderOrder = obj.renderOrder;
+          obj.children[0].onBeforeRender = function () {
+            self.el.sceneEl.renderer.clearDepth();
+          };
+        }
+      }
+    });
   },
   initColorWheel: function () {
     var colorWheel = this.objectsSettings.hueWheel;
-
     var vertexShader = '\
       varying vec2 vUv;\
       void main() {\
@@ -302,7 +371,8 @@ AFRAME.registerComponent('ar-ui', {
     var material = new THREE.ShaderMaterial({
       uniforms: { brightness: { type: 'f', value: this.hsv.v } },
       vertexShader: vertexShader,
-      fragmentShader: fragmentShader
+      fragmentShader: fragmentShader,
+      transparent: true
     });
     colorWheel.material = material;
   },
@@ -572,18 +642,18 @@ AFRAME.registerComponent('ar-ui', {
     this.onBrushChanged();
   },
   onBrushChanged: function () {
-    this.updateBrushButtons();
-    this.el.emit('onBrushChanged', this.el.getAttribute('brush'));
+    this.updateBrushButton();
+    this.el.emit('onBrushChanged', {brush: this.el.getAttribute('brush'), pressure: this.pressure});
+    this.strokeOnButton.setAttribute('material', 'color', this.el.getAttribute('brush').color);
   },
-  updateBrushButtons: function () {
-    // console.log('---', this.objects.brushBtn);
-    this.addBrushToButton(this.objects.brushBtn);
-  },
-  addBrushToButton: function (obj) {
-    var buttonObj = obj.getObject3D('mesh');
-    var urlBrushThumbnail = AFRAME.BRUSHES[this.el.getAttribute('brush').brush].prototype.options.thumbnail;
-    var alphaTexture = new THREE.TextureLoader().load(urlBrushThumbnail);
-    buttonObj.material.map = alphaTexture;
+  updateBrushButton: function () {
+    var buttonObj = this.objects.brushBtn.getObject3D('mesh');
+    if (this.el.getAttribute('brush').brush !== buttonObj.brush) {
+      var urlBrushThumbnail = AFRAME.BRUSHES[this.el.getAttribute('brush').brush].prototype.options.thumbnail;
+      var alphaTexture = new THREE.TextureLoader().load(urlBrushThumbnail);
+      buttonObj.brush = this.el.getAttribute('brush').brush;
+      buttonObj.material.map = alphaTexture;
+    }
     buttonObj.material.color = new THREE.Color(this.el.getAttribute('brush').color);
   },
   onComponentChanged: function (evt) {
@@ -663,8 +733,6 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.layout = params.layout;
     uiEl.onclick = params.onclick;
 
-    uiEl.setAttribute('scaleFactor', 1);
-
     uiEl.setAttribute('geometry', {
       primitive: 'plane',
       width: params.width,
@@ -685,9 +753,7 @@ AFRAME.registerComponent('ar-ui', {
     });
     uiEl.setAttribute('visible', params.visible);
     uiEl.setAttribute('enabled', params.enabled);
-
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
-    uiEl.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
 
     this.el.appendChild(uiEl);
   },
@@ -719,9 +785,7 @@ AFRAME.registerComponent('ar-ui', {
     });
     uiEl.setAttribute('visible', params.visible);
     uiEl.setAttribute('enabled', params.enabled);
-
-    uiEl.object3D.renderOrder = this.renderOrderModal;
-    uiEl.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
+    uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
     this.el.appendChild(uiEl);
   },
@@ -736,8 +800,6 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.class = 'ar-ui';
     uiEl.layout = params.layout;
     uiEl.onclick = params.onclick;
-
-    uiEl.setAttribute('scaleFactor', 1);
 
     uiEl.setAttribute('geometry', {
       primitive: 'plane',
@@ -758,26 +820,27 @@ AFRAME.registerComponent('ar-ui', {
       z: 10000
     });
     uiEl.setAttribute('visible', params.visible);
-
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
-    uiEl.object3D.onBeforeRender = function () { this.el.sceneEl.renderer.clearDepth(); };
 
     this.el.appendChild(uiEl);
   },
   showEl: function (self, id, enable, delay) {
     var uiEntity = self.objects[ id ];
+    if (!uiEntity) {
+      return;
+    }
     uiEntity.setAttribute('visible', true);
-    if (enable){
+    if (enable) {
       uiEntity.setAttribute('enabled', true);
     }
     // Hack to have time to create boundingBox to make the place and get scaleFactor
     setTimeout(function () {
-      self.place(uiEntity, self.width, self.height);
+      self.place(uiEntity);
       uiEntity.object3D.scale.set(0.01, 0.01, 0.01);
       new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
-        x: 1 * uiEntity.getAttribute('scaleFactor'),
-        y: 1 * uiEntity.getAttribute('scaleFactor'),
-        z: 1 * uiEntity.getAttribute('scaleFactor')
+        x: self.scaleFactor,
+        y: self.scaleFactor,
+        z: self.scaleFactor
       }, 500)
         .delay(delay || 0)
         .easing(AFRAME.TWEEN.Easing.Back.Out)
@@ -786,7 +849,10 @@ AFRAME.registerComponent('ar-ui', {
   },
   hideEl: function (self, id, enable, delay){
     var uiEntity = self.objects[ id ];
-    if(enable){
+    if (!uiEntity) {
+      return;
+    }
+    if (enable) {
       uiEntity.setAttribute('enabled', false);
     }
     new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
@@ -801,40 +867,64 @@ AFRAME.registerComponent('ar-ui', {
       })
       .start();
   },
-  mousemove: function (e) {
+  onmove: function (e) {
     var el = this.el;
     this.size = el.sceneEl.renderer.getSize();
-    this.pointer.set(e.clientX, e.clientY);
-    this.pointerNdc.x = (e.clientX / this.size.width) * 2 - 1;
-    this.pointerNdc.y = -(e.clientY / this.size.height) * 2 + 1;
+    var t = e;
+    if (e.touches) {
+      t = e.touches[0];
+    }
+    this.pointer.set(t.clientX, t.clientY);
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.pointerNdc, el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, el.sceneEl.camera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
-    if (this.intersection !== null){
-      el.sceneEl.canvas.style.cursor = 'pointer';
-      var overId = this.intersection.object.el.id;
-      if (overId === '') {
-        overId = this.intersection.object.name;
-        return;
-      }
-      // Only for 2D Screens
-      if (this.objOver) {
-        if (this.objOver.el.id !== overId) {
-          this.onout(this.objOver);
+
+    if (this.tapped && this.lastObjectOverId === 'strokeDragDot') {
+      this.dragStroke();
+      return;
+    }
+    var overId = null;
+    if (t === e) {
+      // mousemove
+      if (this.intersection !== null){
+        el.sceneEl.canvas.style.cursor = 'pointer';
+        overId = this.intersection.object.el.id;
+        this.lastObjectOverId = overId;
+        if (overId === '') {
+          overId = this.intersection.object.name;
+          return;
+        }
+        // Only for 2D Screens
+        if (this.objOver) {
+          if (this.objOver.el.id !== overId) {
+            this.onout(this.objOver);
+            this.onover(this.intersection.object);
+            this.objOver = this.intersection.object;
+          }
+        } else {
           this.onover(this.intersection.object);
           this.objOver = this.intersection.object;
         }
       } else {
-        this.onover(this.intersection.object);
-        this.objOver = this.intersection.object;
+        el.sceneEl.canvas.style.cursor = null;
+        // Only for 2D Screens
+        if (this.objOver) {
+          this.onout(this.objOver);
+          this.objOver = null;
+        }
       }
     } else {
-      el.sceneEl.canvas.style.cursor = null;
-      // Only for 2D Screens
-      if (this.objOver) {
-        this.onout(this.objOver);
-        this.objOver = null;
+      // touchmove
+      if (this.intersection !== null) {
+        if (this.intersection.object.el.id === '') {
+          this.onclickSettingsUI(this.intersection.object, this.intersection.uv);
+        }else{
+          overId = this.intersection.object.el.id;
+          this.lastObjectOverId = overId;
+        }
       }
     }
   },
@@ -843,7 +933,11 @@ AFRAME.registerComponent('ar-ui', {
     var intersectObjects = [];
     Object.keys(this.objects).forEach(function (key) {
       if (self.objects[key].getAttribute('enabled') === 'true') {
-        intersectObjects.push(self.objects[key].object3D.children[0]);
+        for (var i = 0; i < self.objects[key].object3D.children.length; i++) {
+          if (self.objects[key].object3D.children[i].geometry) {
+            intersectObjects.push(self.objects[key].object3D.children[i]);
+          }
+        }
       }
     });
     if (this.modalOpened === 'brushSettings' && this.settingsUI.getAttribute('visible')) {
@@ -863,11 +957,12 @@ AFRAME.registerComponent('ar-ui', {
     if (e.touches) {
       t = e.touches[0];
     }
+    this.tapped = true;
     this.pointer.set(t.clientX, t.clientY);
-    this.pointerNdc.x = (t.clientX / this.size.width) * 2 - 1;
-    this.pointerNdc.y = -(t.clientY / this.size.height) * 2 + 1;
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.pointerNdc, el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, el.sceneEl.camera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null) {
@@ -875,44 +970,26 @@ AFRAME.registerComponent('ar-ui', {
         this.onclickSettingsUI(this.intersection.object, this.intersection.uv);
       } else {
         // Provisional > testing tap events
-        this.onout(this.intersection.object);
+        if(this.intersection.object.el.id !== 'strokeDragDot'){
+          this.onout(this.intersection.object);
+        }
         this.onclick(this.intersection.object.el.id);
       }
-      
     }
-  },
-  // Used to drag settings UI like brightness, color picker or stroke
-  touchmove: function (e) {
-    var el = this.el;
-    this.size = el.sceneEl.renderer.getSize();
-    var t = e;
-    if (e.touches) {
-      t = e.touches[0];
-    }
-    this.pointer.set(t.clientX, t.clientY);
-    this.pointerNdc.x = (t.clientX / this.size.width) * 2 - 1;
-    this.pointerNdc.y = -(t.clientY / this.size.height) * 2 + 1;
-
-    this.raycaster.setFromCamera(this.pointerNdc, el.sceneEl.camera);
-    var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
-    this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
-    if (this.intersection !== null) {
-      if (this.intersection.object.el.id === '') {
-        this.onclickSettingsUI(this.intersection.object, this.intersection.uv);
-      }
-    }
+    this.lastObjectOverId = null;
   },
   tapend: function (e) {
+    this.tapped = false;
+    this.lastObjectOverId = null;
     this.pressedObjects = {};
   },
   onover: function (obj) {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
-    var scaleFactor = obj.el.getAttribute('scaleFactor');
-    var coords = { x: 1 * scaleFactor, y: 1 * scaleFactor, z: 1 * scaleFactor };
+    var coords = { x: this.scaleFactor, y: 1 * this.scaleFactor, z: 1 * this.scaleFactor };
     var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: 1.1 * scaleFactor, y: 1.1 * scaleFactor, z: 1.1 * scaleFactor }, 150)
+    .to({ x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor }, 150)
     .onUpdate(function () {
       obj.el.setAttribute('scale', this);
     })
@@ -923,10 +1000,9 @@ AFRAME.registerComponent('ar-ui', {
     if (obj.el.getAttribute('enabled') === 'false') {
       return;
     }
-    var scaleFactor = obj.el.getAttribute('scaleFactor');
-    var coords = { x: 1.1 * scaleFactor, y: 1.1 * scaleFactor, z: 1.1 * scaleFactor };
+    var coords = { x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor };
     var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: 1 * scaleFactor, y: 1 * scaleFactor, z: 1 * scaleFactor }, 150)
+    .to({ x: this.scaleFactor, y: this.scaleFactor, z: this.scaleFactor }, 150)
     .onUpdate(function () {
       obj.el.setAttribute('scale', this);
     })
@@ -934,7 +1010,7 @@ AFRAME.registerComponent('ar-ui', {
     tween.start();
   },
   onclick: function (id) {
-    if (this.objects[id]) {
+    if (this.objects[id] && this.objects[id].onclick) {
       this.objects[id].onclick(this);
     }
   },
@@ -950,48 +1026,58 @@ AFRAME.registerComponent('ar-ui', {
       }
     });
   },
-  place: function (obj, w, h) {
-    var scaleFactor = Math.max(1, (this.width / Math.abs(this.depth)) / 2);
-    obj.object3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
-    obj.setAttribute('scaleFactor', scaleFactor);
+  place: function (obj) {
+    var w = this.width;
+    var h = this.height;
+    this.scaleFactor = Math.max(1, (w / Math.abs(this.depth)) / 2);
+    obj.object3D.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
-    if (!obj.object3D.children[0].geometry.boundingBox) {
-      obj.object3D.children[0].geometry.computeBoundingBox();
-      obj.object3D.children[0].geometry.width = obj.object3D.children[0].geometry.boundingBox.max.x - obj.object3D.children[0].geometry.boundingBox.min.x;
-      obj.object3D.children[0].geometry.height = obj.object3D.children[0].geometry.boundingBox.max.y - obj.object3D.children[0].geometry.boundingBox.min.y;
+    for (var i = 0; i < obj.object3D.children.length; i++) {
+      if (obj.object3D.children[i].geometry) {
+        if (!obj.object3D.children[i].geometry.boundingBox) {
+          obj.object3D.children[i].geometry.computeBoundingBox();
+          obj.object3D.children[i].geometry.width =   obj.object3D.children[i].geometry.boundingBox.max.x - obj.object3D.children[i].geometry.boundingBox.min.x;
+          obj.object3D.children[i].geometry.height = obj.object3D.children[i].geometry.boundingBox.max.y - obj.object3D.children[i].geometry.boundingBox.min.y;
+        }
+        switch (obj.layout) {
+          case 'bottom-center':
+            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+            break;
+          case 'top-center':
+            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+            break;
+          case 'top-right':
+            positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+            break;
+          case 'bottom-left':
+            positionTmp.x = -(w / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
+            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+            break;
+          case 'bottom-right':
+          case 'stroke-drag':
+            positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+            break;
+          case 'fader':
+            positionTmp = {x: 0, y: 0, z: this.depth};
+            var faderScaleFactor = this.scaleFactor * this.width / this.height;
+            obj.object3D.scale.set(faderScaleFactor, this.scaleFactor, this.scaleFactor);
+            break;
+          case 'center':
+            positionTmp.x = obj.padding[3] * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+            positionTmp.y = obj.padding[2] * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+            break;
+          default:
+            positionTmp = {x: 0, y: 0, z: 10000};
+            break;
+        }
+        if (obj.layout === 'stroke-drag') {
+          positionTmp.x -= this.objects.strokeDragBar.object3D.children[0].geometry.width * this.scaleFactor * (1 - this.strokeNormalized) - obj.object3D.children[i].geometry.width * (1 - this.strokeNormalized) * this.scaleFactor;
+        }
+      }
     }
-    switch (obj.layout) {
-      case 'bottom-center':
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.width / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
-        break;
-      case 'top-center':
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.height / 2 * scaleFactor + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
-        break;
-      case 'top-right':
-        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.width / 2 * scaleFactor + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
-        positionTmp.y = h / 2 - obj.object3D.children[0].geometry.height / 2 * scaleFactor + this.paddingTop * scaleFactor - obj.padding[0] * scaleFactor;
-        break;
-      case 'bottom-left':
-        positionTmp.x = -(w / 2) + obj.object3D.children[0].geometry.width / 2 * scaleFactor - this.paddingRight * scaleFactor + obj.padding[1] * scaleFactor;
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.height / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
-        break;
-      case 'bottom-right':
-        positionTmp.x = w / 2 - obj.object3D.children[0].geometry.width / 2 * scaleFactor + this.paddingRight * scaleFactor - obj.padding[1] * scaleFactor;
-        positionTmp.y = -(h / 2) + obj.object3D.children[0].geometry.height / 2 * scaleFactor - this.paddingBottom * scaleFactor + obj.padding[2] * scaleFactor;
-        break;
-      case 'fader':
-        positionTmp = {x: 0, y: 0, z: this.depth};
-        var faderScaleFactor = scaleFactor * this.width / this.height;
-        obj.object3D.scale.set(faderScaleFactor, scaleFactor, scaleFactor);
-        break;
-      case 'center':
-        positionTmp.x = obj.padding[3] * scaleFactor - obj.padding[1] * scaleFactor;
-        positionTmp.y = obj.padding[2] * scaleFactor - obj.padding[0] * scaleFactor;
-        break;
-      default:
-        positionTmp = {x: 0, y: 0, z: 10000};
-        break;
-    }
+
     obj.setAttribute('position', positionTmp);
   },
   // https://codepen.io/looeee/pen/RVgOgR
@@ -1022,11 +1108,8 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.apainterBtn.setAttribute('enabled', false);
     new AFRAME.TWEEN.Tween(this.objects.apainterBtn.object3D.position).to({
       y: -(this.height / 2) - this.objects.apainterBtn.object3D.children[0].geometry.boundingSphere.radius
-    }, 500)
+    }, 490)
       .easing(AFRAME.TWEEN.Easing.Back.In)
-      .onUpdate(function () {
-        self.objects.apainterBtn.object3D.position.y;
-      })
       .onComplete(function () {
         self.objects.apainterBtn.setAttribute('visible', false);
       })
@@ -1035,8 +1118,8 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'closeBtn', true, 500);
     this.showEl(this, 'undoBtn', true, 600);
     this.showEl(this, 'saveBtn', true, 700);
-    // this.showEl(this, 'strokeDragBar', true, 800);
-    // this.showEl(this, 'strokeDragDot', true, 850);
+    this.showEl(this, 'strokeDragBar', false, 800);
+    this.showEl(this, 'strokeDragDot', true, 850);
     this.showEl(this, 'brushBtn', true, 900);
     this.playSound('#uiClick0');
   },
@@ -1047,8 +1130,8 @@ AFRAME.registerComponent('ar-ui', {
     this.el.emit('deactivate', false);
     // Hide close buttons
     this.hideEl(this, 'closeBtn', true);
-    // this.hideEl(this, 'strokeDragDot', true, 25);
-    // this.hideEl(this, 'strokeDragBar', true, 50);
+    this.hideEl(this, 'strokeDragDot', false, 25);
+    this.hideEl(this, 'strokeDragBar', true, 50);
     this.hideEl(this, 'brushBtn', true, 100);
     this.hideEl(this, 'undoBtn', true, 200);
     this.hideEl(this, 'saveBtn', true, 300);
@@ -1127,7 +1210,7 @@ AFRAME.registerComponent('ar-ui', {
         break;
     }
 
-    this.place(uiEl, this.width, this.height);
+    this.place(uiEl);
   },
   closeModal: function (id, callback) {
     var self = this;
@@ -1192,7 +1275,37 @@ AFRAME.registerComponent('ar-ui', {
     // console.log('saved', this);
   },
   dragStroke: function () {
+    var pointerAbsPosition = (this.width - this.width / 2) * this.normalizedCoordinatedPositionPointer.x;
+    var pointerOverBarPosition = pointerAbsPosition - this.objects.strokeDragBar.object3D.position.x;
+    var pointerOverBarAbsMapLinear = THREE.Math.mapLinear(pointerOverBarPosition, -this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, 0, 1);
+    var pointerOverBarAbsPosition = THREE.Math.clamp(pointerOverBarAbsMapLinear, 0, 1);
+    this.strokeNormalized = pointerOverBarAbsPosition;
+    this.placeStrokeDragDot();
+  },
+  placeStrokeDragDot: function () {
+    this.place(this.objects.strokeDragDot);
+    var scale = THREE.Math.mapLinear(this.strokeNormalized, 0, 1, 0.2, 1.5);
+    this.strokeOnButton.setAttribute('scale', new THREE.Vector3(scale, scale, scale));
 
+    var sizeData = this.el.components.brush.schema.size;
+    var stroke = sizeData.default;
+    if (this.strokeNormalized > 0.5) {
+      stroke = THREE.Math.mapLinear(this.strokeNormalized, 0.5, 1, sizeData.default, sizeData.max);
+    } else {
+      stroke = THREE.Math.mapLinear(this.strokeNormalized, 0.5, 0, sizeData.default, sizeData.min);
+    }
+    this.el.setAttribute('brush', 'size', stroke);
+    this.onBrushChanged();
+  },
+  setStrokeBar: function (size) {
+    var sizeData = this.el.components.brush.schema.size;
+    if (size > sizeData.default) {
+      this.strokeNormalized = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 0.5, 1);
+    } else {
+      this.strokeNormalized = THREE.Math.mapLinear(size, sizeData.default, sizeData.min, 0.5, 0);
+    }
+    var scale = THREE.Math.mapLinear(this.strokeNormalized, 0, 1, 0.2, 1.5);
+    this.strokeOnButton.setAttribute('scale', new THREE.Vector3(scale, scale, scale));
   },
   onPoseLost: function () {
     if (this.modalOpened === null){
