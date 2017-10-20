@@ -63,13 +63,17 @@ AFRAME.registerComponent('ar-paint-controls', {
     }
   },
   onBrushChanged: function (evt) {
-    this.el.setAttribute('material', 'color', evt.detail.color);
-    this.getGazeScale(evt.detail.size);
-    this.el.setAttribute('brush', 'color', evt.detail.color);
-    this.el.setAttribute('brush', 'brush', evt.detail.brush);
+    if (evt.detail.color !== this.el.getAttribute('brush').color) {
+      this.el.setAttribute('brush', 'color', evt.detail.color);
+      this.el.setAttribute('material', 'color', evt.detail.color);
+    }
+    this.setGazeScale(evt.detail.size);
+    if (evt.detail.brush !== this.el.getAttribute('brush').brush) {
+      this.el.setAttribute('brush', 'brush', evt.detail.brush);
+    } 
     this.el.setAttribute('brush', 'size', evt.detail.size);
   },
-  getGazeScale: function (size) {
+  setGazeScale: function (size) {
     var sizeData = this.el.components.brush.schema.size;
     var scale = 1;
     if (size > sizeData.default) {
