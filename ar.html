@@ -22,20 +22,74 @@
     <script src="https://rawgit.com/google-ar/three.ar.js/master/dist/three.ar.js"></script>
     <script src="https://rawgit.com/chenzlabs/aframe-ar/master/dist/aframe-ar.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="vendor/easyrtc.js"></script>
     <script src="build.js"></script>
+    <script src="https://unpkg.com/networked-aframe@^0.3.1/dist/networked-aframe.js"></script>
+    <script src="https://unpkg.com/aframe-motion-capture-components@^0.1.6/dist/aframe-motion-capture-components.min.js"></script>
+    <script src="vendor/aframe-extras.loaders.js"></script>
     <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <script src="vendor/pressure.min.js"></script>
+    <script src="vendor/spawn-in-circle.js"></script>
+    <script>
+      NAF.schemas.add({
+        template: '#head-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.head.vr',
+            component: 'visible'
+          },
+          {
+            selector: '.head.non-vr',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#body-template',
+        components: [
+          'position',
+          'rotation',
+          'visible'
+        ]
+      });
+      NAF.schemas.add({
+        template: '#left-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+      NAF.schemas.add({
+        template: '#right-hand-template',
+        components: [
+          'position',
+          'rotation',
+          {
+            selector: '.hands',
+            component: 'visible'
+          }
+        ]
+      });
+    </script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="manifest.webmanifest">
   </head>
   <body>
-    <a-scene ar>
+    <a-scene ar="cameraUserHeight:true" multiuser-mode>
         <a-assets>
           <a-asset-item id="logoobj" src="assets/models/logo.obj"></a-asset-item>
           <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
+          <img id="skymap" src="assets/images/sky.jpg" crossorigin="anonymous">
           <img id="uinormal" src="assets/images/ui-normal.png" crossorigin="anonymous">
           <a-asset-item id="aruiobj" src="assets/models/ar-ui-settings.obj"></a-asset-item>
           <img id="ar_ui" src="assets/images/ar-ui.png" crossorigin="anonymous">
@@ -51,14 +105,46 @@
           <audio id="ui_menu" src="assets/sounds/ui_menu.ogg"></audio>
           <audio id="ui_paint" src="assets/sounds/ui_paint.ogg"></audio>
           <audio id="ui_undo" src="assets/sounds/ui_undo.ogg"></audio>
+          
+            <div id="head-template" type="text/html">
+              <a-entity class="head non-vr" obj-model="obj: #camera-obj; mtl: #camera-mtl" scale="0.3 0.3 0.3" visible="true"></a-entity>
+              <a-entity class="head vr" gltf-model-next="#avatar1-head-obj" position="0 -0.175 0" rotation="0 180 0" visible="false"></a-entity>
+            </div>
+            <div id="body-template" type="text/html">
+              <a-entity class="body vr" gltf-model-next="#avatar1-body-obj" position="0 -0.175 0" rotation="0 180 0"></a-entity>
+            </div>
+            <div id="left-hand-template" type="text/html">
+              <a-entity class="hands" visible="false">
+                <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+              </a-entity>
+            </div>
+            <div id="right-hand-template" type="text/html">
+              <a-entity class="hands" visible="false">
+                <a-entity class="hand" gltf-model-next="#avatar1-hand-obj"></a-entity>
+              </a-entity>
+            </div>
+            <div id="empty-template" type="text/html">
+              <a-entity></a-entity>
+            </div>
+
+            <img src="assets/avatars/avatar-diffuse.png">
+            <a-asset-item id="avatar1-head-obj" src="assets/avatars/apainter-head.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-head-mobile-obj" src="assets/avatars/apainter-head-mobile.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-body-obj" src="assets/avatars/apainter-body.gltf"></a-asset-item>
+            <a-asset-item id="avatar1-hand-obj" src="assets/avatars/apainter-hand-2.gltf"></a-asset-item>
+            <a-asset-item id="camera-obj" src="./assets/avatars/google-blocks-camera/model.obj"></a-asset-item>
+            <a-asset-item id="camera-mtl" src="./assets/avatars/google-blocks-camera/materials.mtl"></a-asset-item>
         </a-assets>
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"></a-entity>
 
-      <a-entity id="cameraRig">
+      <a-entity id="cameraRig" local-player networked="template:#empty-template">
         <!-- camera -->
-        <a-entity id="acamera" camera look-controls ar-ui></a-entity>
+        <a-entity id="acamera" camera="userHeight:1.6" look-controls wasd-controls ar-ui
+            networked="template:#head-template;showLocalTemplate:false;">
+            <a-entity body networked="template:#body-template;showLocalTemplate:false;"></a-entity>
+        </a-entity>
         <!-- ar-gaze controls -->
         <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
         material="shader:flat;color:#ef2d5e"

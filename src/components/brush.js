@@ -49,17 +49,21 @@ AFRAME.registerComponent('brush', {
     this.el.addEventListener('paint', function (evt) {
       if (!self.data.enabled) { return; }
       // Trigger
-      var value = evt.detail.value;
-      self.sizeModifier = value;
-      if (value > 0.1) {
-        if (!self.active) {
-          self.startNewStroke();
-          self.active = true;
-        }
-      } else {
-        if (self.active) {
-          self.previousEntity = self.currentEntity;
-          self.currentStroke = null;
+      if (evt.detail.id === 1) {
+        var value = evt.detail.state.value;
+        self.sizeModifier = value;
+        if (value > 0.1) {
+          if (!self.active) {
+            self.startNewStroke();
+            self.active = true;
+          }
+        } else {
+          if (self.active) {
+            self.previousEntity = self.currentEntity;
+            self.el.emit('stroke-added', {stroke: self.currentStroke});
+            self.currentStroke = null;
+          }
+          self.active = false;
         }
         self.active = false;
       }
@@ -85,7 +89,16 @@ AFRAME.registerComponent('brush', {
         this.obj.matrixWorld.decompose(position, rotation, scale);
         var pointerPosition = this.system.getPointerPosition(position, rotation);
         this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
+        this.el.emit('stroke-point-added', {
+          position: position,
+          orientation: rotation,
+          pointerPosition: pointerPosition,
+          pressure: this.sizeModifier,
+          timestamp: time,
+          strokeTimestamp: this.currentStroke.data.timestamp
+        });
       }
+      this.lastActive = this.active;
     };
   })(),
   startNewStroke: function () {
