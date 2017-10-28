@@ -9,7 +9,6 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     this.pressure = 0;
     this.size = el.sceneEl.renderer.getSize();
-    this.pointer = new THREE.Vector2();
     // normalized device coordinates position
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
 
@@ -70,7 +69,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     }
     this.pressure = evt.detail.pressure;
     // this.el.components.brush.sizeModifier = evt.detail.pressure;
-    console.log(evt.detail);
+    // console.log(evt.detail);
     this.setGazeScale(evt.detail.brush.size);
     if (evt.detail.brush !== this.el.getAttribute('brush').brush) {
       this.el.setAttribute('brush', 'brush', evt.detail.brush.brush);
@@ -122,7 +121,6 @@ AFRAME.registerComponent('ar-paint-controls', {
     if (e.touches) {
       t = e.touches[0];
     }
-    this.pointer.set(t.clientX, t.clientY);
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 

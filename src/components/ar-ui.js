@@ -86,7 +86,6 @@ AFRAME.registerComponent('ar-ui', {
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
-    this.pointer = new THREE.Vector2();
     // normalized device coordinates position
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
     this.intersection = null;
@@ -874,7 +873,6 @@ AFRAME.registerComponent('ar-ui', {
     if (e.touches) {
       t = e.touches[0];
     }
-    this.pointer.set(t.clientX, t.clientY);
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
@@ -958,7 +956,6 @@ AFRAME.registerComponent('ar-ui', {
       t = e.touches[0];
     }
     this.tapped = true;
-    this.pointer.set(t.clientX, t.clientY);
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
@@ -1077,7 +1074,7 @@ AFRAME.registerComponent('ar-ui', {
         }
       }
     }
-
+    
     obj.setAttribute('position', positionTmp);
   },
   // https://codepen.io/looeee/pen/RVgOgR
@@ -1100,8 +1097,10 @@ AFRAME.registerComponent('ar-ui', {
   // end codepen based code
   enterPainterMode: function () {
     var self = this;
-    document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
-    document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
+    if (document.querySelector('[ar]')) {
+      document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
+      document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
+    }
     this.el.emit('activate', false);
     // Hide a-painter button
     this.objects.apainterBtn.object3D.originalPosition = this.objects.apainterBtn.object3D.position.clone();
@@ -1125,8 +1124,10 @@ AFRAME.registerComponent('ar-ui', {
   },
   exitPainterMode: function () {
     var self = this;
-    document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
-    document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
+    if (document.querySelector('[ar]')) {
+      document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
+      document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
+    }
     this.el.emit('deactivate', false);
     // Hide close buttons
     this.hideEl(this, 'closeBtn', true);
@@ -1318,16 +1319,20 @@ AFRAME.registerComponent('ar-ui', {
     }
   },
   openBrushSettings: function () {
-    document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
-    document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
+    if (document.querySelector('[ar]')) {
+      document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
+      document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
+    }
     if (this.modalOpened === null){
       this.openModal('brushSettings');
       this.playSound('#uiClick0');
     }
   },
   closeBrushSettings: function () {
-    document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
-    document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
+    if (document.querySelector('[ar]')) {
+      document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
+      document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
+    }
     if (this.modalOpened !== null){
       this.closeModal('brushSettings');
       this.playSound('#uiClick1');

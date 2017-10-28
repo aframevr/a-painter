@@ -22,6 +22,7 @@ require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
+require('./components/xr.js');
 
 require('./brushes/line.js');
 require('./brushes/stamp.js');
