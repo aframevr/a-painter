@@ -1033,7 +1033,7 @@ AFRAME.registerComponent('ar-ui', {
       if (obj.object3D.children[i].geometry) {
         if (!obj.object3D.children[i].geometry.boundingBox) {
           obj.object3D.children[i].geometry.computeBoundingBox();
-          obj.object3D.children[i].geometry.width =   obj.object3D.children[i].geometry.boundingBox.max.x - obj.object3D.children[i].geometry.boundingBox.min.x;
+          obj.object3D.children[i].geometry.width = obj.object3D.children[i].geometry.boundingBox.max.x - obj.object3D.children[i].geometry.boundingBox.min.x;
           obj.object3D.children[i].geometry.height = obj.object3D.children[i].geometry.boundingBox.max.y - obj.object3D.children[i].geometry.boundingBox.min.y;
         }
         switch (obj.layout) {
@@ -1074,7 +1074,6 @@ AFRAME.registerComponent('ar-ui', {
         }
       }
     }
-    
     obj.setAttribute('position', positionTmp);
   },
   // https://codepen.io/looeee/pen/RVgOgR

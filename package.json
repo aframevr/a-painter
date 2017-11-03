@@ -22,6 +22,8 @@
     "webpack-dev-server": "^1.16.1"
   },
   "dependencies": {
-    "aframe-tooltip-component": "^0.1.0"
+    "aframe-tooltip-component": "^0.1.0",
+    "three.xr.js": "0.0.3",
+    "aframe-xr": "0.0.1"
   }
 }
