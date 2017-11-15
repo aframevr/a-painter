@@ -43,6 +43,9 @@ AFRAME.registerSystem('xr', {
     this.sessionStarted = this.sessionStarted.bind(this);
     this.sessionStopped = this.sessionStopped.bind(this);
 
+    this.poseLost = this.poseLost.bind(this);
+    this.poseFound = this.poseFound.bind(this);
+
     this.wrapSceneMethods = this.wrapSceneMethods.bind(this);
 
     var self = this;
@@ -139,6 +142,9 @@ AFRAME.registerSystem('xr', {
     sceneEl.renderer.xr.addEventListener('sessionStarted', this.sessionStarted);
     sceneEl.renderer.xr.addEventListener('sessionStopped', this.sessionStopped);
 
+    sceneEl.renderer.xr.addEventListener('poseLost', this.poseLost);
+    sceneEl.renderer.xr.addEventListener('poseFound', this.poseFound);
+
     if (sceneEl.renderer.xr.totalSupportedDisplays === 0) {
       this.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
       // this.sceneEl.setAttribute('ar-mode-ui', {enabled: true});
@@ -181,6 +187,14 @@ AFRAME.registerSystem('xr', {
   sessionStopped: function (data) {
     this.activeRealityType = 'magicWindow';
     this.el.emit('realityChanged', this.activeRealityType);
+  },
+
+  poseLost: function () {
+    this.el.emit('poseLost');
+  },
+
+  poseFound: function () {
+    this.el.emit('poseFound');
   },
 
   updateFrame: function (frame) {

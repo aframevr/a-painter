@@ -1114,10 +1114,9 @@ AFRAME.registerComponent('ar-ui', {
   // end codepen based code
   enterPainterMode: function () {
     var self = this;
-    if (document.querySelector('[ar]')) {
-      document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
-      document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
-    }
+
+    document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     this.el.emit('activate', false);
     // Hide a-painter button
     this.objects.apainterBtn.object3D.originalPosition = this.objects.apainterBtn.object3D.position.clone();
@@ -1141,10 +1140,8 @@ AFRAME.registerComponent('ar-ui', {
   },
   exitPainterMode: function () {
     var self = this;
-    if (document.querySelector('[ar]')) {
-      document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
-      document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
-    }
+    document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
     this.el.emit('deactivate', false);
     // Hide close buttons
     this.hideEl(this, 'closeBtn', true);
@@ -1336,20 +1333,16 @@ AFRAME.registerComponent('ar-ui', {
     }
   },
   openBrushSettings: function () {
-    if (document.querySelector('[ar]')) {
-      document.querySelector('[ar]').removeEventListener('poseLost', this.onPoseLost);
-      document.querySelector('[ar]').removeEventListener('poseFound', this.onPoseFound);
-    }
+    document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
     if (this.modalOpened === null){
       this.openModal('brushSettings');
       this.playSound('#uiClick0');
     }
   },
   closeBrushSettings: function () {
-    if (document.querySelector('[ar]')) {
-      document.querySelector('[ar]').addEventListener('poseLost', this.onPoseLost);
-      document.querySelector('[ar]').addEventListener('poseFound', this.onPoseFound);
-    }
+    document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     if (this.modalOpened !== null){
       this.closeModal('brushSettings');
       this.playSound('#uiClick1');
