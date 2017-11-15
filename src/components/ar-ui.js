@@ -1,13 +1,31 @@
 AFRAME.registerComponent('ar-ui', {
   dependencies: ['raycaster'],
   init: function () {
+    document.querySelector('a-scene').addEventListener('realityChanged', this.realityChanged.bind(this));
+  },
+  realityChanged: function (data) {
+    if (data.detail === 'ar') {
+      this.start();
+    }
+  },
+  start: function () {
     var self = this;
-
     this.depth = -0.1;
-
     this.camera = document.querySelector('[camera]');
     // this.camera.object3D.children[0].near = -this.depth;
     // console.log('--',this.camera.object3D.children[0].near);
+
+    // document.querySelector('a-scene').systems['xr'].updateFrame = function (frame) {
+    //   frame.findAnchor(0.5, 0.5).then(anchorOffset => {
+    //     if (anchorOffset === null) {
+    //       console.log('miss');
+    //     } else {
+    //       console.log('hit', anchorOffset);
+    //     }
+    //   }).catch(err => {
+    //     console.error('Error in hit test', err);
+    //   });
+    // };
 
     var logo = document.querySelector('#logo');
     logo.setAttribute('visible', false);

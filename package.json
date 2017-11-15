@@ -21,8 +21,5 @@
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.16.1"
   },
-  "dependencies": {
-    "aframe-tooltip-component": "^0.1.0",
-    "aframe-xr": "0.0.3"
-  }
+  "dependencies": {}
 }
