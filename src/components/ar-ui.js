@@ -12,8 +12,6 @@ AFRAME.registerComponent('ar-ui', {
     var self = this;
     this.depth = -0.1;
     this.camera = document.querySelector('[camera]');
-    // this.camera.object3D.children[0].near = -this.depth;
-    // console.log('--',this.camera.object3D.children[0].near);
 
     // document.querySelector('a-scene').systems['xr'].updateFrame = function (frame) {
     //   frame.findAnchor(0.5, 0.5).then(anchorOffset => {
@@ -27,8 +25,8 @@ AFRAME.registerComponent('ar-ui', {
     //   });
     // };
 
-    var logo = document.querySelector('#logo');
-    logo.setAttribute('visible', false);
+    // var logo = document.querySelector('#logo');
+    // logo.setAttribute('visible', false);
 
     this.modalOpened = null;
 

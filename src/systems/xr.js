@@ -24,7 +24,6 @@ AFRAME.registerSystem('xr', {
       cameraEl.removeAttribute('ar-ui');
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
-      document.getElementsByClassName('github-corner')[0].style.display = 'inline';
       this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
       return;
     }
