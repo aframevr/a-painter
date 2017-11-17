@@ -1090,6 +1090,8 @@ AFRAME.registerComponent('ar-ui', {
         }
       }
     }
+    // positionTmp = {x: 0, y: 0, z: this.depth * 4};
+    positionTmp.z = this.depth * 4;
     obj.setAttribute('position', positionTmp);
   },
   // https://codepen.io/looeee/pen/RVgOgR

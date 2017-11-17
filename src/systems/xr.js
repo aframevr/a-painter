@@ -4,6 +4,7 @@ AFRAME.registerSystem('xr', {
   },
   init: function () {
     var self = this;
+    // this.el.sceneEl.renderer.setPixelRatio(1);
     this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: false});
     THREE.WebXRUtils.getDisplays().then(self.initXR.bind(self));
   },
@@ -21,12 +22,50 @@ AFRAME.registerSystem('xr', {
 
     this.el.sceneEl.setAttribute('visible', true);
     if (!supportAR) {
-      cameraEl.removeAttribute('ar-ui');
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
       this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
       return;
     }
+
+    var drawing = document.querySelector('.a-drawing');
+    if (!drawing) {
+      drawing = document.createElement('a-entity');
+      drawing.className = 'a-drawing';
+      // drawing.setAttribute('visible', false);
+      document.querySelector('a-scene').appendChild(drawing);
+    }
+
+    this.pinSelected = false;
+    this.pinAdded = false;
+    this.pin = document.createElement('a-entity');
+    this.pin.setAttribute('geometry', {
+      primitive: 'ring',
+      radiusInner: 0.15,
+      radiusOuter: 0.2,
+      segmentsTheta: 4
+    });
+    // this.pin.setAttribute('position', '0 0 -1');
+    this.pin.setAttribute('material', {
+      shader: 'flat',
+      transparent: true,
+      color: 'white',
+      opacity: 0.5
+    });
+
+    // this.box = document.createElement('a-entity');
+    // this.box.setAttribute('geometry', {
+    //   primitive: 'box',
+    //   width: 0.2,
+    //   height: 0.2,
+    //   depth: 0.2
+    // });
+    // this.box.setAttribute('position', '0 0 -1');
+    // document.querySelector('a-scene').appendChild(this.box);
+    var geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    var material = new THREE.MeshNormalMaterial();
+    this.box = new THREE.Mesh(geometry, material);
+
     cameraEl.removeAttribute('orbit-controls');
 
     this.displays = displays;
@@ -38,6 +77,8 @@ AFRAME.registerSystem('xr', {
     this.poseIsLost = true;
 
     this.activeRealityType = 'magicWindow';
+
+    this.updateFrame = this.updateFrame.bind(this);
 
     this.sessionStarted = this.sessionStarted.bind(this);
     this.sessionStopped = this.sessionStopped.bind(this);
@@ -113,7 +154,6 @@ AFRAME.registerSystem('xr', {
       var delta = sceneEl.clock.getDelta() * 1000;
       var renderer = sceneEl.renderer;
       sceneEl.time = sceneEl.clock.elapsedTime * 1000;
-
       if (sceneEl.isPlaying) { sceneEl.tick(sceneEl.time, delta); }
       renderer.animate(sceneEl.render.bind(sceneEl));
       if (sceneEl.renderer.xr && (!sceneEl.renderer.xr.session ||sceneEl.renderer.xr.session && !sceneEl.renderer.xr.sessionActive)) {
@@ -158,8 +198,6 @@ AFRAME.registerSystem('xr', {
     this.defaultPosition = new THREE.Vector3(0, 1.6, 0.1);
     this.el.camera.el.setAttribute('position', this.defaultPosition);
 
-    this.updateFrame = this.updateFrame.bind(this);
-
     this.el.emit('realityChanged', 'magicWindow');
   },
 
@@ -198,14 +236,30 @@ AFRAME.registerSystem('xr', {
 
   updateFrame: function (frame) {
     // Custom code for each frame rendered
-    // frame.findAnchor(0.5, 0.5).then(anchorOffset => {
-    //   if (anchorOffset === null){
-    //     console.log('miss');
-    //   } else {
-    //     console.log('hit');
-    //   }
-    // }).catch(err => {
-    //   console.error('Error in hit test', err);
-    // });
+    if (this.pinSelected) {
+      return;
+    }
+    frame.findAnchor(0.5, 0.5).then(anchorOffset => {
+      if (anchorOffset === null){
+        // console.log('miss');
+      } else {
+        if (!this.pinAdded) {
+          this.pinAdded = true;
+          this.sceneEl.renderer.xr.addAnchoredNode(anchorOffset, this.box);
+          document.querySelector('a-scene').appendChild(this.pin);
+        }
+        if (this.pinAdded) {
+          // this.pin.setAttribute('position', {x: anchorOffset.position.x, y: -1.1 + anchorOffset.position.y, z: -1 + anchorOffset.position.z});
+          // this.pin.setAttribute('position', {x: anchorOffset.position.x, y: anchorOffset.position.y, z: anchorOffset.position.z});
+          // this.pin.object3D.position.set(anchorOffset.position.x, anchorOffset.position.y, anchorOffset.position.z);
+          // console.log('hit', anchorOffset.position);
+          // console.log('hit', anchorOffset.orientation);
+        }
+        // this.pinSelected = true;
+        // console.log('hit', anchorOffset.getOffsetTransform(coordinateSystem));
+      }
+    }).catch(err => {
+      console.error('Error in hit test', err);
+    });
   }
 });

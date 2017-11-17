@@ -4322,7 +4322,7 @@ var CameraReality = function (_Reality) {
 					_this4._arKitWrapper.hitTest(normalizedScreenX, normalizedScreenY, _ARKitWrapper2.default.HIT_TEST_TYPE_EXISTING_PLANES).then(function (hits) {
 						if (hits.length === 0) {
 							resolve(null);
-							console.log('miss');
+							// console.log('miss');
 							return;
 						}
 						var hit = _this4._pickARKitHit(hits);
