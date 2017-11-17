@@ -12,6 +12,8 @@ AFRAME.registerComponent('ar-paint-controls', {
     // normalized device coordinates position
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
 
+    this.uiTouched = false;
+
     this.raycaster = el.components.raycaster.raycaster;
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
@@ -32,6 +34,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     document.querySelector('[ar-ui]').addEventListener('activate', this.activate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('onBrushChanged', this.onBrushChanged.bind(this));
+    document.querySelector('[ar-ui]').addEventListener('objectsIntersected', this.objectsIntersected.bind(this));
     this.el.addEventListener('stroke-started', this.onStrokeStarted);
   },
   onStrokeStarted: function () {
@@ -76,6 +79,9 @@ AFRAME.registerComponent('ar-paint-controls', {
     } 
     this.el.setAttribute('brush', 'size', evt.detail.brush.size);
   },
+  objectsIntersected: function (evt) {
+    evt.detail.intersections > 0 ? this.uiTouched = true : this.uiTouched = false;
+  },
   setGazeScale: function (size) {
     var sizeData = this.el.components.brush.schema.size;
     var scale = 1;
@@ -89,7 +95,7 @@ AFRAME.registerComponent('ar-paint-controls', {
   paintStart: function (e) {
     var el = this.el;
     this.paintMove(e);
-    if (this.intersection !== null) {
+    if (this.intersection !== null || this.uiTouched) {
       return;
     }
     if (!el.components.brush.active) {
