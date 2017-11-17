@@ -22,6 +22,7 @@ AFRAME.registerSystem('xr', {
 
     this.el.sceneEl.setAttribute('visible', true);
     if (!supportAR) {
+      cameraEl.removeAttribute('ar-ui');
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
       this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
