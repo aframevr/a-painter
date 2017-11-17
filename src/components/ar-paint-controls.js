@@ -17,7 +17,6 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.raycaster = el.components.raycaster.raycaster;
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
-    this.intersection = null;
 
     el.object3D.visible = false;
 
@@ -95,7 +94,7 @@ AFRAME.registerComponent('ar-paint-controls', {
   paintStart: function (e) {
     var el = this.el;
     this.paintMove(e);
-    if (this.intersection !== null || this.uiTouched) {
+    if (this.uiTouched) {
       return;
     }
     if (!el.components.brush.active) {
@@ -112,14 +111,6 @@ AFRAME.registerComponent('ar-paint-controls', {
     el.components.sound.stopSound();
     el.components.sound.playSound();
   },
-  getIntersectObjects: function () {
-    var intersectObjects = [];
-    for (var i = 0; i < document.querySelector('[ar-ui]').children.length; i++) {
-      var element = document.querySelector('[ar-ui]').children[i];
-      intersectObjects.push(element.object3D);
-    }
-    return intersectObjects;
-  },
   paintMove: function (e) {
     var el = this.el;
     this.size = this.el.sceneEl.renderer.getSize();
@@ -132,9 +123,7 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
 
-    var intersections = this.raycaster.intersectObjects(this.getIntersectObjects(), true);
-    this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
-    if (this.intersection !== null) {
+    if (this.uiTouched) {
       return;
     }
     if (e.touches && e.touches[0].touchType === 'stylus'){
