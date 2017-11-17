@@ -132,7 +132,7 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.sizeModifier = 1;
     }
     el.object3D.position.copy(this.ray.direction);
-    el.object3D.position.multiplyScalar(0.75);
+    el.object3D.position.multiplyScalar(0.5);
     el.object3D.position.add(this.ray.origin);
     el.object3D.updateMatrixWorld();
   },
