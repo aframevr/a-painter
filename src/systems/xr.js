@@ -22,7 +22,6 @@ AFRAME.registerSystem('xr', {
 
     this.el.sceneEl.setAttribute('visible', true);
     if (!supportAR) {
-      cameraEl.removeAttribute('ar-ui');
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
       this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
@@ -247,7 +246,7 @@ AFRAME.registerSystem('xr', {
         if (!this.pinAdded) {
           this.pinAdded = true;
           this.sceneEl.renderer.xr.addAnchoredNode(anchorOffset, this.box);
-          document.querySelector('a-scene').appendChild(this.pin);
+          document.querySelector('.a-drawing').appendChild(this.pin);
         }
         if (this.pinAdded) {
           // this.pin.setAttribute('position', {x: anchorOffset.position.x, y: -1.1 + anchorOffset.position.y, z: -1 + anchorOffset.position.z});

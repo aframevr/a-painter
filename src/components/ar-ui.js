@@ -11,19 +11,29 @@ AFRAME.registerComponent('ar-ui', {
   start: function () {
     var self = this;
     this.depth = -0.1;
-    this.camera = document.querySelector('[camera]');
 
-    // document.querySelector('a-scene').systems['xr'].updateFrame = function (frame) {
-    //   frame.findAnchor(0.5, 0.5).then(anchorOffset => {
-    //     if (anchorOffset === null) {
-    //       console.log('miss');
-    //     } else {
-    //       console.log('hit', anchorOffset);
-    //     }
-    //   }).catch(err => {
-    //     console.error('Error in hit test', err);
-    //   });
-    // };
+    // Create a-entity container for all the UI
+    this.containerUI = document.createElement('a-entity');
+    this.containerUI.setAttribute('id', 'containerUI');
+    this.el.appendChild(this.containerUI);
+
+    this.drawing = document.querySelector('.a-drawing');
+    this.frustumSize = 1;
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.orthoCamera = new THREE.OrthographicCamera(this.frustumSize * this.aspect / -2, this.frustumSize * this.aspect / 2, this.frustumSize / 2, this.frustumSize / -2, 0.05, 0.2);
+    document.querySelector('#acamera').object3D.add(this.orthoCamera);
+
+    // Override doRender method
+    this.el.sceneEl.renderer.xr.doRender = function () {
+      var arui = self.el.sceneEl.camera.el.components['ar-ui'];
+      self.drawing.setAttribute('visible', true);
+      self.containerUI.setAttribute('visible', false);
+      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, self.el.sceneEl.camera);
+
+      self.drawing.setAttribute('visible', false);
+      self.containerUI.setAttribute('visible', true);
+      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, arui.orthoCamera);
+    };
 
     // var logo = document.querySelector('#logo');
     // logo.setAttribute('visible', false);
@@ -142,22 +152,22 @@ AFRAME.registerComponent('ar-ui', {
     }
     soundEl.setAttribute('src', '#ui_click0' + iOSSuffix);
     soundEl.setAttribute('id', 'uiClick0');
-    this.el.appendChild(soundEl);
+    this.containerUI.appendChild(soundEl);
 
     soundEl = document.createElement('a-sound');
     soundEl.setAttribute('src', '#ui_click1' + iOSSuffix);
     soundEl.setAttribute('id', 'uiClick1');
-    this.el.appendChild(soundEl);
+    this.containerUI.appendChild(soundEl);
 
     soundEl = document.createElement('a-sound');
     soundEl.setAttribute('src', '#ui_menu' + iOSSuffix);
     soundEl.setAttribute('id', 'uiMenu');
-    this.el.appendChild(soundEl);
+    this.containerUI.appendChild(soundEl);
 
     soundEl = document.createElement('a-sound');
     soundEl.setAttribute('src', '#ui_undo' + iOSSuffix);
     soundEl.setAttribute('id', 'uiUndo');
-    this.el.appendChild(soundEl);
+    this.containerUI.appendChild(soundEl);
   },
   addInitEl: function () {
     // Add 'init' section elements
@@ -295,12 +305,12 @@ AFRAME.registerComponent('ar-ui', {
       fog: false,
       src: '#uinormal'
     });
-    this.settingsUI.setAttribute('position', '0 -0.02 -0.098');
+    this.settingsUI.setAttribute('position', '0 -0.12 -0.098');
     
-    this.settingsUI.setAttribute('scale', '0.4 0.4 0.4');
+    this.settingsUI.setAttribute('scale', '3 3 3');
     this.settingsUI.setAttribute('visible', false);
     // uiEl.classList.add('apainter-ui');
-    this.el.appendChild(this.settingsUI);
+    this.containerUI.appendChild(this.settingsUI);
   },
   onModelLoaded: function (evt) {
     var uiEl = this.settingsUI;
@@ -770,7 +780,7 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.setAttribute('enabled', params.enabled);
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
-    this.el.appendChild(uiEl);
+    this.containerUI.appendChild(uiEl);
   },
   addFader: function (params) {
     this.objects[params.id] = document.createElement('a-entity');
@@ -802,7 +812,7 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.setAttribute('enabled', params.enabled);
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
-    this.el.appendChild(uiEl);
+    this.containerUI.appendChild(uiEl);
   },
   addImage: function (params) {
     this.objects[params.id] = document.createElement('a-entity');
@@ -837,7 +847,7 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.setAttribute('visible', params.visible);
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
-    this.el.appendChild(uiEl);
+    this.containerUI.appendChild(uiEl);
   },
   showEl: function (self, id, enable, delay) {
     var uiEntity = self.objects[ id ];
@@ -892,7 +902,7 @@ AFRAME.registerComponent('ar-ui', {
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
 
@@ -975,7 +985,7 @@ AFRAME.registerComponent('ar-ui', {
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
     if (this.intersection !== null) {
@@ -1030,19 +1040,27 @@ AFRAME.registerComponent('ar-ui', {
   onWindowResize: function (e) {
     var el = this.el;
     this.size = el.sceneEl.canvas.getBoundingClientRect();
-    this.width = this.visibleWidthAtZDepth(this.depth, el.sceneEl.camera);
-    this.height = this.visibleHeightAtZDepth(this.depth, el.sceneEl.camera);
+    this.width = window.innerWidth / window.innerHeight;
+    this.height = 1;
+
     var self = this;
     Object.keys(this.objects).forEach(function (key) {
       if (self.objects[key].getAttribute('visible')) {
         self.place(self.objects[key], self.width, self.height);
       }
     });
+
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.orthoCamera.left = -this.frustumSize * this.aspect / 2;
+    this.orthoCamera.right = this.frustumSize * this.aspect / 2;
+    this.orthoCamera.top = this.frustumSize / 2;
+    this.orthoCamera.bottom = -this.frustumSize / 2;
+    this.orthoCamera.updateProjectionMatrix();
   },
   place: function (obj) {
     var w = this.width;
     var h = this.height;
-    this.scaleFactor = Math.max(1, (w / Math.abs(this.depth)) / 2);
+    this.scaleFactor = Math.max(1, (1.2 / Math.abs(this.depth)) / 2);
     obj.object3D.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
     for (var i = 0; i < obj.object3D.children.length; i++) {
@@ -1090,28 +1108,9 @@ AFRAME.registerComponent('ar-ui', {
         }
       }
     }
-    // positionTmp = {x: 0, y: 0, z: this.depth * 4};
-    positionTmp.z = this.depth * 4;
+    // positionTmp = {x: 0, y: 0, z: this.depth};
     obj.setAttribute('position', positionTmp);
   },
-  // https://codepen.io/looeee/pen/RVgOgR
-  visibleHeightAtZDepth: function (depth, camera) {
-    // compensate for cameras not positioned at z=0
-    var cameraOffset = camera.position.z;
-    if (depth < cameraOffset) depth -= cameraOffset;
-    else depth += cameraOffset;
-
-    // vertical fov in radians
-    var vFOV = camera.fov * Math.PI / 180;
-
-    // Math.abs to ensure the result is always positive
-    return 2 * Math.tan(vFOV / 2) * Math.abs(depth);
-  },
-  visibleWidthAtZDepth: function (depth, camera) {
-    var height = this.visibleHeightAtZDepth(depth, camera);
-    return height * camera.aspect;
-  },
-  // end codepen based code
   enterPainterMode: function () {
     var self = this;
 
@@ -1177,7 +1176,7 @@ AFRAME.registerComponent('ar-ui', {
     var self = this;
     this.modalOpened = id;
     var uiEl = document.querySelector('#fader-' + id);
-    this.camera.setAttribute('look-controls', {enabled: false});
+    // this.orthoCamera.setAttribute('look-controls', {enabled: false});
     // var uiEl = this.objects.fader;
     uiEl.setAttribute('visible', true);
 
@@ -1231,7 +1230,7 @@ AFRAME.registerComponent('ar-ui', {
     var self = this;
     var uiEl = document.querySelector('#fader-' + id);
 
-    this.camera.setAttribute('look-controls', {enabled: true});
+    // this.orthoCamera.setAttribute('look-controls', {enabled: true});
     switch (id) {
       case 'saving':
         break;
