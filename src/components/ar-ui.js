@@ -35,7 +35,7 @@ AFRAME.registerComponent('ar-ui', {
     this.renderOrderUI = 10000;
     this.renderOrderModal = 10001;
 
-    this.atlasData = '{"total": {"w": 1024, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 512, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 512, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 256, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 512, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 256, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 }}}';
+    this.atlasData = '{"total": {"w": 2048, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 1536, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 1536, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 1280, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 1536, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 1280, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 },"saved": { "x": 1792, "y": 640, "w": 256, "h": 256 },"moveAroundDevice": { "x": 0, "y": 0, "w": 512, "h": 512 },"moveAround": { "x": 1024, "y": 1792, "w": 1024, "h": 256 },"dragTapPin": { "x": 1024, "y": 1536, "w": 1024, "h": 256 },"saving": { "x": 1024, "y": 1024, "w": 512, "h": 512 }}}';
     this.atlas = JSON.parse(this.atlasData);
 
     this.objects = {};
@@ -152,6 +152,7 @@ AFRAME.registerComponent('ar-ui', {
     });
     this.el.sceneEl.addEventListener('drawing-upload-error', function (event) {
       console.log('---upload error', self.objects.messageError);
+      this.closeModal('saving');
     });
   },
   addUIElements: function () {
@@ -160,6 +161,7 @@ AFRAME.registerComponent('ar-ui', {
     this.addPaintingEl();
     this.addCommonEl();
     this.addSettingsEl();
+    this.addSavingEl();
     this.addTrackingLostEl();
   },
   addSounds: function () {
@@ -234,12 +236,7 @@ AFRAME.registerComponent('ar-ui', {
   },
   addCommonEl: function () {
      // Add fader for settings modal
-     this.addFader({
-      id: 'fader-saving',
-      visible: false,
-      enabled: false
-    });
-     this.addFader({
+    this.addFader({
       id: 'fader-brushSettings',
       visible: false,
       enabled: false
@@ -727,6 +724,32 @@ AFRAME.registerComponent('ar-ui', {
     this.updateColorHistory();
   },
   // End settings UI code
+  addSavingEl: function () {
+    // Add fader for settings modal
+    this.addFader({
+      id: 'fader-saving',
+      visible: false,
+      enabled: false
+    });
+    this.addImage({
+      id: 'saving',
+      layout: 'center',
+      visible: false,
+      width: 0.08,
+      height: 0.08,
+      padding: [0, 0, 0, 0],
+      renderOrder: this.renderOrderModal
+    });
+    this.addImage({
+      id: 'saved',
+      layout: 'center',
+      visible: false,
+      width: 0.04,
+      height: 0.04,
+      padding: [0, 0, 0, 0],
+      renderOrder: this.renderOrderModal
+    });
+  },
   addTrackingLostEl: function (){
     // Add fader for trackingLost modal
     this.addFader({
@@ -872,6 +895,20 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
     this.containerUI.appendChild(uiEl);
+  },
+  animateEl: function (self, id) {
+    var uiEntity = self.objects[ id ];
+    if (!uiEntity) {
+      return;
+    }
+    self.tweenSaving = new AFRAME.TWEEN.Tween(uiEntity.object3D.rotation).to({
+      z: -Math.PI * 2
+    }, 1000)
+      .onComplete(function () {
+        uiEntity.object3D.rotation.z = 0;
+      })
+      .repeat(Infinity)
+      .start();
   },
   showEl: function (self, id, enable, delay) {
     var uiEntity = self.objects[ id ];
@@ -1234,6 +1271,8 @@ AFRAME.registerComponent('ar-ui', {
         this.objects.saveBtn.setAttribute('enabled', false);
         this.objects.undoBtn.setAttribute('enabled', false);
         this.objects.brushBtn.setAttribute('enabled', false);
+        this.showEl(this, 'saving', false, 100);
+        this.animateEl(this, 'saving');
         break;
       case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', false);
@@ -1266,6 +1305,8 @@ AFRAME.registerComponent('ar-ui', {
         this.objects.saveBtn.setAttribute('enabled', true);
         this.objects.undoBtn.setAttribute('enabled', true);
         this.objects.brushBtn.setAttribute('enabled', false);
+        self.hideEl(self, 'saving', false);
+        this.tweenSaving.stop();
         break;
       case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', true);
@@ -1320,9 +1361,11 @@ AFRAME.registerComponent('ar-ui', {
     self.openModal('saving', self.saved);
   },
   saved: function (url) {
-    console.log('---upload completed', url);
-    window.location.href = '/?url=' + url + '#save-painting';
-    // this.closeModal('saving');
+    this.tweenSaving.stop();
+    this.showEl(this, 'saved', false, 10);
+    setTimeout(() => {
+      window.location.href = '/?url=' + url + '#save-painting';
+    }, 1000);
   },
   dragStroke: function () {
     var pointerAbsPosition = (this.width - this.width / 2) * this.normalizedCoordinatedPositionPointer.x;
