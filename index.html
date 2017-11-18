@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>A-Painter</title>
+    <title>Social graffiti</title>
     <style>html,body{background-color:#030404}</style>
     <link rel="icon" href="img/icon-256.png">
     <meta name="description" content="Paint in VR in your browser. Powered by A-Frame.">
@@ -71,9 +71,9 @@
         <!-- camera -->
         <a-entity id="acamera" camera look-controls orbit-controls ar-ui></a-entity>
          <!-- ar-gaze controls -->
-      <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
-      material="shader:flat;color:#ef2d5e"
-      position="0 0 -0.25"></a-entity>
+        <a-entity id="ar-gaze" ar-paint-controls geometry="primitive:ring;radiusInner:0.006;radiusOuter:0.009"
+        material="shader:flat;color:#ef2d5e"
+        position="0 0 -0.25"></a-entity>
         <!-- hand controls -->
         <a-entity id="left-hand"
                   brush
@@ -195,6 +195,9 @@
                       </a-entity>
                     </a-entity>
         </a-entity>
+      </a-entity>
+      <a-entity id="drawing-container">
+        <a-entity class="a-drawing"></a-entity>
       </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048" xr="ar: false"></a-entity>
     </a-scene>

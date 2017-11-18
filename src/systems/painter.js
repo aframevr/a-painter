@@ -73,7 +73,7 @@ AFRAME.registerSystem('painter', {
     if (urlParams.url || urlParams.urljson) {
       var isBinary = urlParams.urljson === undefined;
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
-      document.getElementById('logo').setAttribute('visible', false);
+      // document.getElementById('logo').setAttribute('visible', false);
       document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
       // document.getElementById('apainter-logo').classList.remove('hidden');
       //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
@@ -188,7 +188,9 @@ AFRAME.registerSystem('painter', {
     var self = this;
 
     var baseUrl = 'https://aframe.io/a-painter/?url=';
-
+    if (AFRAME.scenes[0].systems.xr.supportAR) {
+      baseUrl = '';
+    }
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
     var uploader = 'uploadcare'; // or 'fileio'

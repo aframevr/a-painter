@@ -10,30 +10,8 @@ AFRAME.registerComponent('ar-ui', {
   },
   start: function () {
     var self = this;
+
     this.depth = -0.1;
-
-    // Create a-entity container for all the UI
-    this.containerUI = document.createElement('a-entity');
-    this.containerUI.setAttribute('id', 'containerUI');
-    this.el.appendChild(this.containerUI);
-
-    this.drawing = document.querySelector('.a-drawing');
-    this.frustumSize = 1;
-    this.aspect = window.innerWidth / window.innerHeight;
-    this.orthoCamera = new THREE.OrthographicCamera(this.frustumSize * this.aspect / -2, this.frustumSize * this.aspect / 2, this.frustumSize / 2, this.frustumSize / -2, 0.05, 0.2);
-    document.querySelector('#acamera').object3D.add(this.orthoCamera);
-
-    // Override doRender method
-    this.el.sceneEl.renderer.xr.doRender = function () {
-      var arui = self.el.sceneEl.camera.el.components['ar-ui'];
-      self.drawing.setAttribute('visible', true);
-      self.containerUI.setAttribute('visible', false);
-      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, self.el.sceneEl.camera);
-
-      self.drawing.setAttribute('visible', false);
-      self.containerUI.setAttribute('visible', true);
-      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, arui.orthoCamera);
-    };
 
     // var logo = document.querySelector('#logo');
     // logo.setAttribute('visible', false);
@@ -65,6 +43,7 @@ AFRAME.registerComponent('ar-ui', {
     this.setPressure();
     this.bindMethods();
     this.initRaycaster();
+    this.addContainers();
     this.setLayoutSettings();
     this.addEvents();
     this.addUIElements();
@@ -109,6 +88,8 @@ AFRAME.registerComponent('ar-ui', {
 
     this.brushBtnClicked = this.brushBtnClicked.bind(this);
     this.dragStroke = this.dragStroke.bind(this);
+
+    this.updateFrame = this.updateFrame.bind(this);
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
@@ -116,6 +97,36 @@ AFRAME.registerComponent('ar-ui', {
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
     this.intersection = null;
     this.objOver;
+  },
+  updateFrame: function (frame) {
+    
+  },
+  addContainers: function (){
+    document.querySelector('a-scene').addEventListener('updateFrame', this.updateFrame);
+
+    // Create a-entity container for all the UI
+    this.containerUI = document.createElement('a-entity');
+    this.containerUI.setAttribute('id', 'ui-container');
+    this.el.appendChild(this.containerUI);
+
+    this.drawing = document.querySelector('.a-drawing');
+    this.frustumSize = 1;
+    this.aspect = window.innerWidth / window.innerHeight;
+    this.orthoCamera = new THREE.OrthographicCamera(this.frustumSize * this.aspect / -2, this.frustumSize * this.aspect / 2, this.frustumSize / 2, this.frustumSize / -2, 0.05, 0.2);
+    document.querySelector('#acamera').object3D.add(this.orthoCamera);
+
+    var self = this;
+    // Override doRender method
+    this.el.sceneEl.renderer.xr.doRender = function () {
+      var arui = self.el.sceneEl.camera.el.components['ar-ui'];
+      self.drawing.setAttribute('visible', true);
+      self.containerUI.setAttribute('visible', false);
+      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, self.el.sceneEl.camera);
+
+      self.drawing.setAttribute('visible', false);
+      self.containerUI.setAttribute('visible', true);
+      self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, arui.orthoCamera);
+    };
   },
   setLayoutSettings: function () {
     this.paddingTop = this.paddingBottom = this.paddingRight = this.paddingLeft = this.depth / 20;
@@ -134,6 +145,14 @@ AFRAME.registerComponent('ar-ui', {
     this.el.addEventListener('model-loaded', this.onModelLoaded);
     this.el.addEventListener('componentchanged', this.onComponentChanged);
     document.querySelector('[ar-paint-controls]').addEventListener('brush-started', this.onStrokeStarted);
+
+    var self = this;
+    this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
+      self.saved(event.detail.url);
+    });
+    this.el.sceneEl.addEventListener('drawing-upload-error', function (event) {
+      console.log('---upload error', self.objects.messageError);
+    });
   },
   addUIElements: function () {
     this.addSounds();
@@ -215,6 +234,11 @@ AFRAME.registerComponent('ar-ui', {
   },
   addCommonEl: function () {
      // Add fader for settings modal
+     this.addFader({
+      id: 'fader-saving',
+      visible: false,
+      enabled: false
+    });
      this.addFader({
       id: 'fader-brushSettings',
       visible: false,
@@ -1206,6 +1230,10 @@ AFRAME.registerComponent('ar-ui', {
 
     switch (id) {
       case 'saving':
+        this.objects.closeBtn.setAttribute('enabled', false);
+        this.objects.saveBtn.setAttribute('enabled', false);
+        this.objects.undoBtn.setAttribute('enabled', false);
+        this.objects.brushBtn.setAttribute('enabled', false);
         break;
       case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', false);
@@ -1234,6 +1262,10 @@ AFRAME.registerComponent('ar-ui', {
     // this.orthoCamera.setAttribute('look-controls', {enabled: true});
     switch (id) {
       case 'saving':
+        this.objects.closeBtn.setAttribute('enabled', true);
+        this.objects.saveBtn.setAttribute('enabled', true);
+        this.objects.undoBtn.setAttribute('enabled', true);
+        this.objects.brushBtn.setAttribute('enabled', false);
         break;
       case 'trackingLost':
         this.objects.closeBtn.setAttribute('enabled', true);
@@ -1282,12 +1314,15 @@ AFRAME.registerComponent('ar-ui', {
     this.playSound('#uiUndo');
   },
   save: function () {
-    // console.log('save', this);
-    // this.el.sceneEl.systems.painter.upload();
-    //this.openModal('saving', this.saved);
+    this.drawingContainer = document.querySelector('#drawing-container');
+    var self = this;
+    self.el.sceneEl.systems.painter.upload();
+    self.openModal('saving', self.saved);
   },
-  saved: function () {
-    // console.log('saved', this);
+  saved: function (url) {
+    console.log('---upload completed', url);
+    window.location.href = '/?url=' + url + '#save-painting';
+    // this.closeModal('saving');
   },
   dragStroke: function () {
     var pointerAbsPosition = (this.width - this.width / 2) * this.normalizedCoordinatedPositionPointer.x;

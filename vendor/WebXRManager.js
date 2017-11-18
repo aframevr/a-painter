@@ -12,9 +12,6 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
 
   var boundHandleFrame = handleFrame.bind(this); // Useful for setting up the requestAnimationFrame callback
 
-  // an array of info that we'll use in _handleFrame to update the nodes using anchors
-  this.anchoredNodes = []; // { XRAnchorOffset, Three.js Object3D }
-
   var devicePixelRatio = window.devicePixelRatio;
 
   // A provisional hack until XRSession end method works
@@ -41,11 +38,6 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
         this.dispatchEvent({ type: 'poseFound' });
         this.poseFound = true;
       }
-    }
-
-    // Update anchored node positions in the scene graph
-    for (let anchoredNode of this.anchoredNodes) {
-      this.updateNodeFromAnchorOffset(frame, anchoredNode.node, anchoredNode.anchorOffset);
     }
 
     // Let the extending class update the scene before each render
@@ -98,30 +90,6 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
       this.doRender();
     }
   }
-
-  /*
-  Add a node to the scene and keep its pose updated using the anchorOffset
-  */
-  this.addAnchoredNode = function (anchorOffset, node) {
-    this.anchoredNodes.push({
-      anchorOffset: anchorOffset,
-      node: node
-    });
-    this.scene.add(node);
-  };
-
-  /*
-  Get the anchor data from the frame and use it and the anchor offset to update the pose of the node, this must be an Object3D
-  */
-  this.updateNodeFromAnchorOffset = function (frame, node, anchorOffset) {
-    const anchor = frame.getAnchor(anchorOffset.anchorUID);
-    if (anchor === null) {
-      return;
-    }
-    node.matrixAutoUpdate = false;
-    node.matrix.fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
-    node.updateMatrixWorld(true);
-  };
 
   this.startSession = function (display, reality) {
     var createVirtualReality = false;

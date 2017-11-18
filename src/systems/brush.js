@@ -72,6 +72,9 @@ AFRAME.registerBrush = function (name, definition, options) {
       // Points
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
+        if (AFRAME.scenes[0].systems.xr.drawingOffset) {
+          point.position.sub(AFRAME.scenes[0].systems.xr.drawingOffset);
+        }
         binaryManager.writeFloat32Array(point.position.toArray());
         binaryManager.writeFloat32Array(point.orientation.toArray());
         binaryManager.writeFloat32(point.pressure);
@@ -346,8 +349,10 @@ AFRAME.registerSystem('brush', {
 
       for (var j = 0; j < strokeData.points.length; j++) {
         var point = strokeData.points[j];
-
         var position = new THREE.Vector3().fromArray(point.position);
+        if (this.offset) {
+          position.add(this.offset);
+        }
         var orientation = new THREE.Quaternion().fromArray(point.orientation);
         var pressure = point.pressure;
         var timestamp = point.timestamp;
@@ -388,6 +393,9 @@ AFRAME.registerSystem('brush', {
 
       for (var i = 0; i < numPoints; i++) {
         var position = binaryManager.readVector3();
+        if (this.offset) {
+          position.add(this.offset);
+        }
         var orientation = binaryManager.readQuaternion();
         var pressure = binaryManager.readFloat();
         var timestamp = binaryManager.readUint32();
@@ -407,11 +415,26 @@ AFRAME.registerSystem('brush', {
     var self = this;
 
     loader.load(url, function (buffer) {
-      if (binary === true) {
-        self.loadBinary(buffer);
-      } else {
-        self.loadJSON(JSON.parse(buffer));
+      self.bufferLoaded = buffer;
+      self.isBufferLoadedBinary = binary;
+      // If was added offset first
+      if (self.offset) {
+        self.loadOnceAllIsDone();
       }
     });
+  },
+  addOffset: function (offset) {
+    this.offset = offset;
+    // If was loaded the buffer first
+    if (this.isBufferLoadedBinary) {
+      this.loadOnceAllIsDone();
+    }
+  },
+  loadOnceAllIsDone: function () {
+    if (this.isBufferLoadedBinary === true) {
+      this.loadBinary(this.bufferLoaded);
+    } else {
+      this.loadJSON(JSON.parse(this.bufferLoaded));
+    }
   }
 });

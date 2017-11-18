@@ -10,61 +10,49 @@ AFRAME.registerSystem('xr', {
   },
 
   initXR: function (displays) {
-    var supportAR = false;
+    this.supportAR = false;
     for (var i = 0; i < displays.length; i++) {
       const display = displays[i];
       if (display.supportedRealities.ar) {
-        supportAR = true;
+        this.supportAR = true;
       }
     }
 
     var cameraEl = document.querySelector('[camera]');
 
     this.el.sceneEl.setAttribute('visible', true);
-    if (!supportAR) {
+
+    this.drawingOffset = new THREE.Vector3();
+
+    if (!this.supportAR) {
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
       this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: true});
+      // On VR offset is always 0,0,0
+      this.sceneEl.systems.brush.addOffset(this.drawingOffset);
       return;
     }
 
-    var drawing = document.querySelector('.a-drawing');
-    if (!drawing) {
-      drawing = document.createElement('a-entity');
-      drawing.className = 'a-drawing';
-      // drawing.setAttribute('visible', false);
-      document.querySelector('a-scene').appendChild(drawing);
-    }
+    // an array of info that we'll use in _handleFrame to update the nodes using anchors
+    this.anchoredNodes = []; // { XRAnchorOffset, Three.js Object3D }
 
+    this.drawingContainer = document.querySelector('#drawing-container');
+    this.drawing = document.querySelector('.a-drawing');
+    this.cameraRig = document.querySelector('#cameraRig');
     this.pinSelected = false;
     this.pinAdded = false;
-    this.pin = document.createElement('a-entity');
-    this.pin.setAttribute('geometry', {
-      primitive: 'ring',
-      radiusInner: 0.15,
-      radiusOuter: 0.2,
-      segmentsTheta: 4
+    var geometry = new THREE.RingGeometry(0.05, 0.06, 8);
+    geometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
+    var material = new THREE.MeshBasicMaterial({
+      color: 0xffffff
     });
-    // this.pin.setAttribute('position', '0 0 -1');
-    this.pin.setAttribute('material', {
-      shader: 'flat',
-      transparent: true,
-      color: 'white',
-      opacity: 0.5
-    });
+    this.pin = new THREE.Mesh(geometry, material);
 
-    // this.box = document.createElement('a-entity');
-    // this.box.setAttribute('geometry', {
-    //   primitive: 'box',
-    //   width: 0.2,
-    //   height: 0.2,
-    //   depth: 0.2
-    // });
-    // this.box.setAttribute('position', '0 0 -1');
-    // document.querySelector('a-scene').appendChild(this.box);
-    var geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    var material = new THREE.MeshNormalMaterial();
-    this.box = new THREE.Mesh(geometry, material);
+
+    var geometry2 = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+    var material2 = new THREE.MeshNormalMaterial();
+    this.box = new THREE.Mesh(geometry2, material2);
+    this.el.sceneEl.object3D.add(this.box);
 
     cameraEl.removeAttribute('orbit-controls');
 
@@ -235,6 +223,7 @@ AFRAME.registerSystem('xr', {
   },
 
   updateFrame: function (frame) {
+    this.el.emit('updateFrame', frame);
     // Custom code for each frame rendered
     if (this.pinSelected) {
       return;
@@ -245,8 +234,7 @@ AFRAME.registerSystem('xr', {
       } else {
         if (!this.pinAdded) {
           this.pinAdded = true;
-          this.sceneEl.renderer.xr.addAnchoredNode(anchorOffset, this.box);
-          document.querySelector('.a-drawing').appendChild(this.pin);
+          this.addAnchoredNode(anchorOffset, this.pin);
         }
         if (this.pinAdded) {
           // this.pin.setAttribute('position', {x: anchorOffset.position.x, y: -1.1 + anchorOffset.position.y, z: -1 + anchorOffset.position.z});
@@ -261,5 +249,40 @@ AFRAME.registerSystem('xr', {
     }).catch(err => {
       console.error('Error in hit test', err);
     });
+    // Update anchored node positions in the scene graph
+    for (let anchoredNode of this.anchoredNodes) {
+      this.updateNodeFromAnchorOffset(frame, anchoredNode.node, anchoredNode.anchorOffset);
+    }
+  },
+
+  /*
+  Add a node to the scene and keep its pose updated using the anchorOffset
+  */
+  addAnchoredNode: function (anchorOffset, node) {
+    this.anchoredNodes.push({
+      anchorOffset: anchorOffset,
+      node: node
+    });
+    this.el.sceneEl.object3D.add(node);
+    // this.drawingContainer.object3D.add(node);
+  },
+
+  /*
+  Get the anchor data from the frame and use it and the anchor offset to update the pose of the node, this must be an Object3D
+  */
+  updateNodeFromAnchorOffset: function (frame, node, anchorOffset) {
+    const anchor = frame.getAnchor(anchorOffset.anchorUID);
+    if (anchor === null) {
+      return;
+    }
+    node.matrixAutoUpdate = false;
+    node.matrix.fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
+    node.updateMatrixWorld(true);
+    // if (this.drawingOffset.x !== node.getWorldPosition().x) {
+    if (this.drawingOffset.x === 0) {
+      this.drawingOffset = node.getWorldPosition();
+      this.sceneEl.systems.brush.addOffset(this.drawingOffset);
+    }
   }
+
 });
