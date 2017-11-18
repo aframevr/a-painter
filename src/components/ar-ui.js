@@ -1049,7 +1049,11 @@ AFRAME.registerComponent('ar-ui', {
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
-    this.el.emit('objectsIntersected', {intersections: intersections.length});
+    if(this.modalOpened !== null){
+      this.el.emit('objectsUIIntersected', {intersections: 1});
+    }else{
+      this.el.emit('objectsUIIntersected', {intersections: intersections.length});
+    }
     if (this.intersection !== null) {
       if (this.intersection.object.el.id === '') {
         this.onclickSettingsUI(this.intersection.object, this.intersection.uv);
