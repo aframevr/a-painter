@@ -13,6 +13,7 @@
     <script>window.debug = true;</script>
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="vendor/aframe-v0.7.0.min.js"></script>
     <script src="vendor/webxr-polyfill.js"></script>
     <script src="vendor/WebXRManager.js"></script>
@@ -197,6 +198,7 @@
         </a-entity>
       </a-entity>
       <a-entity id="drawing-container">
+        <a-entity id="ar-pin" ar-pin position="0 0 -0.001"></a-entity>
         <a-entity class="a-drawing"></a-entity>
       </a-entity>
       <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048" xr="ar: false"></a-entity>

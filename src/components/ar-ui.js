@@ -90,6 +90,9 @@ AFRAME.registerComponent('ar-ui', {
     this.dragStroke = this.dragStroke.bind(this);
 
     this.updateFrame = this.updateFrame.bind(this);
+
+    this.onPinDetected = this.onPinDetected.bind(this);
+    this.onPinSelected = this.onPinSelected.bind(this);
   },
   initRaycaster: function () {
     this.raycaster = this.el.components.raycaster.raycaster;
@@ -99,7 +102,7 @@ AFRAME.registerComponent('ar-ui', {
     this.objOver;
   },
   updateFrame: function (frame) {
-    
+
   },
   addContainers: function (){
     document.querySelector('a-scene').addEventListener('updateFrame', this.updateFrame);
@@ -109,7 +112,7 @@ AFRAME.registerComponent('ar-ui', {
     this.containerUI.setAttribute('id', 'ui-container');
     this.el.appendChild(this.containerUI);
 
-    this.drawing = document.querySelector('.a-drawing');
+    this.drawingContainer = document.querySelector('#drawing-container');
     this.frustumSize = 1;
     this.aspect = window.innerWidth / window.innerHeight;
     this.orthoCamera = new THREE.OrthographicCamera(this.frustumSize * this.aspect / -2, this.frustumSize * this.aspect / 2, this.frustumSize / 2, this.frustumSize / -2, 0.05, 0.2);
@@ -119,11 +122,11 @@ AFRAME.registerComponent('ar-ui', {
     // Override doRender method
     this.el.sceneEl.renderer.xr.doRender = function () {
       var arui = self.el.sceneEl.camera.el.components['ar-ui'];
-      self.drawing.setAttribute('visible', true);
+      self.drawingContainer.setAttribute('visible', true);
       self.containerUI.setAttribute('visible', false);
       self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, self.el.sceneEl.camera);
 
-      self.drawing.setAttribute('visible', false);
+      self.drawingContainer.setAttribute('visible', false);
       self.containerUI.setAttribute('visible', true);
       self.el.sceneEl.renderer.render(self.el.sceneEl.object3D, arui.orthoCamera);
     };
@@ -145,6 +148,8 @@ AFRAME.registerComponent('ar-ui', {
     this.el.addEventListener('model-loaded', this.onModelLoaded);
     this.el.addEventListener('componentchanged', this.onComponentChanged);
     document.querySelector('[ar-paint-controls]').addEventListener('brush-started', this.onStrokeStarted);
+    document.querySelector('[ar-pin]').addEventListener('pinselected', this.onPinSelected);
+    document.querySelector('[ar-pin]').addEventListener('pindetected', this.onPinDetected);
 
     var self = this;
     this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
@@ -192,14 +197,30 @@ AFRAME.registerComponent('ar-ui', {
   },
   addInitEl: function () {
     // Add 'init' section elements
-    this.addButton({
-      id: 'apainterBtn',
+    this.addImage({
+      id: 'moveAround',
       layout: 'bottom-center',
       visible: true,
-      enabled: false,
+      width: 0.06,
+      height: 0.015,
+      padding: [0, 0, -0.015, 0]
+    });
+    this.addImage({
+      id: 'moveAroundDevice',
+      layout: 'center',
+      visible: true,
       width: 0.02,
       height: 0.02,
-      onclick: this.enterPainterMode
+      padding: [0, 0, 0, 0],
+      renderOrder: this.renderOrderModal
+    });
+    this.addImage({
+      id: 'dragTapPin',
+      layout: 'bottom-center',
+      visible: false,
+      width: 0.06,
+      height: 0.015,
+      padding: [0, 0, -0.015, 0]
     });
   },
   addPaintingEl: function () {
@@ -381,6 +402,18 @@ AFRAME.registerComponent('ar-ui', {
         }
       }
     });
+  },
+  onPinDetected: function () {
+    if (this.tweenMoveAround1) {
+      this.stopMoveAround();
+    }
+    this.hideEl(this, 'moveAroundDevice', false);
+    this.hideEl(this, 'moveAround', false, 500);
+    this.showEl(this, 'dragTapPin', false, 1000);
+  },
+  onPinSelected: function () {
+    this.hideEl(this, 'dragTapPin', false);
+    this.enterPainterMode();
   },
   initColorWheel: function () {
     var colorWheel = this.objectsSettings.hueWheel;
@@ -779,16 +812,27 @@ AFRAME.registerComponent('ar-ui', {
   },
   initUI: function () {
     var self = this;
-    var uiEl = self.objects.apainterBtn;
+    var uiEl = self.objects.moveAround;
     uiEl.setAttribute('material', {opacity: 0});
-    new AFRAME.TWEEN.Tween({value: 0})
-    .to({ value: 1 }, 500)
+    this.tweenMoveAround = new AFRAME.TWEEN.Tween({value: 0})
+    .to({ value: 0.7 }, 500)
     .delay(1000)
     .onUpdate(function () {
       uiEl.setAttribute('material', {opacity: this.value});
     })
+    .easing(AFRAME.TWEEN.Easing.Cubic.In)
+    .start();
+
+    var uiEl2 = self.objects.moveAroundDevice;
+    uiEl2.setAttribute('material', {opacity: 0});
+    this.tweenMoveAroundDevice = new AFRAME.TWEEN.Tween({value: 0})
+    .to({ value: 1 }, 500)
+    .delay(1500)
+    .onUpdate(function () {
+      uiEl2.setAttribute('material', {opacity: this.value});
+    })
     .onComplete(function () {
-      uiEl.setAttribute('enabled', true);
+      self.moveAroundEl(self, 'moveAroundDevice');
     })
     .easing(AFRAME.TWEEN.Easing.Cubic.In)
     .start();
@@ -909,6 +953,125 @@ AFRAME.registerComponent('ar-ui', {
       })
       .repeat(Infinity)
       .start();
+  },
+  moveAroundEl: function (self, id) {
+    var uiEntity = self.objects[ id ];
+    if (!uiEntity) {
+      return;
+    }
+    var originalScale = uiEntity.object3D.scale.x;
+
+    self.tweenMoveAround1 = new AFRAME.TWEEN.Tween({
+      valueScale: originalScale,
+      valuePosY: 0
+    })
+    .to({
+      valueScale: originalScale * 1.5,
+      valuePosY: -0.1
+    }, 600)
+    .easing(TWEEN.Easing.Quadratic.Out)
+    .onUpdate(function () {
+      uiEntity.object3D.scale.x = this.valueScale;
+      uiEntity.object3D.scale.y = this.valueScale;
+      uiEntity.object3D.position.y = this.valuePosY;
+    })
+    .onComplete(function () {
+      this.valueScale = originalScale;
+      this.valuePosY = 0;
+    });
+
+    self.tweenMoveAround2 = new AFRAME.TWEEN.Tween({
+      valueScale: originalScale * 1.5,
+      valuePosX: 0,
+      valuePosY: -0.1
+    })
+    .to({
+      valueScale: originalScale,
+      valuePosX: -0.25,
+      valuePosY: 0
+    }, 1200)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(function () {
+      uiEntity.object3D.scale.x = this.valueScale;
+      uiEntity.object3D.scale.y = this.valueScale;
+      uiEntity.object3D.position.x = this.valuePosX;
+      uiEntity.object3D.position.y = this.valuePosY;
+    })
+    .onComplete(function () {
+      this.valueScale = originalScale * 1.5;
+      this.valuePosX = 0;
+      this.valuePosY = -0.1;
+    });
+
+    self.tweenMoveAround3 = new AFRAME.TWEEN.Tween({
+      valuePosX: -0.25
+    })
+    .to({
+      valuePosX: 0.25
+    }, 1800)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(function () {
+      uiEntity.object3D.position.x = this.valuePosX;
+    })
+    .onComplete(function () {
+      this.valuePosX = -0.25;
+    });
+
+    self.tweenMoveAround4 = new AFRAME.TWEEN.Tween({
+      valueScale: originalScale,
+      valuePosX: 0.25,
+      valuePosY: 0
+    })
+    .to({
+      valueScale: originalScale * 0.5,
+      valuePosX: 0,
+      valuePosY: 0.1
+    }, 1200)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(function () {
+      uiEntity.object3D.scale.x = this.valueScale;
+      uiEntity.object3D.scale.y = this.valueScale;
+      uiEntity.object3D.position.x = this.valuePosX;
+      uiEntity.object3D.position.y = this.valuePosY;
+    })
+    .onComplete(function () {
+      this.valueScale = originalScale;
+      this.valuePosX = 0.25;
+      this.valuePosY = 0;
+    });
+
+    self.tweenMoveAround5 = new AFRAME.TWEEN.Tween({
+      valueScale: originalScale * 0.5,
+      valuePosY: 0.1
+    })
+    .to({
+      valueScale: originalScale,
+      valuePosY: 0
+    }, 600)
+    .easing(TWEEN.Easing.Quadratic.In)
+    .onUpdate(function () {
+      uiEntity.object3D.scale.x = this.valueScale;
+      uiEntity.object3D.scale.y = this.valueScale;
+      uiEntity.object3D.position.y = this.valuePosY;
+    })
+    .onComplete(function () {
+      this.valueScale = originalScale * 0.5;
+      this.valuePosY = 0.1;
+    });
+
+    self.tweenMoveAround1.chain(self.tweenMoveAround2);
+    self.tweenMoveAround2.chain(self.tweenMoveAround3);
+    self.tweenMoveAround3.chain(self.tweenMoveAround4);
+    self.tweenMoveAround4.chain(self.tweenMoveAround5);
+    self.tweenMoveAround5.chain(self.tweenMoveAround1);
+    self.tweenMoveAround1.start();
+  },
+  stopMoveAround: function () {
+    this.tweenMoveAround1.stop();
+    this.tweenMoveAround2.stop();
+    this.tweenMoveAround3.stop();
+    this.tweenMoveAround4.stop();
+    this.tweenMoveAround5.stop();
   },
   showEl: function (self, id, enable, delay) {
     var uiEntity = self.objects[ id ];
@@ -1183,17 +1346,6 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     this.el.emit('activate', false);
-    // Hide a-painter button
-    this.objects.apainterBtn.object3D.originalPosition = this.objects.apainterBtn.object3D.position.clone();
-    this.objects.apainterBtn.setAttribute('enabled', false);
-    new AFRAME.TWEEN.Tween(this.objects.apainterBtn.object3D.position).to({
-      y: -(this.height / 2) - this.objects.apainterBtn.object3D.children[0].geometry.boundingSphere.radius
-    }, 490)
-      .easing(AFRAME.TWEEN.Easing.Back.In)
-      .onComplete(function () {
-        self.objects.apainterBtn.setAttribute('visible', false);
-      })
-      .start();
     // Show and activate close button
     this.showEl(this, 'closeBtn', true, 500);
     this.showEl(this, 'undoBtn', true, 600);
@@ -1204,33 +1356,19 @@ AFRAME.registerComponent('ar-ui', {
     this.playSound('#uiClick0');
   },
   exitPainterMode: function () {
-    var self = this;
-    document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
-    document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
-    this.el.emit('deactivate', false);
-    // Hide close buttons
-    this.hideEl(this, 'closeBtn', true);
-    this.hideEl(this, 'strokeDragDot', false, 25);
-    this.hideEl(this, 'strokeDragBar', true, 50);
-    this.hideEl(this, 'brushBtn', true, 100);
-    this.hideEl(this, 'undoBtn', true, 200);
-    this.hideEl(this, 'saveBtn', true, 300);
-    // Show and activate a-painter button
-    new AFRAME.TWEEN.Tween(this.objects.apainterBtn.object3D.position).to({
-      x: this.objects.apainterBtn.object3D.originalPosition.x,
-      y: this.objects.apainterBtn.object3D.originalPosition.y,
-      z: this.objects.apainterBtn.object3D.originalPosition.z
-    }, 500)
-      .delay(500)
-      .easing(AFRAME.TWEEN.Easing.Back.Out)
-      .onStart(function () {
-        self.objects.apainterBtn.setAttribute('visible', true);
-      })
-      .onComplete(function () {
-        self.objects.apainterBtn.setAttribute('enabled', true);
-      })
-      .start();
-    this.playSound('#uiClick1');
+    // var self = this;
+    // document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
+    // document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
+    // this.el.emit('deactivate', false);
+    // // Hide close buttons
+    // this.hideEl(this, 'closeBtn', true);
+    // this.hideEl(this, 'strokeDragDot', false, 25);
+    // this.hideEl(this, 'strokeDragBar', true, 50);
+    // this.hideEl(this, 'brushBtn', true, 100);
+    // this.hideEl(this, 'undoBtn', true, 200);
+    // this.hideEl(this, 'saveBtn', true, 300);
+    // this.playSound('#uiClick1');
+    console.log('---redirect to A5');
   },
   playSound: function (id){
     var el = document.querySelector(id);
@@ -1359,7 +1497,6 @@ AFRAME.registerComponent('ar-ui', {
     this.playSound('#uiUndo');
   },
   save: function () {
-    this.drawingContainer = document.querySelector('#drawing-container');
     var self = this;
     self.el.sceneEl.systems.painter.upload();
     self.openModal('saving', self.saved);

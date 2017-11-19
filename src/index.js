@@ -14,6 +14,7 @@ require('./systems/painter.js');
 
 require('./components/ar-paint-controls.js');
 require('./components/ar-mode-ui.js');
+require('./components/ar-pin.js');
 require('./components/ar-ui.js');
 require('./components/ar-ui-modal-material.js');
 
