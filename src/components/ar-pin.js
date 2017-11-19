@@ -147,7 +147,7 @@ AFRAME.registerComponent('ar-pin', {
   tapHandler: function (e) {
     if (this.pin.visible && this.pinIntersected) {
       this.drawingOffset = this.pin.getWorldPosition();
-      console.log('---',this.drawingOffset);
+      this.el.sceneEl.object3D.drawingOffset = this.drawingOffset;
       this.el.sceneEl.systems.brush.addOffset(this.drawingOffset);
       this.pinSelected = true;
       this.ringTop.material.opacity = 1;

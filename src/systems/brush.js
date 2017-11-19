@@ -72,8 +72,8 @@ AFRAME.registerBrush = function (name, definition, options) {
       // Points
       for (var i = 0; i < this.data.points.length; i++) {
         var point = this.data.points[i];
-        if (AFRAME.scenes[0].systems.xr.drawingOffset) {
-          point.position.sub(AFRAME.scenes[0].systems.xr.drawingOffset);
+        if (AFRAME.scenes[0].object3D.drawingOffset) {
+          point.position.sub(AFRAME.scenes[0].object3D.drawingOffset);
         }
         binaryManager.writeFloat32Array(point.position.toArray());
         binaryManager.writeFloat32Array(point.orientation.toArray());
