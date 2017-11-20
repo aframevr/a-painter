@@ -58,7 +58,7 @@ AFRAME.registerComponent('ar-ui', {
   },
   setPressure: function () {
     var self = this;
-    Pressure.set(this.el.sceneEl.canvas, {
+    Pressure.set(this.el.sceneEl, {
       change: function (force, event) {
         if (event.touches && event.touches[0].touchType === 'stylus') {
           self.pressure = force;
