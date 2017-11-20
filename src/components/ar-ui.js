@@ -1374,8 +1374,8 @@ AFRAME.registerComponent('ar-ui', {
     // this.hideEl(this, 'brushBtn', true, 100);
     // this.hideEl(this, 'undoBtn', true, 200);
     // this.hideEl(this, 'saveBtn', true, 300);
-    // this.playSound('#uiClick1');
-    console.log('---redirect to A5');
+    // this.playSound('#uiClick1'); 
+    window.location.href = '/#';
   },
   playSound: function (id){
     var el = document.querySelector(id);
