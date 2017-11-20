@@ -1511,7 +1511,7 @@ AFRAME.registerComponent('ar-ui', {
   saved: function (url) {
     this.tweenSaving.stop();
     this.showEl(this, 'saved', false, 10);
-    setTimeout(() => {
+    setTimeout(function () {
       window.location.href = '/?url=' + url + '#save-painting';
     }, 1000);
   },

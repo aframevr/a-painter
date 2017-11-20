@@ -231,21 +231,21 @@ AFRAME.registerComponent('ar-pin', {
     if (this.pinSelected) {
       return;
     }
-
-    data.detail.findAnchor(this.coordinatesToFindAnchors.x, this.coordinatesToFindAnchors.y).then(anchorOffset => {
+    var self = this;
+    data.detail.findAnchor(this.coordinatesToFindAnchors.x, this.coordinatesToFindAnchors.y).then(function (anchorOffset) {
       if (anchorOffset === null){
         // this.pin.visible = false;
       } else {
-        if (!this.pin.visible) {
-          this.el.emit('pindetected');
-          this.updatePinFromAnchorOffset(data.detail, anchorOffset);
-          this.pin.visible = true;
+        if (!self.pin.visible) {
+          self.el.emit('pindetected');
+          self.updatePinFromAnchorOffset(data.detail, anchorOffset);
+          self.pin.visible = true;
         }
-        if (this.pinIntersected) {
-          this.updatePinFromAnchorOffset(data.detail, anchorOffset);
+        if (self.pinIntersected) {
+          self.updatePinFromAnchorOffset(data.detail, anchorOffset);
         }
       }
-    }).catch(err => {
+    }).catch(function (err) {
       console.error('Error in hit test', err);
     });
   }
