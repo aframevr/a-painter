@@ -3,12 +3,14 @@ AFRAME.registerSystem('xr', {
     AR_AUTOSTART: { default: true }
   },
   init: function () {
-    var self = this;
     // this.el.sceneEl.renderer.setPixelRatio(1);
     this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: false});
+    this.sceneEl.addEventListener('loaded', this.sceneLoaded.bind(this));
+  },
+  sceneLoaded: function () {
+    var self = this;
     THREE.WebXRUtils.getDisplays().then(self.initXR.bind(self));
   },
-
   initXR: function (displays) {
     this.supportAR = false;
     for (var i = 0; i < displays.length; i++) {
@@ -17,7 +19,6 @@ AFRAME.registerSystem('xr', {
         this.supportAR = true;
       }
     }
-
     this.el.emit('xrInitialized');
 
     var cameraEl = document.querySelector('[camera]');
@@ -52,11 +53,7 @@ AFRAME.registerSystem('xr', {
     this.wrapSceneMethods = this.wrapSceneMethods.bind(this);
 
     var self = this;
-    if (this.sceneEl.hasLoaded) {
-      this.wrapSceneMethods();
-    } else {
-      this.sceneEl.addEventListener('loaded', this.wrapSceneMethods);
-    }
+    this.wrapSceneMethods();
     if (this.el.camera) {
       this.cameraActivated();
     } else {

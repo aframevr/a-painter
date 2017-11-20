@@ -10,7 +10,7 @@ AFRAME.registerComponent('ar-pin', {
   },
   xrInitialized: function () {
     // this.scene.removeEventListener('XRInitialized', this.XRInitialized);
-
+    this.xrIsInit = true;
     this.drawingOffset = new THREE.Vector3();
     
     if (!AFRAME.scenes[0].systems.xr.supportAR) {
@@ -111,11 +111,17 @@ AFRAME.registerComponent('ar-pin', {
     // var material2 = new THREE.MeshNormalMaterial();
     // this.box = new THREE.Mesh(geometry2, material2);
     // this.el.sceneEl.object3D.add(this.box);
-
+    if (this.isNotStartedYet) {
+      this.start();
+    }
   },
   realityChanged: function (data) {
     if (data.detail === 'ar') {
-      this.start();
+      if (this.xrIsInit) {
+        this.start();
+      } else {
+        this.isNotStartedYet = true;
+      }
     }
   },
 

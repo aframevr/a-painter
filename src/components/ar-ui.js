@@ -156,7 +156,7 @@ AFRAME.registerComponent('ar-ui', {
       self.saved(event.detail.url);
     });
     this.el.sceneEl.addEventListener('drawing-upload-error', function (event) {
-      console.log('---upload error', self.objects.messageError);
+      console.log('Error uploading', self.objects.messageError);
       this.closeModal('saving');
     });
   },
@@ -227,31 +227,32 @@ AFRAME.registerComponent('ar-ui', {
     // Add 'painting' section elements
     this.addButton({
       id: 'closeBtn',
-      layout: 'top-right',
+      layout: 'top-left',
       visible: false,
       enabled: false,
-      width: 0.0075,
-      height: 0.0075,
+      width: 0.01,
+      height: 0.01,
+      padding: [0.005, 0.0025, 0, 0],
       onclick: this.exitPainterMode
     });
     this.addButton({
       id: 'undoBtn',
-      layout: 'bottom-left',
+      layout: 'bottom-right',
       visible: false,
       enabled: false,
       width: 0.0075,
       height: 0.0075,
-      padding: [0, 0, 0.005, 0],
+      padding: [0, 0.0015, 0.0175, 0],
       onclick: this.undo
     });
     this.addButton({
       id: 'saveBtn',
-      layout: 'bottom-left',
+      layout: 'top-right',
       visible: false,
       enabled: false,
-      width: 0.0075,
-      height: 0.0075,
-      padding: [0, 0, 0.0175, 0],
+      width: 0.01,
+      height: 0.01,
+      padding: [0.005, 0, 0, 0.0025],
       onclick: this.save
     });
   },
@@ -269,15 +270,16 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.015,
       height: 0.015,
+      padding: [0, 0, 0.0125, 0],
       onclick: this.brushBtnClicked
     });
     this.addImage({
       id: 'strokeDragBar',
-      layout: 'bottom-right',
+      layout: 'bottom-center',
       visible: false,
       width: 0.03,
       height: 0.00375,
-      padding: [0, 0, 0.005, 0],
+      padding: [0, 0, -0.01, 0],
       renderOrder: this.renderOrderModal
     });
     this.addButton({
@@ -286,7 +288,7 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0, 0.00175, 0],
+      padding: [0, 0.05, 0],
       renderOrder: this.renderOrderModal
     });
     this.addStrokeOnButton();
@@ -328,8 +330,9 @@ AFRAME.registerComponent('ar-ui', {
       layout: 'top-right',
       visible: false,
       enabled: false,
-      width: 0.0075,
-      height: 0.0075,
+      width: 0.01,
+      height: 0.01,
+      padding: [0.005, 0, 0, 0.0025],
       onclick: this.closeBrushSettings.bind(this),
       renderOrder: this.renderOrderModal
     });
@@ -347,7 +350,7 @@ AFRAME.registerComponent('ar-ui', {
       fog: false,
       src: '#uinormal'
     });
-    this.settingsUI.setAttribute('position', '0 -0.12 -0.098');
+    this.settingsUI.setAttribute('position', '0 -0.06 -0.098');
     
     this.settingsUI.setAttribute('scale', '3 3 3');
     this.settingsUI.setAttribute('visible', false);
@@ -768,8 +771,8 @@ AFRAME.registerComponent('ar-ui', {
       id: 'saving',
       layout: 'center',
       visible: false,
-      width: 0.08,
-      height: 0.08,
+      width: 0.05,
+      height: 0.05,
       padding: [0, 0, 0, 0],
       renderOrder: this.renderOrderModal
     });
@@ -777,8 +780,8 @@ AFRAME.registerComponent('ar-ui', {
       id: 'saved',
       layout: 'center',
       visible: false,
-      width: 0.04,
-      height: 0.04,
+      width: 0.025,
+      height: 0.025,
       padding: [0, 0, 0, 0],
       renderOrder: this.renderOrderModal
     });
@@ -1301,6 +1304,7 @@ AFRAME.registerComponent('ar-ui', {
         }
         switch (obj.layout) {
           case 'bottom-center':
+          case 'stroke-drag':
             positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
             break;
           case 'top-center':
@@ -1310,12 +1314,15 @@ AFRAME.registerComponent('ar-ui', {
             positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
             positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
             break;
+          case 'top-left':
+            positionTmp.x = -(w / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
+            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+            break;
           case 'bottom-left':
             positionTmp.x = -(w / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
             positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
             break;
           case 'bottom-right':
-          case 'stroke-drag':
             positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
             positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
             break;
@@ -1333,7 +1340,7 @@ AFRAME.registerComponent('ar-ui', {
             break;
         }
         if (obj.layout === 'stroke-drag') {
-          positionTmp.x -= this.objects.strokeDragBar.object3D.children[0].geometry.width * this.scaleFactor * (1 - this.strokeNormalized) - obj.object3D.children[i].geometry.width * (1 - this.strokeNormalized) * this.scaleFactor;
+          positionTmp.x += this.objects.strokeDragBar.object3D.children[0].geometry.width * this.scaleFactor * this.strokeNormalized - this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor;
         }
       }
     }
