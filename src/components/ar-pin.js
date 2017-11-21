@@ -75,7 +75,7 @@ AFRAME.registerComponent('ar-pin', {
       opacity: 0,
       transparent: true,
       depthTest: false,
-      depthWirte: false
+      depthWrite: false
     });
     this.collider = new THREE.Mesh(geometryCollider, materialCollider);
 
