@@ -68,6 +68,7 @@ AFRAME.registerComponent('ar-pin', {
       transparent: true
     });
     this.ringShadow = new THREE.Mesh(geometry, materialShadow);
+    this.ringShadow.position.y = -0.001;
 
     var geometryCollider = new THREE.CircleGeometry(0.12, 8);
     geometryCollider.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
