@@ -1,5 +1,4 @@
 AFRAME.registerComponent('ar-pin', {
-  dependencies: ['raycaster'],
   init: function () {
     this.xrInitialized = this.xrInitialized.bind(this);
     this.realityChanged = this.realityChanged.bind(this);
@@ -129,7 +128,7 @@ AFRAME.registerComponent('ar-pin', {
   },
 
   start: function () {
-    this.raycaster = this.el.components.raycaster.raycaster;
+    this.raycaster = new THREE.Raycaster();
     this.scene.addEventListener('updateFrame', this.updateFrame);
   },
 

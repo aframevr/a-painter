@@ -1,5 +1,4 @@
 AFRAME.registerComponent('ar-ui', {
-  dependencies: ['raycaster'],
   init: function () {
     document.querySelector('a-scene').addEventListener('realityChanged', this.realityChanged.bind(this));
   },
@@ -95,7 +94,7 @@ AFRAME.registerComponent('ar-ui', {
     this.onPinSelected = this.onPinSelected.bind(this);
   },
   initRaycaster: function () {
-    this.raycaster = this.el.components.raycaster.raycaster;
+    this.raycaster = new THREE.Raycaster();
     // normalized device coordinates position
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
     this.intersection = null;

@@ -1,7 +1,7 @@
 
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ar-paint-controls', {
-  dependencies: ['brush', 'raycaster'],
+  dependencies: ['brush'],
 
   init: function () {
     var el = this.el;
@@ -14,11 +14,11 @@ AFRAME.registerComponent('ar-paint-controls', {
 
     this.uiTouched = false;
 
-    this.raycaster = el.components.raycaster.raycaster;
+    this.raycaster = new THREE.Raycaster();
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
 
-    el.object3D.visible = false;
+    // el.object3D.visible = false;
 
     var soundEl = document.createElement('a-sound');
     var iOSSuffix = '';
@@ -85,25 +85,18 @@ AFRAME.registerComponent('ar-paint-controls', {
     var sizeData = this.el.components.brush.schema.size;
     var scale = 1;
     if (size > sizeData.default) {
-      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 1, 4);
+      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 1, 30);
     } else {
       scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.min, 1, 0.25);
     }
     this.el.object3D.scale.set(scale, scale, scale);
   },
   paintStart: function (e) {
-    var el = this.el;
-    this.paintMove(e);
+    // this.paintMove(e);
     if (this.uiTouched) {
       return;
     }
-    if (!el.components.brush.active) {
-      el.components.brush.sizeModifier = 0;
-      el.components.brush.startNewStroke();
-      el.components.brush.active = true;
-      this.playSound('#uiPaint');
-    }
-    el.object3D.visible = true;
+    // el.object3D.visible = true;
   },
   playSound: function (id){
     var el = document.querySelector(id);
@@ -112,29 +105,24 @@ AFRAME.registerComponent('ar-paint-controls', {
     el.components.sound.playSound();
   },
   paintMove: function (e) {
-    var el = this.el;
-    this.size = this.el.sceneEl.renderer.getSize();
-    var t = e;
-    if (e.touches) {
-      t = e.touches[0];
-    }
-    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
-
-    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
-
     if (this.uiTouched) {
       return;
     }
+    var el = this.el;
+    if (!el.components.brush.active) {
+      el.components.brush.sizeModifier = 0;
+      el.components.brush.startNewStroke();
+      el.components.brush.active = true;
+      this.playSound('#uiPaint');
+    }
+
     if (e.touches && e.touches[0].touchType === 'stylus'){
       el.components.brush.sizeModifier = this.pressure;
     } else {
       el.components.brush.sizeModifier = 1;
     }
-    el.object3D.position.copy(this.ray.direction);
-    el.object3D.position.multiplyScalar(0.5);
-    el.object3D.position.add(this.ray.origin);
-    el.object3D.updateMatrixWorld();
+    this.updateGazePosition(e);
+    this.eventTouched = e;
   },
   paintEnd: function (e) {
     var el = this.el;
@@ -142,7 +130,29 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.currentStroke = null;
       el.components.brush.active = false;
     }
-    el.object3D.visible = false;
+    this.eventTouched = null;
+    // el.object3D.visible = false;
+  },
+  updateGazePosition: function (e) {
+    if(e){
+      this.size = this.el.sceneEl.renderer.getSize();
+      var t = e;
+      if (e.touches) {
+        t = e.touches[0];
+      }
+      this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
+      this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
+    }else{
+      this.normalizedCoordinatedPositionPointer.x = 0;
+      this.normalizedCoordinatedPositionPointer.y = 0;
+    }
+
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
+
+    this.el.object3D.position.copy(this.ray.direction);
+    this.el.object3D.position.multiplyScalar(0.5);
+    this.el.object3D.position.add(this.ray.origin);
+    this.el.object3D.updateMatrixWorld();
   },
   play: function () {
   },
@@ -150,6 +160,9 @@ AFRAME.registerComponent('ar-paint-controls', {
   pause: function () {
   },
   tick: function (t) {
-    this.el.object3D.lookAt(this.el.sceneEl.camera.getWorldPosition());
+    // this.el.object3D.lookAt(this.el.sceneEl.camera.getWorldPosition());
+    if(this.eventTouched === null){
+      // this.updateGazePosition(this.eventTouched);
+    }
   }
 });
