@@ -69,11 +69,13 @@ AFRAME.registerComponent('ar-pin', {
     });
     this.ringShadow = new THREE.Mesh(geometry, materialShadow);
 
-    var geometryCollider = new THREE.CircleGeometry(0.07, 8);
-    geometryCollider.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-70)));
+    var geometryCollider = new THREE.CircleGeometry(0.12, 8);
+    geometryCollider.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
     var materialCollider = new THREE.MeshBasicMaterial({
       opacity: 0,
-      transparent: true
+      transparent: true,
+      depthTest: false,
+      depthWirte: false
     });
     this.collider = new THREE.Mesh(geometryCollider, materialCollider);
 
@@ -141,7 +143,8 @@ AFRAME.registerComponent('ar-pin', {
   },
   moveHandler: function (e) {
     var el = this.el;
-    this.setCoordinates(e);
+    // this.setCoordinates(e);
+    this.setPinIntersected(e);
   },
   endHandler: function (e) {
     var el = this.el;
@@ -158,7 +161,7 @@ AFRAME.registerComponent('ar-pin', {
       this.pinSelected = true;
       this.ringTop.material.opacity = 1;
       this.ringTop.position.y = 0;
-      
+
       var self = this;
       new AFRAME.TWEEN.Tween({
         valueScale: 1,
@@ -201,6 +204,13 @@ AFRAME.registerComponent('ar-pin', {
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
     var intersections = this.raycaster.intersectObjects([this.collider]);
     this.pinIntersected = intersections.length > 0;
+    if (intersections.length > 0) {
+      this.setPinPosition(intersections[0].point);
+    }
+  },
+  setPinPosition: function (pos) {
+    this.pin.position.x = pos.x;
+    this.pin.position.z = pos.z;
   },
   /*
   Add a node to the scene and keep its pose updated using the anchorOffset
@@ -222,9 +232,14 @@ AFRAME.registerComponent('ar-pin', {
     if (anchor === null) {
       return;
     }
-    this.pin.matrixAutoUpdate = false;
-    this.pin.matrix.fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
-    this.pin.updateMatrixWorld(true);
+    // this.pin.matrixAutoUpdate = false;
+    // this.pin.matrix.fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
+    // this.pin.updateMatrixWorld(true);
+    var anchorMatrix = new THREE.Matrix4().fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
+    this.pin.position.setFromMatrixPosition(anchorMatrix);
+    this.pin.quaternion.setFromRotationMatrix(anchorMatrix);
+    this.originalPinPosition = this.pin.position.clone();
+
   },
 
   updateFrame: function (data) {
@@ -236,14 +251,13 @@ AFRAME.registerComponent('ar-pin', {
       if (anchorOffset === null){
         // this.pin.visible = false;
       } else {
-        if (!self.pin.visible) {
-          self.el.emit('pindetected');
-          self.updatePinFromAnchorOffset(data.detail, anchorOffset);
-          self.pin.visible = true;
-        }
-        if (self.pinIntersected) {
-          self.updatePinFromAnchorOffset(data.detail, anchorOffset);
-        }
+        self.pin.visible = true;
+        self.el.emit('pindetected');
+        self.updatePinFromAnchorOffset(data.detail, anchorOffset);
+        self.scene.removeEventListener('updateFrame', self.updateFrame);
+        // if (self.pinIntersected) {
+        //   self.updatePinFromAnchorOffset(data.detail, anchorOffset);
+        // }
       }
     }).catch(function (err) {
       console.error('Error in hit test', err);
