@@ -15,8 +15,6 @@ AFRAME.registerComponent('ar-pin', {
     if (!AFRAME.scenes[0].systems.xr.supportAR) {
       var arGaze = document.querySelector('#ar-gaze');
       arGaze.parentNode.removeChild(arGaze);
-      // On VR offset is always 0,0,0
-      this.sceneEl.systems.brush.addOffset(this.drawingOffset);
       return;
     }
 
@@ -119,10 +117,15 @@ AFRAME.registerComponent('ar-pin', {
   },
   realityChanged: function (data) {
     if (data.detail === 'ar') {
-      if (this.xrIsInit) {
-        this.start();
+      if (!AFRAME.scenes[0].systems.xr.supportAR) {
+        // On VR offset is always 0,0,0
+        this.sceneEl.systems.brush.addOffset(this.drawingOffset);
       } else {
-        this.isNotStartedYet = true;
+        if (this.xrIsInit) {
+          this.start();
+        } else {
+          this.isNotStartedYet = true;
+        }
       }
     }
   },
