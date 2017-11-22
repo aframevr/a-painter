@@ -13,12 +13,23 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
 
     this.uiTouched = false;
+    // this.prevPointerPosition = new THREE.Vector3();
+    this.pointerPosition = new THREE.Vector3();
+
+    this.stylusActive = false;
 
     this.raycaster = new THREE.Raycaster();
     // this.el.components.raycaster.showLine = true;
     this.ray = this.raycaster.ray;
 
-    // el.object3D.visible = false;
+    this.pointerScale = 1;
+    // var pointerGeometry = new THREE.CylinderGeometry(0.008, 0.008, 0.008, 3);
+    var pointerGeometry = new THREE.BoxGeometry(0.008, 0.008, 0.008);
+    var pointerMaterial = new THREE.MeshStandardMaterial({
+      color: 0xef2d5e
+    });
+    this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
+    this.el.object3D.add(this.pointer);
 
     var soundEl = document.createElement('a-sound');
     var iOSSuffix = '';
@@ -67,11 +78,9 @@ AFRAME.registerComponent('ar-paint-controls', {
   onBrushChanged: function (evt) {
     if (evt.detail.brush.color !== this.el.getAttribute('brush').color) {
       this.el.setAttribute('brush', 'color', evt.detail.brush.color);
-      this.el.setAttribute('material', 'color', evt.detail.brush.color);
+      this.pointer.material.color = new THREE.Color(evt.detail.brush.color);
     }
     this.pressure = evt.detail.pressure;
-    // this.el.components.brush.sizeModifier = evt.detail.pressure;
-    // console.log(evt.detail);
     this.setGazeScale(evt.detail.brush.size);
     if (evt.detail.brush !== this.el.getAttribute('brush').brush) {
       this.el.setAttribute('brush', 'brush', evt.detail.brush.brush);
@@ -83,20 +92,27 @@ AFRAME.registerComponent('ar-paint-controls', {
   },
   setGazeScale: function (size) {
     var sizeData = this.el.components.brush.schema.size;
-    var scale = 1;
     if (size > sizeData.default) {
-      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 1, 30);
+      this.pointerScale = THREE.Math.mapLinear(size, sizeData.default, sizeData.max, 1, 30);
     } else {
-      scale = THREE.Math.mapLinear(size, sizeData.default, sizeData.min, 1, 0.25);
+      this.pointerScale = THREE.Math.mapLinear(size, sizeData.default, sizeData.min, 1, 0.25);
     }
-    this.el.object3D.scale.set(scale, scale, scale);
+    if (this.stylusActive) {
+      var stylusPressureScale = Math.max(0.1, this.pointerScale * this.pressure);
+      if (this.uiTouched) {
+        stylusPressureScale = this.pointerScale * 0.1;
+      }
+      this.el.object3D.scale.set(stylusPressureScale, stylusPressureScale, stylusPressureScale);
+    } else {
+      this.el.object3D.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
+    }
   },
   paintStart: function (e) {
-    // this.paintMove(e);
     if (this.uiTouched) {
       return;
     }
-    // el.object3D.visible = true;
+    this.eventTouched = e;
+    this.updateGazePosition(e);
   },
   playSound: function (id){
     var el = document.querySelector(id);
@@ -116,13 +132,19 @@ AFRAME.registerComponent('ar-paint-controls', {
       this.playSound('#uiPaint');
     }
 
-    if (e.touches && e.touches[0].touchType === 'stylus'){
+    if (e.touches && e.touches[0].touchType === 'stylus') {
+      this.stylusActive = true;
       el.components.brush.sizeModifier = this.pressure;
     } else {
+      this.stylusActive = false;
+      if (el.components.brush.sizeModifier !== 1) {
+        this.pressure = 0;
+        this.el.object3D.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
+      }
       el.components.brush.sizeModifier = 1;
     }
-    this.updateGazePosition(e);
     this.eventTouched = e;
+    this.updateGazePosition(e);
   },
   paintEnd: function (e) {
     var el = this.el;
@@ -130,11 +152,11 @@ AFRAME.registerComponent('ar-paint-controls', {
       el.components.brush.currentStroke = null;
       el.components.brush.active = false;
     }
+    // this.el.object3D.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
     this.eventTouched = null;
-    // el.object3D.visible = false;
   },
   updateGazePosition: function (e) {
-    if(e){
+    if (e) {
       this.size = this.el.sceneEl.renderer.getSize();
       var t = e;
       if (e.touches) {
@@ -142,17 +164,32 @@ AFRAME.registerComponent('ar-paint-controls', {
       }
       this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
       this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
-    }else{
+    } else {
       this.normalizedCoordinatedPositionPointer.x = 0;
       this.normalizedCoordinatedPositionPointer.y = 0;
     }
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
 
-    this.el.object3D.position.copy(this.ray.direction);
-    this.el.object3D.position.multiplyScalar(0.5);
-    this.el.object3D.position.add(this.ray.origin);
-    this.el.object3D.updateMatrixWorld();
+    this.pointerPosition.copy(this.ray.direction);
+    this.pointerPosition.multiplyScalar(0.5);
+    this.pointerPosition.add(this.ray.origin);
+
+    // var dir = new THREE.Vector3();
+    // dir.subVectors(this.prevPointerPosition, this.pointerPosition).normalize();
+    // this.prevPointerPosition = this.pointerPosition.clone();
+
+    if (this.tweenPointer) {
+      this.tweenPointer.stop();
+    }
+
+    if (!e) {
+      this.tweenPointer = new AFRAME.TWEEN.Tween(this.el.object3D.position)
+      .to({ x: this.pointerPosition.x, y: this.pointerPosition.y, z: this.pointerPosition.z }, 250);
+      this.tweenPointer.start();
+    } else {
+      this.el.object3D.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
+    }
   },
   play: function () {
   },
@@ -161,8 +198,8 @@ AFRAME.registerComponent('ar-paint-controls', {
   },
   tick: function (t) {
     // this.el.object3D.lookAt(this.el.sceneEl.camera.getWorldPosition());
-    if(this.eventTouched === null){
-      // this.updateGazePosition(this.eventTouched);
+    if (!this.eventTouched && this.startHandler) {
+      this.updateGazePosition(this.eventTouched);
     }
   }
 });

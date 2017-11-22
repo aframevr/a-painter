@@ -415,7 +415,10 @@ AFRAME.registerComponent('ar-ui', {
   },
   onPinSelected: function () {
     this.hideEl(this, 'dragTapPin', false);
-    this.enterPainterMode();
+    var self = this;
+    setTimeout(() => {
+      self.enterPainterMode();
+    }, 1000);
   },
   initColorWheel: function () {
     var colorWheel = this.objectsSettings.hueWheel;
@@ -1351,7 +1354,6 @@ AFRAME.registerComponent('ar-ui', {
 
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
-    this.el.emit('activate', false);
     // Show and activate close button
     this.showEl(this, 'closeBtn', true, 500);
     this.showEl(this, 'undoBtn', true, 600);
@@ -1360,6 +1362,9 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'strokeDragDot', true, 850);
     this.showEl(this, 'brushBtn', true, 900);
     this.playSound('#uiClick0');
+    setTimeout(() => {
+      self.el.emit('activate', false);
+    }, 1100);
   },
   exitPainterMode: function () {
     // var self = this;
