@@ -31,6 +31,16 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
     this.el.object3D.add(this.pointer);
 
+    var pointerShadowGeometry = new THREE.PlaneGeometry(0.008, 0.008);
+    pointerShadowGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
+    var pointerShadowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.5
+    });
+    this.pointerShadow = new THREE.Mesh(pointerShadowGeometry, pointerShadowMaterial);
+    this.el.sceneEl.object3D.add(this.pointerShadow);
+
     var soundEl = document.createElement('a-sound');
     var iOSSuffix = '';
     if (AFRAME.utils.device.isIOS()) {
@@ -106,6 +116,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     } else {
       this.el.object3D.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
     }
+    this.pointerShadow.scale.set(this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z);
   },
   paintStart: function (e) {
     if (this.uiTouched) {
@@ -140,6 +151,7 @@ AFRAME.registerComponent('ar-paint-controls', {
       if (el.components.brush.sizeModifier !== 1) {
         this.pressure = 0;
         this.el.object3D.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
+        this.pointerShadow.scale.set(this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z);
       }
       el.components.brush.sizeModifier = 1;
     }
@@ -184,11 +196,32 @@ AFRAME.registerComponent('ar-paint-controls', {
     }
 
     if (!e) {
-      this.tweenPointer = new AFRAME.TWEEN.Tween(this.el.object3D.position)
-      .to({ x: this.pointerPosition.x, y: this.pointerPosition.y, z: this.pointerPosition.z }, 250);
+      var self = this;
+      this.tweenPointer = new AFRAME.TWEEN.Tween({
+        valuePosX: self.el.object3D.position.x,
+        valuePosY: self.el.object3D.position.y,
+        valuePosZ: self.el.object3D.position.z
+      })
+      .to({
+        valuePosX: self.pointerPosition.x,
+        valuePosY: self.pointerPosition.y,
+        valuePosZ: self.pointerPosition.z
+      }, 250)
+      .onUpdate(function () {
+        self.el.object3D.position.set(this.valuePosX, this.valuePosY, this.valuePosZ);
+        self.pointerShadow.position.set(this.valuePosX, AFRAME.scenes[0].object3D.drawingOffset.y, this.valuePosZ);
+      });
       this.tweenPointer.start();
     } else {
       this.el.object3D.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
+      this.pointerShadow.position.set(this.pointerPosition.x, AFRAME.scenes[0].object3D.drawingOffset.y, this.pointerPosition.z);
+    }
+    if (this.el.object3D.position.y > AFRAME.scenes[0].object3D.drawingOffset.y) {
+      this.pointer.material.wireframe = false;
+      this.pointerShadow.material.wireframe = false;
+    } else {
+      this.pointer.material.wireframe = true;
+      this.pointerShadow.material.wireframe = true;
     }
   },
   play: function () {

@@ -163,7 +163,7 @@ AFRAME.registerComponent('ar-pin', {
       this.el.sceneEl.systems.brush.addOffset(this.drawingOffset);
       this.pinSelected = true;
       this.ringTop.material.opacity = 1;
-      this.ringTop.position.y = 0;
+      this.ringTop.position.y = -0.0005;
 
       var self = this;
       new AFRAME.TWEEN.Tween({
