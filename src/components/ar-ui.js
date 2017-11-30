@@ -51,7 +51,6 @@ AFRAME.registerComponent('ar-ui', {
     this.addEvents();
     this.addUIElements();
     this.initUI();
-    this.el.setAttribute('brush', 'brush', 'smooth');
     // Hack to wait until created entities are init
     setTimeout(function () {
       self.onWindowResize();
@@ -279,6 +278,7 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       enabled: false
     });
+    // this.el.setAttribute('brush', 'brush', 'smooth');
     this.addButton({
       id: 'brushBtn',
       layout: 'bottom-center',
