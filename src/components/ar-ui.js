@@ -203,11 +203,11 @@ AFRAME.registerComponent('ar-ui', {
     // Add 'init' section elements
     this.addImage({
       id: 'moveAround',
-      layout: 'bottom-center',
+      layout: 'top-center',
       visible: false,
       width: 0.06,
       height: 0.015,
-      padding: [0, 0, 0.01, 0]
+      padding: [0, 0, 0, 0]
     });
     this.addImage({
       id: 'moveAroundDevice',
@@ -220,11 +220,11 @@ AFRAME.registerComponent('ar-ui', {
     });
     this.addImage({
       id: 'dragTapPin',
-      layout: 'bottom-center',
+      layout: 'top-center',
       visible: false,
       width: 0.06,
       height: 0.015,
-      padding: [0, 0, 0.01, 0]
+      padding: [0, 0, 0, 0]
     });
   },
   addPaintingEls: function () {
@@ -236,17 +236,17 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0.005, 0.0025, 0, 0],
+      padding: [0.005, 0.0015, 0, 0],
       onclick: this.exitPainterMode
     });
     this.addButton({
       id: 'undoBtn',
-      layout: 'bottom-right',
+      layout: 'bottom-left',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0.0015, 0.0175, 0],
+      padding: [0, 0, 0.0175, 0.0015],
       onclick: this.undo
     });
     this.addButton({
@@ -256,18 +256,18 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0.005, 0, 0, 0.0025],
+      padding: [0.005, 0, 0, 0.0015],
       onclick: this.save
     });
     this.addButton({
       id: 'paintModeBtn',
       atlasId: 'paintMode1Btn',
-      layout: 'bottom-right',
+      layout: 'bottom-left',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0.0015, 0.0325, 0],
+      padding: [0, 0, 0.0325, 0.0015],
       onclick: this.openPaintMode.bind(this)
     });
   },
