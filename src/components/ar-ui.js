@@ -246,7 +246,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0, 0.0175, 0.0015],
+      padding: [0, 0.0015, 0.0175, 0],
       onclick: this.undo
     });
     this.addButton({
@@ -267,7 +267,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0, 0.0325, 0.0015],
+      padding: [0, 0.0015, 0.0325, 0],
       onclick: this.openPaintMode.bind(this)
     });
   },
