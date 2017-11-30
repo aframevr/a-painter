@@ -34,8 +34,12 @@ AFRAME.registerComponent('ar-ui', {
     this.renderOrderUI = 10000;
     this.renderOrderModal = 10001;
 
-    this.atlasData = '{"total": {"w": 2048, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 1536, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 1536, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 1280, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 1536, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 1280, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 },"saved": { "x": 1792, "y": 640, "w": 256, "h": 256 },"moveAroundDevice": { "x": 0, "y": 0, "w": 512, "h": 512 },"moveAround": { "x": 1024, "y": 1792, "w": 1024, "h": 256 },"dragTapPin": { "x": 1024, "y": 1536, "w": 1024, "h": 256 },"saving": { "x": 1024, "y": 1024, "w": 512, "h": 512 }}}';
+    this.paintMode = 1;
+
+    this.atlasData = '{"total": {"w": 2048, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 1536, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 1536, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 1280, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 1536, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 1280, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 },"saved": { "x": 1792, "y": 640, "w": 256, "h": 256 },"moveAroundDevice": { "x": 0, "y": 0, "w": 512, "h": 512 },"moveAround": { "x": 1024, "y": 1792, "w": 1024, "h": 256 },"dragTapPin": { "x": 1024, "y": 1536, "w": 1024, "h": 256 },"saving": { "x": 1024, "y": 1024, "w": 512, "h": 512 },"paintMode1": { "x": 512, "y": 1280, "w": 256, "h": 256 },"paintMode2": { "x": 256, "y": 1280, "w": 256, "h": 256 },"paintMode1Btn": { "x": 512, "y": 1024, "w": 256, "h": 256 },"paintMode2Btn": { "x": 256, "y": 1024, "w": 256, "h": 256 }}}';
     this.atlas = JSON.parse(this.atlasData);
+
+    this.paintControlsEl = document.querySelector('#ar-paint-controls');
 
     this.objects = {};
 
@@ -47,6 +51,7 @@ AFRAME.registerComponent('ar-ui', {
     this.addEvents();
     this.addUIElements();
     this.initUI();
+    this.el.setAttribute('brush', 'brush', 'smooth');
     // Hack to wait until created entities are init
     setTimeout(function () {
       self.onWindowResize();
@@ -146,9 +151,9 @@ AFRAME.registerComponent('ar-ui', {
     }
     this.el.addEventListener('model-loaded', this.onModelLoaded);
     this.el.addEventListener('componentchanged', this.onComponentChanged);
-    document.querySelector('[ar-paint-controls]').addEventListener('brush-started', this.onStrokeStarted);
-    document.querySelector('[ar-pin]').addEventListener('pinselected', this.onPinSelected);
+    document.querySelector('#ar-paint-controls').addEventListener('brush-started', this.onStrokeStarted);
     document.querySelector('[ar-pin]').addEventListener('pindetected', this.onPinDetected);
+    document.querySelector('[ar-pin]').addEventListener('pinselected', this.onPinSelected);
 
     var self = this;
     this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
@@ -162,11 +167,12 @@ AFRAME.registerComponent('ar-ui', {
   addUIElements: function () {
     this.addSounds();
     this.addInitEl();
-    this.addPaintingEl();
-    this.addCommonEl();
-    this.addSettingsEl();
-    this.addSavingEl();
-    this.addTrackingLostEl();
+    this.addPaintingEls();
+    this.addCommonEls();
+    this.addPaintModeEls();
+    this.addSettingsEls();
+    this.addSavingEls();
+    this.addTrackingLostEls();
   },
   addSounds: function () {
     // Add sounds
@@ -199,15 +205,15 @@ AFRAME.registerComponent('ar-ui', {
     this.addImage({
       id: 'moveAround',
       layout: 'bottom-center',
-      visible: true,
+      visible: false,
       width: 0.06,
       height: 0.015,
-      padding: [0, 0, -0.015, 0]
+      padding: [0, 0, 0.01, 0]
     });
     this.addImage({
       id: 'moveAroundDevice',
       layout: 'center',
-      visible: true,
+      visible: false,
       width: 0.02,
       height: 0.02,
       padding: [0, 0, 0, 0],
@@ -219,10 +225,10 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       width: 0.06,
       height: 0.015,
-      padding: [0, 0, -0.015, 0]
+      padding: [0, 0, 0.01, 0]
     });
   },
-  addPaintingEl: function () {
+  addPaintingEls: function () {
     // Add 'painting' section elements
     this.addButton({
       id: 'closeBtn',
@@ -239,8 +245,8 @@ AFRAME.registerComponent('ar-ui', {
       layout: 'bottom-right',
       visible: false,
       enabled: false,
-      width: 0.0075,
-      height: 0.0075,
+      width: 0.01,
+      height: 0.01,
       padding: [0, 0.0015, 0.0175, 0],
       onclick: this.undo
     });
@@ -254,8 +260,19 @@ AFRAME.registerComponent('ar-ui', {
       padding: [0.005, 0, 0, 0.0025],
       onclick: this.save
     });
+    this.addButton({
+      id: 'paintModeBtn',
+      atlasId: 'paintMode1Btn',
+      layout: 'bottom-right',
+      visible: false,
+      enabled: false,
+      width: 0.01,
+      height: 0.01,
+      padding: [0, 0.0015, 0.0325, 0],
+      onclick: this.openPaintMode.bind(this)
+    });
   },
-  addCommonEl: function () {
+  addCommonEls: function () {
      // Add fader for settings modal
     this.addFader({
       id: 'fader-brushSettings',
@@ -278,7 +295,7 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       width: 0.03,
       height: 0.00375,
-      padding: [0, 0, -0.01, 0],
+      padding: [0, 0, 0.0025, 0],
       renderOrder: this.renderOrderModal
     });
     this.addButton({
@@ -292,6 +309,60 @@ AFRAME.registerComponent('ar-ui', {
     });
     this.addStrokeOnButton();
   },
+  addPaintModeEls: function () {
+    // Add fader for settings modal
+    this.addFader({
+      id: 'fader-paintMode',
+      visible: false,
+      enabled: false
+    });
+    this.addButton({
+      id: 'closePaintModeBtn',
+      atlasId: 'closeBtn',
+      layout: 'top-right',
+      visible: false,
+      enabled: false,
+      width: 0.01,
+      height: 0.01,
+      padding: [0.005, 0, 0, 0.0025],
+      onclick: this.closePaintMode.bind(this),
+      renderOrder: this.renderOrderModal
+    });
+    this.addText({
+      id: 'titlePaintModeModal',
+      text: 'Select paint mode',
+      font: 'FiraSans-Regular',
+      layout: 'bottom-center',
+      align: 'center',
+      visible: false,
+      padding: [0, 0, 0.035, 0],
+      size: 0.15
+    });
+    this.addGroupBtn({
+      id: 'paintMode1',
+      icon: 'paintMode1',
+      layout: 'bottom-center',
+      visible: false,
+      enabled: false,
+      padding: [0, 0, 0.03, 0],
+      title: 'Normal',
+      description: 'Touch and move your finger',
+      active: true,
+      onclick: this.changePaintMode.bind(this, 1)
+    });
+    this.addGroupBtn({
+      id: 'paintMode2',
+      icon: 'paintMode2',
+      layout: 'bottom-center',
+      visible: false,
+      enabled: false,
+      padding: [0, 0, 0.01, 0],
+      title: 'Advanced',
+      description: 'Paint with helpers',
+      active: false,
+      onclick: this.changePaintMode.bind(this, 2)
+    });
+ },
   addStrokeOnButton: function () {
     var uiEl = document.createElement('a-entity');
     this.strokeOnButton = uiEl;
@@ -321,7 +392,7 @@ AFRAME.registerComponent('ar-ui', {
 
     this.objects.strokeDragDot.appendChild(uiEl);
   },
-  addSettingsEl: function () {
+  addSettingsEls: function () {
     // Add 'settings' section elements
     this.addButton({
       id: 'closeSettingsBtn',
@@ -762,7 +833,7 @@ AFRAME.registerComponent('ar-ui', {
     this.updateColorHistory();
   },
   // End settings UI code
-  addSavingEl: function () {
+  addSavingEls: function () {
     // Add fader for settings modal
     this.addFader({
       id: 'fader-saving',
@@ -788,7 +859,7 @@ AFRAME.registerComponent('ar-ui', {
       renderOrder: this.renderOrderModal
     });
   },
-  addTrackingLostEl: function (){
+  addTrackingLostEls: function (){
     // Add fader for trackingLost modal
     this.addFader({
       id: 'fader-trackingLost',
@@ -818,6 +889,7 @@ AFRAME.registerComponent('ar-ui', {
   initUI: function () {
     var self = this;
     var uiEl = self.objects.moveAround;
+    uiEl.setAttribute('visible', true);
     uiEl.setAttribute('material', {opacity: 0});
     this.tweenMoveAround = new AFRAME.TWEEN.Tween({value: 0})
     .to({ value: 0.7 }, 500)
@@ -829,6 +901,7 @@ AFRAME.registerComponent('ar-ui', {
     .start();
 
     var uiEl2 = self.objects.moveAroundDevice;
+    uiEl2.setAttribute('visible', true);
     uiEl2.setAttribute('material', {opacity: 0});
     this.tweenMoveAroundDevice = new AFRAME.TWEEN.Tween({value: 0})
     .to({ value: 1 }, 500)
@@ -865,7 +938,7 @@ AFRAME.registerComponent('ar-ui', {
       fog: false,
       src: '#ar_ui',
       repeat: {x: this.atlas.images[uiEl.atlasId].w / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].h / this.atlas.total.h},
-      offset: {x: this.atlas.total.w - this.atlas.images[uiEl.atlasId].x / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
+      offset: {x: (this.atlas.total.w - this.atlas.images[uiEl.atlasId].x) / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
     });
     uiEl.setAttribute('position', {
       x: 0,
@@ -933,7 +1006,7 @@ AFRAME.registerComponent('ar-ui', {
       fog: false,
       src: '#ar_ui',
       repeat: {x: this.atlas.images[uiEl.atlasId].w / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].h / this.atlas.total.h},
-      offset: {x: this.atlas.total.w - this.atlas.images[uiEl.atlasId].x / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
+      offset: {x: (this.atlas.total.w - this.atlas.images[uiEl.atlasId].x) / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
     });
     uiEl.setAttribute('position', {
       x: 0,
@@ -944,6 +1017,200 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
 
     this.containerUI.appendChild(uiEl);
+  },
+  addText: function (params) {
+    this.objects[params.id] = document.createElement('a-entity');
+    var uiEl = this.objects[params.id];
+
+    // top, right, bottom, left
+    uiEl.padding = params.padding || [0, 0, 0, 0];
+    uiEl.id = params.id;
+    uiEl.layout = params.layout;
+
+    uiEl.setAttribute('text', {
+      value: params.text,
+      font: 'assets/fonts/' + params.font + '.json',
+      align: params.align || 'center',
+      shader: 'msdf',
+      color: '#FFFFFF'
+    });
+    uiEl.setAttribute('position', {
+      x: 0,
+      y: 0,
+      z: 1000
+    });
+    uiEl.setAttribute('scale', {
+      x: params.size,
+      y: params.size,
+      z: params.size
+    });
+    uiEl.setAttribute('fontSize', 0.1);
+
+    uiEl.setAttribute('visible', params.visible);
+    uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
+    this.containerUI.appendChild(uiEl);
+  },
+  addGroupBtn: function (params) {
+    this.objects[params.id] = document.createElement('a-entity');
+    var uiEl = this.objects[params.id];
+
+    // top, right, bottom, left
+    uiEl.padding = params.padding || [0, 0, 0, 0];
+    uiEl.id = params.id;
+    uiEl.class = 'ar-ui';
+    uiEl.layout = params.layout;
+    uiEl.onclick = params.onclick;
+
+    uiEl.setAttribute('position', {
+      x: 0,
+      y: 0,
+      z: 1000
+    });
+    uiEl.setAttribute('visible', params.visible);
+    uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
+
+    var roundedBg = document.createElement('a-entity');
+    roundedBg.setAttribute('rounded', {
+      width: 0.075,
+      height: 0.015,
+      radius: 0.003,
+      opacity: 0.75
+    });
+    roundedBg.setAttribute('position', {
+      x: -0.0375
+    });
+    uiEl.appendChild(roundedBg);
+
+    this.addImageToGroup(uiEl, {
+      id: 'icon-' + params.id,
+      atlasId: params.icon,
+      color: '#333333',
+      width: 0.01,
+      height: 0.01,
+      position: [-0.03, 0.0075, 0]
+    });
+
+    this.addTextToGroup(uiEl, {
+      id: 'title-' + params.id,
+      text: params.title,
+      font: 'FiraSans-Bold',
+      align: 'left',
+      color: '#333333',
+      position: [0.0265, 0.0075, 0],
+      size: 0.1
+    });
+
+    this.addTextToGroup(uiEl, {
+      id: 'description-' + params.id,
+      text: params.description,
+      font: 'FiraSans-Regular',
+      align: 'left',
+      color: '#333333',
+      position: [0.0135, 0.003, 0],
+      size: 0.075
+    });
+
+    this.addColliderToGroup(uiEl, {
+      id: 'collider-' + params.id,
+      width: 0.075,
+      height: 0.015,
+      position: [0.0135, 0.003, 0],
+      size: 0.075
+    });
+
+    this.setGroupActive(params.id, params.active);
+
+    this.containerUI.appendChild(uiEl);
+  },
+  addColliderToGroup: function (container, params) {
+    var uiEl = document.createElement('a-entity');
+    uiEl.selectable = true;
+    uiEl.id = params.id;
+    uiEl.setAttribute('geometry', {
+      primitive: 'plane',
+      width: params.width,
+      height: params.height
+    });
+
+    uiEl.setAttribute('material', {
+      shader: 'flat',
+      transparent: true,
+      opacity: 0,
+      fog: false,
+      depthTest: false,
+      depthWrite: false
+    });
+
+    uiEl.setAttribute('position', {
+      y: 0.0075
+    });
+
+    container.appendChild(uiEl);
+  },
+  setGroupActive: function (id, bool) {
+    var uiEl = this.objects[id];
+    uiEl.children[0].setAttribute('visible', bool);
+    if (bool) {
+      uiEl.children[1].setAttribute('material', {color: '#333333'});
+      uiEl.children[2].setAttribute('text', {color: '#333333'});
+      uiEl.children[3].setAttribute('text', {color: '#333333'});
+    } else {
+      uiEl.children[1].setAttribute('material', {color: '#ffffff'});
+      uiEl.children[2].setAttribute('text', {color: '#ffffff'});
+      uiEl.children[3].setAttribute('text', {color: '#ffffff'});
+    }
+  },
+  addTextToGroup: function (container, params) {
+    var uiEl = document.createElement('a-entity');
+
+    uiEl.id = params.id;
+
+    uiEl.setAttribute('text', {
+      value: params.text,
+      font: 'assets/fonts/' + params.font + '.json',
+      align: params.align || 'center',
+      shader: 'msdf',
+      color: params.color || '#FFFFFF'
+    });
+    uiEl.setAttribute('position', {
+      x: params.position[0],
+      y: params.position[1],
+      z: params.position[2]
+    });
+    uiEl.setAttribute('scale', {
+      x: params.size,
+      y: params.size,
+      z: params.size
+    });
+    container.appendChild(uiEl);
+  },
+  addImageToGroup: function (container, params) {
+    var uiEl = document.createElement('a-entity');
+
+    uiEl.id = params.id;
+    uiEl.atlasId = params.atlasId || params.id;
+
+    uiEl.setAttribute('geometry', {
+      primitive: 'plane',
+      width: params.width,
+      height: params.height
+    });
+    uiEl.setAttribute('material', {
+      shader: 'flat',
+      transparent: true,
+      fog: false,
+      src: '#ar_ui',
+      color: '#333333',
+      repeat: {x: this.atlas.images[uiEl.atlasId].w / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].h / this.atlas.total.h},
+      offset: {x: (this.atlas.total.w - this.atlas.images[uiEl.atlasId].x) / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
+    });
+    uiEl.setAttribute('position', {
+      x: params.position[0],
+      y: params.position[1],
+      z: params.position[2]
+    });
+
+    container.appendChild(uiEl);
   },
   animateEl: function (self, id) {
     var uiEntity = self.objects[ id ];
@@ -1087,14 +1354,18 @@ AFRAME.registerComponent('ar-ui', {
     if (enable) {
       uiEntity.setAttribute('enabled', true);
     }
+    var originalSize = 1;
+    if (uiEntity.getAttribute('fontSize')) {
+      originalSize = uiEntity.getAttribute('fontSize');
+    }
     // Hack to have time to create boundingBox to make the place and get scaleFactor
     setTimeout(function () {
       self.place(uiEntity);
-      uiEntity.object3D.scale.set(0.01, 0.01, 0.01);
+      uiEntity.object3D.scale.set(originalSize * 0.01, originalSize * 0.01, originalSize * 0.01);
       new AFRAME.TWEEN.Tween(uiEntity.object3D.scale).to({
-        x: self.scaleFactor,
-        y: self.scaleFactor,
-        z: self.scaleFactor
+        x: originalSize * self.scaleFactor,
+        y: originalSize * self.scaleFactor,
+        z: originalSize * self.scaleFactor
       }, 500)
         .delay(delay || 0)
         .easing(AFRAME.TWEEN.Easing.Back.Out)
@@ -1132,7 +1403,7 @@ AFRAME.registerComponent('ar-ui', {
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
-    var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
+    var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects(), true);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
 
     if (this.tapped && this.lastObjectOverId === 'strokeDragDot') {
@@ -1153,19 +1424,19 @@ AFRAME.registerComponent('ar-ui', {
         // Only for 2D Screens
         if (this.objOver) {
           if (this.objOver.el.id !== overId) {
-            this.onout(this.objOver);
-            this.onover(this.intersection.object);
+            // this.onout(this.objOver);
+            // this.onover(this.intersection.object);
             this.objOver = this.intersection.object;
           }
         } else {
-          this.onover(this.intersection.object);
+          // this.onover(this.intersection.object);
           this.objOver = this.intersection.object;
         }
       } else {
         el.sceneEl.canvas.style.cursor = null;
         // Only for 2D Screens
         if (this.objOver) {
-          this.onout(this.objOver);
+          // this.onout(this.objOver);
           this.objOver = null;
         }
       }
@@ -1186,20 +1457,22 @@ AFRAME.registerComponent('ar-ui', {
     var intersectObjects = [];
     Object.keys(this.objects).forEach(function (key) {
       if (self.objects[key].getAttribute('enabled') === 'true') {
-        for (var i = 0; i < self.objects[key].object3D.children.length; i++) {
-          if (self.objects[key].object3D.children[i].geometry) {
-            intersectObjects.push(self.objects[key].object3D.children[i]);
-          }
-        }
+        // for (var i = 0; i < self.objects[key].object3D.children.length; i++) {
+        //   if (self.objects[key].object3D.children[i].geometry) {
+        //     intersectObjects.push(self.objects[key].object3D.children[i]);
+        //   }
+        // }
+        intersectObjects.push(self.objects[key].object3D);
       }
     });
     if (this.modalOpened === 'brushSettings' && this.settingsUI.getAttribute('visible')) {
-      for (var i = 0; i < this.settingsUI.object3D.children[0].children.length; i++) {
-        // Don't push brightnesscursor / hucursor
-        if (this.settingsUI.object3D.children[0].children[i].name.indexOf('cursor') === -1) {
-          intersectObjects.push(this.settingsUI.object3D.children[0].children[i]);
-        }
-      }
+      // for (var i = 0; i < this.settingsUI.object3D.children[0].children.length; i++) {
+      //   // Don't push brightnesscursor / hucursor
+      //   if (this.settingsUI.object3D.children[0].children[i].name.indexOf('cursor') === -1) {
+      //     intersectObjects.push(this.settingsUI.object3D.children[0].children[i]);
+      //   }
+      // }
+      intersectObjects.push(this.settingsUI.object3D);
     }
     return intersectObjects;
   },
@@ -1215,11 +1488,26 @@ AFRAME.registerComponent('ar-ui', {
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
-    var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects());
-    this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
-    if(this.modalOpened !== null){
+    var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects(), true);
+    this.intersection = null;
+    var firstSelectable = null;
+    if (intersections.length > 0) {
+      for (let i = 0; i < intersections.length; i++) {
+        if (intersections[i].object.el.selectable) {
+          firstSelectable = intersections[i];
+          break;
+        }
+      }
+      if (firstSelectable) {
+        this.intersection = firstSelectable;
+      } else {
+        this.intersection = intersections[0];
+      }
+    }
+    // this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
+    if (this.modalOpened !== null) {
       this.el.emit('objectsUIIntersected', {intersections: 1});
-    }else{
+    } else {
       this.el.emit('objectsUIIntersected', {intersections: intersections.length});
     }
     if (this.intersection !== null) {
@@ -1227,10 +1515,14 @@ AFRAME.registerComponent('ar-ui', {
         this.onclickSettingsUI(this.intersection.object, this.intersection.uv);
       } else {
         // Provisional > testing tap events
-        if(this.intersection.object.el.id !== 'strokeDragDot'){
-          this.onout(this.intersection.object);
+        if (this.intersection.object.el.id !== 'strokeDragDot') {
+          // this.onout(this.intersection.object);
         }
-        this.onclick(this.intersection.object.el.id);
+        if (this.intersection.object.el.id.indexOf('collider') !== -1) {
+          this.onclick(this.intersection.object.parent.parent.el.id);
+        } else {
+          this.onclick(this.intersection.object.el.id);
+        }
       }
     }
     this.lastObjectOverId = null;
@@ -1240,32 +1532,32 @@ AFRAME.registerComponent('ar-ui', {
     this.lastObjectOverId = null;
     this.pressedObjects = {};
   },
-  onover: function (obj) {
-    if (obj.el.getAttribute('enabled') === 'false') {
-      return;
-    }
-    var coords = { x: this.scaleFactor, y: 1 * this.scaleFactor, z: 1 * this.scaleFactor };
-    var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor }, 150)
-    .onUpdate(function () {
-      obj.el.setAttribute('scale', this);
-    })
-    .easing(AFRAME.TWEEN.Easing.Quadratic.In);
-    tween.start();
-  },
-  onout: function (obj) {
-    if (obj.el.getAttribute('enabled') === 'false') {
-      return;
-    }
-    var coords = { x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor };
-    var tween = new AFRAME.TWEEN.Tween(coords)
-    .to({ x: this.scaleFactor, y: this.scaleFactor, z: this.scaleFactor }, 150)
-    .onUpdate(function () {
-      obj.el.setAttribute('scale', this);
-    })
-    .easing(AFRAME.TWEEN.Easing.Quadratic.Out);
-    tween.start();
-  },
+  // onover: function (obj) {
+  //   if (obj.el.getAttribute('enabled') === 'false') {
+  //     return;
+  //   }
+  //   var coords = { x: this.scaleFactor, y: 1 * this.scaleFactor, z: 1 * this.scaleFactor };
+  //   var tween = new AFRAME.TWEEN.Tween(coords)
+  //   .to({ x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor }, 150)
+  //   .onUpdate(function () {
+  //     obj.el.setAttribute('scale', this);
+  //   })
+  //   .easing(AFRAME.TWEEN.Easing.Quadratic.In);
+  //   tween.start();
+  // },
+  // onout: function (obj) {
+  //   if (obj.el.getAttribute('enabled') === 'false') {
+  //     return;
+  //   }
+  //   var coords = { x: 1.1 * this.scaleFactor, y: 1.1 * this.scaleFactor, z: 1.1 * this.scaleFactor };
+  //   var tween = new AFRAME.TWEEN.Tween(coords)
+  //   .to({ x: this.scaleFactor, y: this.scaleFactor, z: this.scaleFactor }, 150)
+  //   .onUpdate(function () {
+  //     obj.el.setAttribute('scale', this);
+  //   })
+  //   .easing(AFRAME.TWEEN.Easing.Quadratic.Out);
+  //   tween.start();
+  // },
   onclick: function (id) {
     if (this.objects[id] && this.objects[id].onclick) {
       this.objects[id].onclick(this);
@@ -1297,56 +1589,67 @@ AFRAME.registerComponent('ar-ui', {
     this.scaleFactor = Math.max(1, (1.2 / Math.abs(this.depth)) / 2);
     obj.object3D.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
-    for (var i = 0; i < obj.object3D.children.length; i++) {
-      if (obj.object3D.children[i].geometry) {
-        if (!obj.object3D.children[i].geometry.boundingBox) {
-          obj.object3D.children[i].geometry.computeBoundingBox();
-          obj.object3D.children[i].geometry.width = obj.object3D.children[i].geometry.boundingBox.max.x - obj.object3D.children[i].geometry.boundingBox.min.x;
-          obj.object3D.children[i].geometry.height = obj.object3D.children[i].geometry.boundingBox.max.y - obj.object3D.children[i].geometry.boundingBox.min.y;
-        }
-        switch (obj.layout) {
-          case 'bottom-center':
-          case 'stroke-drag':
-            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
-            break;
-          case 'top-center':
-            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
-            break;
-          case 'top-right':
-            positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
-            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
-            break;
-          case 'top-left':
-            positionTmp.x = -(w / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
-            positionTmp.y = h / 2 - obj.object3D.children[i].geometry.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
-            break;
-          case 'bottom-left':
-            positionTmp.x = -(w / 2) + obj.object3D.children[i].geometry.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
-            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
-            break;
-          case 'bottom-right':
-            positionTmp.x = w / 2 - obj.object3D.children[i].geometry.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
-            positionTmp.y = -(h / 2) + obj.object3D.children[i].geometry.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
-            break;
-          case 'fader':
-            positionTmp = {x: 0, y: 0, z: this.depth};
-            var faderScaleFactor = this.scaleFactor * this.width / this.height;
-            obj.object3D.scale.set(faderScaleFactor, this.scaleFactor, this.scaleFactor);
-            break;
-          case 'center':
-            positionTmp.x = obj.padding[3] * this.scaleFactor - obj.padding[1] * this.scaleFactor;
-            positionTmp.y = obj.padding[2] * this.scaleFactor - obj.padding[0] * this.scaleFactor;
-            break;
-          default:
-            positionTmp = {x: 0, y: 0, z: 10000};
-            break;
-        }
-        if (obj.layout === 'stroke-drag') {
-          positionTmp.x += this.objects.strokeDragBar.object3D.children[0].geometry.width * this.scaleFactor * this.strokeNormalized - this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor;
+    var geometryChildren = obj.object3D.children[0].geometry;
+    if (geometryChildren && geometryChildren.layout) {
+      obj.object3D.width = geometryChildren.layout.width * 0.001;
+      obj.object3D.height = geometryChildren.layout.height * 0.001;
+    } else {
+      var firstSelectable = null;
+      for (let i = 0; i < obj.object3D.children.length; i++) {
+        if (obj.object3D.children[i].el.selectable) {
+          firstSelectable = i;
+          break;
         }
       }
+      if (firstSelectable) {
+        obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D.children[firstSelectable]);
+      } else {
+        obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D);
+      }
+      obj.object3D.width = (obj.object3D.box3Obj.max.x - obj.object3D.box3Obj.min.x) / this.scaleFactor;
+      obj.object3D.height = (obj.object3D.box3Obj.max.y - obj.object3D.box3Obj.min.y) / this.scaleFactor;
     }
-    // positionTmp = {x: 0, y: 0, z: this.depth};
+
+    switch (obj.layout) {
+      case 'bottom-center':
+      case 'stroke-drag':
+        positionTmp.y = -(h / 2) + obj.object3D.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+        break;
+      case 'top-center':
+        positionTmp.y = h / 2 - obj.object3D.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+        break;
+      case 'top-right':
+        positionTmp.x = w / 2 - obj.object3D.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+        positionTmp.y = h / 2 - obj.object3D.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+        break;
+      case 'top-left':
+        positionTmp.x = -(w / 2) + obj.object3D.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
+        positionTmp.y = h / 2 - obj.object3D.height / 2 * this.scaleFactor + this.paddingTop * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+        break;
+      case 'bottom-left':
+        positionTmp.x = -(w / 2) + obj.object3D.width / 2 * this.scaleFactor - this.paddingRight * this.scaleFactor + obj.padding[1] * this.scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+        break;
+      case 'bottom-right':
+        positionTmp.x = w / 2 - obj.object3D.width / 2 * this.scaleFactor + this.paddingRight * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+        positionTmp.y = -(h / 2) + obj.object3D.height / 2 * this.scaleFactor - this.paddingBottom * this.scaleFactor + obj.padding[2] * this.scaleFactor;
+        break;
+      case 'fader':
+        positionTmp = {x: 0, y: 0, z: this.depth};
+        var faderScaleFactor = this.scaleFactor * this.width / this.height;
+        obj.object3D.scale.set(faderScaleFactor, this.scaleFactor, this.scaleFactor);
+        break;
+      case 'center':
+        positionTmp.x = obj.padding[3] * this.scaleFactor - obj.padding[1] * this.scaleFactor;
+        positionTmp.y = obj.padding[2] * this.scaleFactor - obj.padding[0] * this.scaleFactor;
+        break;
+      default:
+        positionTmp = {x: 0, y: 0, z: 10000};
+        break;
+    }
+    if (obj.layout === 'stroke-drag') {
+      positionTmp.x += this.objects.strokeDragBar.object3D.width * this.scaleFactor * this.strokeNormalized - this.objects.strokeDragBar.object3D.width / 2 * this.scaleFactor;
+    }
     obj.setAttribute('position', positionTmp);
   },
   enterPainterMode: function () {
@@ -1358,9 +1661,10 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'closeBtn', true, 500);
     this.showEl(this, 'undoBtn', true, 600);
     this.showEl(this, 'saveBtn', true, 700);
-    this.showEl(this, 'strokeDragBar', false, 800);
-    this.showEl(this, 'strokeDragDot', true, 850);
-    this.showEl(this, 'brushBtn', true, 900);
+    this.showEl(this, 'paintModeBtn', true, 800);
+    this.showEl(this, 'strokeDragBar', false, 900);
+    this.showEl(this, 'strokeDragDot', true, 950);
+    this.showEl(this, 'brushBtn', true, 1000);
     this.playSound('#uiClick0');
     setTimeout(() => {
       self.el.emit('activate', false);
@@ -1378,7 +1682,7 @@ AFRAME.registerComponent('ar-ui', {
     // this.hideEl(this, 'brushBtn', true, 100);
     // this.hideEl(this, 'undoBtn', true, 200);
     // this.hideEl(this, 'saveBtn', true, 300);
-    // this.playSound('#uiClick1'); 
+    // this.playSound('#uiClick1');
     window.location.href = '/#';
   },
   playSound: function (id){
@@ -1418,30 +1722,28 @@ AFRAME.registerComponent('ar-ui', {
     })
     .start();
 
+    this.objects.closeBtn.setAttribute('enabled', false);
+    this.objects.saveBtn.setAttribute('enabled', false);
+    this.objects.undoBtn.setAttribute('enabled', false);
+    this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
       case 'saving':
-        this.objects.closeBtn.setAttribute('enabled', false);
-        this.objects.saveBtn.setAttribute('enabled', false);
-        this.objects.undoBtn.setAttribute('enabled', false);
-        this.objects.brushBtn.setAttribute('enabled', false);
         this.showEl(this, 'saving', false, 100);
         this.animateEl(this, 'saving');
         break;
       case 'trackingLost':
-        this.objects.closeBtn.setAttribute('enabled', false);
-        this.objects.saveBtn.setAttribute('enabled', false);
-        this.objects.undoBtn.setAttribute('enabled', false);
-        this.objects.brushBtn.setAttribute('enabled', false);
         this.showEl(this, 'trackingLost', false, 100);
         this.showEl(this, 'trackingDevice', false, 300);
         break;
       case 'brushSettings':
-        this.objects.closeBtn.setAttribute('enabled', false);
-        this.objects.saveBtn.setAttribute('enabled', false);
-        this.objects.undoBtn.setAttribute('enabled', false);
-        this.objects.brushBtn.setAttribute('enabled', false);
         this.showEl(this, 'closeSettingsBtn', true, 100);
         this.settingsUI.setAttribute('visible', true);
+        break;
+      case 'paintMode':
+        this.showEl(this, 'closePaintModeBtn', true, 100);
+        this.showEl(this, 'titlePaintModeModal', false, 200);
+        this.showEl(this, 'paintMode1', true, 300);
+        this.showEl(this, 'paintMode2', true, 400);
         break;
     }
 
@@ -1452,30 +1754,28 @@ AFRAME.registerComponent('ar-ui', {
     var uiEl = document.querySelector('#fader-' + id);
 
     // this.orthoCamera.setAttribute('look-controls', {enabled: true});
+    this.objects.closeBtn.setAttribute('enabled', true);
+    this.objects.saveBtn.setAttribute('enabled', true);
+    this.objects.undoBtn.setAttribute('enabled', true);
+    this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
       case 'saving':
-        this.objects.closeBtn.setAttribute('enabled', true);
-        this.objects.saveBtn.setAttribute('enabled', true);
-        this.objects.undoBtn.setAttribute('enabled', true);
-        this.objects.brushBtn.setAttribute('enabled', false);
         self.hideEl(self, 'saving', false);
         this.tweenSaving.stop();
         break;
       case 'trackingLost':
-        this.objects.closeBtn.setAttribute('enabled', true);
-        this.objects.saveBtn.setAttribute('enabled', true);
-        this.objects.undoBtn.setAttribute('enabled', true);
-        this.objects.brushBtn.setAttribute('enabled', false);
         self.hideEl(self, 'trackingDevice', false);
         self.hideEl(self, 'trackingLost', false, 100);
         break;
       case 'brushSettings':
-        this.objects.closeBtn.setAttribute('enabled', true);
-        this.objects.saveBtn.setAttribute('enabled', true);
-        this.objects.undoBtn.setAttribute('enabled', true);
-        this.objects.brushBtn.setAttribute('enabled', false);
         this.hideEl(this, 'closeSettingsBtn', true);
         this.settingsUI.setAttribute('visible', false);
+        break;
+      case 'paintMode':
+        this.hideEl(this, 'closePaintModeBtn', true);
+        this.hideEl(this, 'titlePaintModeModal', false);
+        this.hideEl(this, 'paintMode1', true);
+        this.hideEl(this, 'paintMode2', true);
         break;
     }
     
@@ -1508,9 +1808,8 @@ AFRAME.registerComponent('ar-ui', {
     this.playSound('#uiUndo');
   },
   save: function () {
-    var self = this;
-    self.el.sceneEl.systems.painter.upload();
-    self.openModal('saving', self.saved);
+    this.el.sceneEl.systems.painter.upload();
+    this.openModal('saving', this.saved);
   },
   saved: function (url) {
     this.tweenSaving.stop();
@@ -1522,7 +1821,7 @@ AFRAME.registerComponent('ar-ui', {
   dragStroke: function () {
     var pointerAbsPosition = (this.width - this.width / 2) * this.normalizedCoordinatedPositionPointer.x;
     var pointerOverBarPosition = pointerAbsPosition - this.objects.strokeDragBar.object3D.position.x;
-    var pointerOverBarAbsMapLinear = THREE.Math.mapLinear(pointerOverBarPosition, -this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, this.objects.strokeDragBar.object3D.children[0].geometry.width / 2 * this.scaleFactor, 0, 1);
+    var pointerOverBarAbsMapLinear = THREE.Math.mapLinear(pointerOverBarPosition, -this.objects.strokeDragBar.object3D.width / 2 * this.scaleFactor, this.objects.strokeDragBar.object3D.width / 2 * this.scaleFactor, 0, 1);
     var pointerOverBarAbsPosition = THREE.Math.clamp(pointerOverBarAbsMapLinear, 0, 1);
     this.strokeNormalized = pointerOverBarAbsPosition;
     this.placeStrokeDragDot();
@@ -1578,11 +1877,49 @@ AFRAME.registerComponent('ar-ui', {
       this.playSound('#uiClick1');
     }
   },
+  openPaintMode: function () {
+    document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
+    if (this.modalOpened === null){
+      this.openModal('paintMode');
+      this.playSound('#uiClick0');
+    }
+  },
+  closePaintMode: function () {
+    document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
+    if (this.modalOpened !== null){
+      this.closeModal('paintMode');
+      this.playSound('#uiClick1');
+    }
+  },
   brushBtnClicked: function () {
     if (!this.modalOpened){
       this.openBrushSettings();
     } else {
       this.closeBrushSettings();
+    }
+  },
+  changePaintMode: function (id) {
+    if (id !== this.paintMode) {
+      this.setGroupActive('paintMode' + this.paintMode, false);
+      this.setGroupActive('paintMode' + id, true);
+      this.paintMode = id;
+      this.playSound('#uiClick0');
+      var atlasId = 'paintMode' + this.paintMode + 'Btn';
+      // this.objects.paintModeBtn.setAttribute('material', 'offset', {x: (this.atlas.total.w - this.atlas.images[atlasId].x) / this.atlas.total.w, y: this.atlas.images[atlasId].y / this.atlas.total.h});
+      var material = this.objects.paintModeBtn.object3D.children[0].material;
+      material.map.offset.x = (this.atlas.total.w - this.atlas.images[atlasId].x) / this.atlas.total.w;
+      material.map.offset.y = this.atlas.images[atlasId].y / this.atlas.total.h;
+      // this.el.emit('onPaintModeChanged', {mode: this.paintMode});
+      var paintModeName = 'normal';
+      switch (this.paintMode) {
+        case 2:
+          paintModeName = 'advanced';
+          break;
+      }
+      this.paintControlsEl.setAttribute('ar-paint-controls', 'mode', paintModeName);
+      this.closeModal('paintMode');
     }
   }
 });

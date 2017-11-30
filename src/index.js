@@ -34,3 +34,6 @@ require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
 require('./brushes/single-sphere.js');
+
+require('./paintModes/normal.js');
+require('./paintModes/advanced.js');

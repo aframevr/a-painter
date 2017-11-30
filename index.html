@@ -20,6 +20,7 @@
     <script src="vendor/WebXRManager.js"></script>
     <script src="vendor/WebXRUtils.js"></script>
     <script src="vendor/aframe-input-mapping-component.min.js"></script>
+    <script src="vendor/aframe-rounded-component.min.js"></script>
     <script src="build.js"></script>
     <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
     <script src="vendor/aframe-teleport-controls.min.js"></script>
@@ -194,8 +195,7 @@
         </a-entity>
       </a-entity>
       <a-entity id="drawing-container">
-        <!-- ar-gaze controls -->
-        <a-entity id="ar-gaze" ar-paint-controls></a-entity>
+        <a-entity id="ar-paint-controls" ar-paint-controls></a-entity>
         <a-entity id="ar-pin" ar-pin></a-entity>
         <a-entity class="a-drawing"></a-entity>
       </a-entity>

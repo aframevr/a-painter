@@ -13,8 +13,8 @@ AFRAME.registerComponent('ar-pin', {
     this.drawingOffset = new THREE.Vector3();
     
     if (!AFRAME.scenes[0].systems.xr.supportAR) {
-      var arGaze = document.querySelector('#ar-gaze');
-      arGaze.parentNode.removeChild(arGaze);
+      var arPaintControls = document.querySelector('#ar-paint-controls');
+      arPaintControls.parentNode.removeChild(arPaintControls);
       return;
     }
 
@@ -80,6 +80,21 @@ AFRAME.registerComponent('ar-pin', {
     this.pin.add(this.ringTop);
     this.pin.add(this.ringShadow);
     this.pin.add(this.collider);
+
+    var floorGeometry = new THREE.PlaneGeometry(100, 100);
+    floorGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad(-90)));
+    var floorMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.25
+    });
+    floorMaterial.blending = THREE.CustomBlending;
+    floorMaterial.blendEquation = THREE.AddEquation;
+    floorMaterial.blendSrc = THREE.ZeroFactor;
+    floorMaterial.blendDst = THREE.SrcAlphaFactor;
+
+    this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    document.querySelector('#drawing-container').object3D.add(this.floor);
 
     this.pin.visible = false;
 
@@ -240,6 +255,7 @@ AFRAME.registerComponent('ar-pin', {
     // this.pin.updateMatrixWorld(true);
     var anchorMatrix = new THREE.Matrix4().fromArray(anchorOffset.getOffsetTransform(anchor.coordinateSystem));
     this.pin.position.setFromMatrixPosition(anchorMatrix);
+    this.floor.position.y = this.pin.position.y - 0.005;
     this.pin.quaternion.setFromRotationMatrix(anchorMatrix);
     this.originalPinPosition = this.pin.position.clone();
 

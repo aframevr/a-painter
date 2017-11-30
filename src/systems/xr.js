@@ -45,7 +45,7 @@ AFRAME.registerSystem('xr', {
     this.updateFrame = this.updateFrame.bind(this);
 
     this.sessionStarted = this.sessionStarted.bind(this);
-    this.sessionStopped = this.sessionStopped.bind(this);
+    this.sessionEnded = this.sessionEnded.bind(this);
 
     this.poseLost = this.poseLost.bind(this);
     this.poseFound = this.poseFound.bind(this);
@@ -139,7 +139,7 @@ AFRAME.registerSystem('xr', {
     };
     sceneEl.renderer.xr = new THREE.WebXRManager(options, displays, sceneEl.renderer, sceneEl.camera, sceneEl.object3D, this.updateFrame);
     sceneEl.renderer.xr.addEventListener('sessionStarted', this.sessionStarted);
-    sceneEl.renderer.xr.addEventListener('sessionStopped', this.sessionStopped);
+    sceneEl.renderer.xr.addEventListener('sessionEnded', this.sessionEnded);
 
     sceneEl.renderer.xr.addEventListener('poseLost', this.poseLost);
     sceneEl.renderer.xr.addEventListener('poseFound', this.poseFound);
@@ -181,7 +181,7 @@ AFRAME.registerSystem('xr', {
     this.el.emit('realityChanged', this.activeRealityType);
   },
 
-  sessionStopped: function (data) {
+  sessionEnded: function (data) {
     this.activeRealityType = 'magicWindow';
     this.el.emit('realityChanged', this.activeRealityType);
   },
