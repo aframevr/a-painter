@@ -20,12 +20,14 @@ AFRAME.registerComponent('ar-paint-controls', {
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('onBrushChanged', this.onBrushChanged.bind(this));
     document.querySelector('[ar-ui]').addEventListener('objectsUIIntersected', this.objectsUIIntersected.bind(this));
+    document.querySelector('a-scene').addEventListener('updateFrame', this.updateFrame);
   },
   bindMethods: function () {
     this.onStrokeStarted = this.onStrokeStarted.bind(this);
     this.startHandler = this.paintStart.bind(this);
     this.moveHandler = this.paintMove.bind(this);
     this.endHandler = this.paintEnd.bind(this);
+    this.updateFrame = this.updateFrame.bind(this);
   },
   onStrokeStarted: function () {
     this.el.emit('brush-started');
@@ -53,7 +55,6 @@ AFRAME.registerComponent('ar-paint-controls', {
     }
   },
   onBrushChanged: function (evt) {
-    console.log(evt.detail.brush.brush);
     if (evt.detail.brush.color !== this.el.getAttribute('brush').color) {
       this.el.setAttribute('brush', 'color', evt.detail.brush.color);
     }
@@ -83,6 +84,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     if (this.uiTouched) {
       return;
     }
+    this.eventTouch = e;
     var el = this.el;
     if (!el.components.brush.active) {
       el.components.brush.sizeModifier = 0;
@@ -102,10 +104,6 @@ AFRAME.registerComponent('ar-paint-controls', {
       }
       el.components.brush.sizeModifier = 1;
     }
-    this.el.emit('paintpainting', {
-      touchEvent: e,
-      stylusActive: this.stylusActive
-    });
   },
   paintEnd: function (e) {
     var el = this.el;
@@ -136,6 +134,14 @@ AFRAME.registerComponent('ar-paint-controls', {
   updateSchema: function (data) {
     if (data.mode && this.activePaintMode && this.activePaintMode !== data.mode) {
       this.switchPaintMode(data.mode);
+    }
+  },
+  updateFrame: function (frame) {
+    if (this.el.components.brush.active) {
+      this.el.emit('paintpainting', {
+        touchEvent: this.eventTouch,
+        stylusActive: this.stylusActive
+      });
     }
   }
 });
