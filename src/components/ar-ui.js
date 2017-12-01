@@ -304,7 +304,7 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0.05, 0],
+      padding: [0, 0, 0, 0],
       renderOrder: this.renderOrderModal
     });
     this.addStrokeOnButton();
