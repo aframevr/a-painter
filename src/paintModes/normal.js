@@ -12,8 +12,18 @@ AFRAME.registerComponent('ar-paint-normal', {
   init: function () {
     this.bindMethods();
     this.initVars();
-    this.addPointer();
     this.setPointerScale(this.data.size, false);
+    this.el.setAttribute('geometry', {
+      primitive: 'ring',
+      radiusInner: 0.004,
+      radiusOuter: 0.006
+    });
+    this.el.setAttribute('material', {
+      shader: 'flat',
+      color: this.data.color,
+      transparent: true,
+      fog: false
+    });
     document.querySelector('[ar-paint-controls]').addEventListener('brushchanged', this.onBrushChanged);
     document.querySelector('[ar-paint-controls]').addEventListener('paintplaced', this.onPaintPlaced);
     document.querySelector('[ar-paint-controls]').addEventListener('paintstarted', this.onPaintStarted);
@@ -39,16 +49,8 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.raycaster = new THREE.Raycaster();
     this.ray = this.raycaster.ray;
   },
-  addPointer: function () {
-    var pointerGeometry = new THREE.BoxGeometry(0.008, 0.008, 0.008);
-    var pointerMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(this.data.color)
-    });
-    this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
-    document.querySelector('#drawing-container').object3D.add(this.pointer);
-  },
   onBrushChanged: function (evt) {
-    this.pointer.material.color = new THREE.Color(evt.detail.brush.color);
+    this.el.setAttribute('material', 'color', evt.detail.brush.color);
     this.pressure = evt.detail.pressure;
     this.setPointerScale(evt.detail.brush.size, evt.detail.uiTouched);
   },
@@ -63,13 +65,21 @@ AFRAME.registerComponent('ar-paint-normal', {
       if (uiTouched) {
         stylusPressureScale = this.pointerScale * 0.1;
       }
-      this.pointer.scale.set(stylusPressureScale, stylusPressureScale, stylusPressureScale);
+      this.el.setAttribute('scale', {
+        x: stylusPressureScale,
+        y: stylusPressureScale,
+        z: stylusPressureScale
+      });
     } else {
-      this.pointer.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
+      this.el.setAttribute('scale', {
+        x: this.pointerScale,
+        y: this.pointerScale,
+        z: this.pointerScale
+      });
     }
   },
   onPaintPlaced: function (e) {
-    this.pointer.visible = true;
+    this.el.setAttribute('visible', true);
     this.updatePointerPosition(e.detail.touchEvent);
   },
   onPaintStarted: function () {
@@ -78,14 +88,18 @@ AFRAME.registerComponent('ar-paint-normal', {
   onPaintPainting: function (e) {
     // End stylus mode
     if (!e.detail.stylusActive && this.stylusActive) {
-      this.pointer.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
+      this.el.setAttribute('scale', {
+        x: this.pointerScale,
+        y: this.pointerScale,
+        z: this.pointerScale
+      });
     }
     this.stylusActive = e.detail.stylusActive;
     this.updatePointerPosition(e.detail.touchEvent);
   },
   onPaintEnded: function () {
     // sconsole.log('paint ended');
-    this.pointer.visible = false;
+    this.el.setAttribute('visible', false);
   },
   updatePointerPosition: function (e) {
     if (e) {
@@ -108,11 +122,17 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.pointerPosition.add(this.ray.origin);
 
     if (!e) {
-      this.el.object3D.position.set(this.valuePosX, this.valuePosY, this.valuePosZ);
-      this.pointer.position.set(this.valuePosX, this.valuePosY, this.valuePosZ);
+      this.el.setAttribute('position', {
+        x: this.valuePosX,
+        y: this.valuePosY,
+        z: this.valuePosZ
+      });
     } else {
-      this.el.object3D.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
-      this.pointer.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
+      this.el.setAttribute('position', {
+        x: this.pointerPosition.x,
+        y: this.pointerPosition.y,
+        z: this.pointerPosition.z
+      });
     }
   },
   pause: function () {
@@ -122,9 +142,8 @@ AFRAME.registerComponent('ar-paint-normal', {
     document.querySelector('[ar-paint-controls]').removeEventListener('paintpainting', this.onPaintPainting);
     document.querySelector('[ar-paint-controls]').removeEventListener('paintended', this.onPaintEnded);
     document.querySelector('a-scene').removeEventListener('updateFrame', this.updateFrame);
-    document.querySelector('#drawing-container').object3D.remove(this.pointer);
   },
   updateFrame: function (frame) {
-    // console.log('----tick normal');
+    this.el.object3D.lookAt(this.el.sceneEl.camera.getWorldPosition());
   }
 });
