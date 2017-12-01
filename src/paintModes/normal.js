@@ -121,13 +121,7 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.pointerPosition.multiplyScalar(0.5);
     this.pointerPosition.add(this.ray.origin);
 
-    if (!e) {
-      this.el.setAttribute('position', {
-        x: this.valuePosX,
-        y: this.valuePosY,
-        z: this.valuePosZ
-      });
-    } else {
+    if (e) {
       this.el.setAttribute('position', {
         x: this.pointerPosition.x,
         y: this.pointerPosition.y,
