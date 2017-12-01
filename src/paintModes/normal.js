@@ -102,18 +102,13 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.el.setAttribute('visible', false);
   },
   updatePointerPosition: function (e) {
-    if (e) {
-      this.size = this.el.sceneEl.renderer.getSize();
-      var t = e;
-      if (e.touches) {
-        t = e.touches[0];
-      }
-      this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-      this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
-    } else {
-      this.normalizedCoordinatedPositionPointer.x = 0;
-      this.normalizedCoordinatedPositionPointer.y = 0;
+    this.size = this.el.sceneEl.renderer.getSize();
+    var t = e;
+    if (e.touches) {
+      t = e.touches[0];
     }
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
 
@@ -121,13 +116,11 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.pointerPosition.multiplyScalar(0.5);
     this.pointerPosition.add(this.ray.origin);
 
-    if (e) {
-      this.el.setAttribute('position', {
-        x: this.pointerPosition.x,
-        y: this.pointerPosition.y,
-        z: this.pointerPosition.z
-      });
-    }
+    this.el.setAttribute('position', {
+      x: this.pointerPosition.x,
+      y: this.pointerPosition.y,
+      z: this.pointerPosition.z
+    });
   },
   pause: function () {
     document.querySelector('[ar-paint-controls]').removeEventListener('bushchanged', this.onBrushChanged);
