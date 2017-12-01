@@ -22,6 +22,18 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
   this.autoStarted = false;
 
   this.poseFound = false;
+
+  var headMatrix = new THREE.Matrix4();
+  var headPosition = new THREE.Vector3();
+  var headQuaternion = new THREE.Quaternion();
+  var headScale = new THREE.Vector3();
+
+  var cameraPosition = new THREE.Vector3();
+  var cameraQuaternion = new THREE.Quaternion();
+  var cameraScale = new THREE.Vector3();
+
+  var interpolationFactor = 0.25;
+
   function handleFrame (frame) {
     if (this.sessionActive) {
       this.session.requestFrame(boundHandleFrame);
@@ -55,8 +67,17 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
         var view = frame.views[i];
         this.camera.projectionMatrix.fromArray(view.projectionMatrix);
         if (this.camera.parent && this.camera.parent.type !== 'Scene') {
+          headMatrix.fromArray(headPose.poseModelMatrix).decompose(headPosition, headQuaternion, headScale);
+          cameraPosition = this.camera.parent.getWorldPosition();
+          cameraQuaternion = this.camera.parent.getWorldQuaternion();
+          cameraScale = this.camera.parent.getWorldScale();
+          cameraPosition.lerp(headPosition, interpolationFactor);
+          cameraQuaternion.slerp(headQuaternion, interpolationFactor);
+          cameraScale.lerp(headScale, interpolationFactor);
+
           this.camera.parent.matrixAutoUpdate = false;
-          this.camera.parent.matrix.fromArray(headPose.poseModelMatrix);
+          this.camera.parent.matrix.compose(cameraPosition, cameraQuaternion, cameraScale);
+          // this.camera.parent.matrix.fromArray(headPose.poseModelMatrix);
           this.camera.parent.updateMatrixWorld(true);
         } else {
           this.camera.matrixAutoUpdate = false;
