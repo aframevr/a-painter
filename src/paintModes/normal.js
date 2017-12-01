@@ -12,6 +12,9 @@ AFRAME.registerComponent('ar-paint-normal', {
   init: function () {
     this.bindMethods();
     this.initVars();
+
+    this.tempCamera = new THREE.PerspectiveCamera();
+
     this.setPointerScale(this.data.size, false);
     this.el.setAttribute('geometry', {
       primitive: 'ring',
@@ -110,7 +113,9 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
+    this.tempCamera.matrixWorld = this.el.sceneEl.camera.matrixWorld;
+    this.tempCamera.projectionMatrix = this.el.sceneEl.camera.projectionMatrix;
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.tempCamera);
 
     this.pointerPosition.copy(this.ray.direction);
     this.pointerPosition.multiplyScalar(0.5);
@@ -130,7 +135,33 @@ AFRAME.registerComponent('ar-paint-normal', {
     document.querySelector('[ar-paint-controls]').removeEventListener('paintended', this.onPaintEnded);
     document.querySelector('a-scene').removeEventListener('updateFrame', this.updateFrame);
   },
-  updateFrame: function (frame) {
+  updateFrame: function (data) {
     this.el.object3D.lookAt(this.el.sceneEl.camera.getWorldPosition());
+    var frame = data.detail;
+    var headPose = frame.getDisplayPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL));
+    var headMatrix = new THREE.Matrix4();
+    var headPosition = new THREE.Vector3();
+    var headQuaternion = new THREE.Quaternion();
+    var headScale = new THREE.Vector3();
+
+    headMatrix.fromArray(headPose.poseModelMatrix).decompose(headPosition, headQuaternion, headScale);
+
+    var cameraPosition = new THREE.Vector3();
+    var cameraQuaternion = new THREE.Quaternion();
+    var cameraScale = new THREE.Vector3();
+
+    var interpolationFactor = 0.1;
+
+    cameraPosition = this.tempCamera.getWorldPosition();
+    cameraQuaternion = this.tempCamera.getWorldQuaternion();
+    cameraScale = this.tempCamera.getWorldScale();
+
+    cameraPosition.lerp(headPosition, interpolationFactor);
+    cameraQuaternion.slerp(headQuaternion, interpolationFactor);
+    cameraScale.lerp(headScale, interpolationFactor);
+
+    this.tempCamera.matrixAutoUpdate = false;
+    this.tempCamera.matrix.compose(cameraPosition, cameraQuaternion, cameraScale);
+    this.tempCamera.updateMatrixWorld(true);
   }
 });
