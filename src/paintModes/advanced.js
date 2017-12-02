@@ -135,10 +135,11 @@ AFRAME.registerComponent('ar-paint-advanced', {
     // this.impliedPlane.scale.set(this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z);
   },
   onPaintPlaced: function (e) {
-    this.updatePointerPosition(e.detail.touchEvent);
+    this.eventTouch = null;
   },
-  onPaintStarted: function () {
+  onPaintStarted: function (e) {
     // console.log('paint started');
+    this.eventTouch = null;
     this.isPainting = true;
   },
   onPaintPainting: function (e) {
@@ -149,10 +150,11 @@ AFRAME.registerComponent('ar-paint-advanced', {
       this.connectedLine.scale.set(this.pointerScale, this.pointerScale, this.pointerScale);
     }
     this.stylusActive = e.detail.stylusActive;
-    this.updatePointerPosition(e.detail.touchEvent);
+    this.eventTouch = e.detail.touchEvent;
   },
   onPaintEnded: function () {
     // sconsole.log('paint ended');
+    this.eventTouch = null;
     this.isPainting = false;
   },
   updatePointerPosition: function (e) {
@@ -213,9 +215,8 @@ AFRAME.registerComponent('ar-paint-advanced', {
     var scaleCompensationFactor = THREE.Math.mapLinear(this.pointerShadow.scale.x, 0.25, 30, 0.5, 4);
     var impliedScale = 1 / this.pointerShadow.scale.x * scaleCompensationFactor;
     this.impliedPlane.scale.set(impliedScale, impliedScale, impliedScale);
-    if (!this.isPainting) {
-      this.updatePointerPosition();
-    }
+
+    this.updatePointerPosition(this.eventTouch);
 
     var frame = data.detail;
     var headPose = frame.getDisplayPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL));
