@@ -87,11 +87,9 @@ AFRAME.registerComponent('ar-paint-controls', {
     this.eventTouch = e;
     var el = this.el;
     if (!el.components.brush.active) {
-      el.components.brush.sizeModifier = 0;
-      el.components.brush.startNewStroke();
-      el.components.brush.active = true;
       this.el.emit('paintstarted', {
-        touchEvent: e
+        touchEvent: e,
+        brush: el.components.brush
       });
       return;
     }

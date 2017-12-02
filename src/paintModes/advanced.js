@@ -139,7 +139,9 @@ AFRAME.registerComponent('ar-paint-advanced', {
   },
   onPaintStarted: function (e) {
     // console.log('paint started');
-    this.eventTouch = null;
+    this.eventTouch = e.detail.touchEvent;
+    this.strokeStarted = false;
+    this.brush = e.detail.brush;
     this.isPainting = true;
   },
   onPaintPainting: function (e) {
@@ -156,6 +158,7 @@ AFRAME.registerComponent('ar-paint-advanced', {
     // sconsole.log('paint ended');
     this.eventTouch = null;
     this.isPainting = false;
+    this.strokeStarted = false;
   },
   updatePointerPosition: function (e) {
     if (e) {
@@ -181,6 +184,12 @@ AFRAME.registerComponent('ar-paint-advanced', {
     this.pointer.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
     this.pointerShadow.position.set(this.pointerPosition.x, AFRAME.scenes[0].object3D.drawingOffset.y, this.pointerPosition.z);
     this.connectedLine.position.set(this.pointerPosition.x, AFRAME.scenes[0].object3D.drawingOffset.y, this.pointerPosition.z);
+    if (!this.strokeStarted && e) {
+      this.strokeStarted = true;
+      this.brush.sizeModifier = 0;
+      this.brush.startNewStroke();
+      this.brush.active = true;
+    }
   },
   pause: function () {
     document.querySelector('[ar-paint-controls]').removeEventListener('bushchanged', this.onBrushChanged);
