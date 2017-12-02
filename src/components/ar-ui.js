@@ -1366,13 +1366,13 @@ AFRAME.registerComponent('ar-ui', {
         x: originalSize * self.scaleFactor,
         y: originalSize * self.scaleFactor,
         z: originalSize * self.scaleFactor
-      }, 500)
+      }, 290)
         .delay(delay || 0)
         .easing(AFRAME.TWEEN.Easing.Back.Out)
         .start();
     }, 500);
   },
-  hideEl: function (self, id, enable, delay){
+  hideEl: function (self, id, enable, delay) {
     var uiEntity = self.objects[ id ];
     if (!uiEntity) {
       return;
@@ -1658,17 +1658,17 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     // Show and activate close button
-    this.showEl(this, 'closeBtn', true, 500);
-    this.showEl(this, 'undoBtn', true, 600);
-    this.showEl(this, 'saveBtn', true, 700);
-    this.showEl(this, 'paintModeBtn', true, 800);
-    this.showEl(this, 'strokeDragBar', false, 900);
-    this.showEl(this, 'strokeDragDot', true, 950);
-    this.showEl(this, 'brushBtn', true, 1000);
+    this.showEl(this, 'closeBtn', true, 200);
+    this.showEl(this, 'undoBtn', true, 500);
+    this.showEl(this, 'saveBtn', true, 800);
+    this.showEl(this, 'paintModeBtn', true, 1100);
+    this.showEl(this, 'strokeDragBar', false, 1400);
+    this.showEl(this, 'strokeDragDot', true, 1700);
+    this.showEl(this, 'brushBtn', true, 2000);
     this.playSound('#uiClick0');
     setTimeout(() => {
       self.el.emit('activate', false);
-    }, 1100);
+    }, 2100);
   },
   exitPainterMode: function () {
     // var self = this;
