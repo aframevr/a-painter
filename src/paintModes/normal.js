@@ -15,18 +15,6 @@ AFRAME.registerComponent('ar-paint-normal', {
 
     this.tempCamera = new THREE.PerspectiveCamera();
 
-    this.setPointerScale(this.data.size, false);
-    this.el.setAttribute('geometry', {
-      primitive: 'ring',
-      radiusInner: 0.004,
-      radiusOuter: 0.006
-    });
-    this.el.setAttribute('material', {
-      shader: 'flat',
-      color: this.data.color,
-      transparent: true,
-      fog: false
-    });
     document.querySelector('[ar-paint-controls]').addEventListener('brushchanged', this.onBrushChanged);
     document.querySelector('[ar-paint-controls]').addEventListener('paintplaced', this.onPaintPlaced);
     document.querySelector('[ar-paint-controls]').addEventListener('paintstarted', this.onPaintStarted);
@@ -43,7 +31,6 @@ AFRAME.registerComponent('ar-paint-normal', {
     this.updateFrame = this.updateFrame.bind(this);
   },
   initVars: function () {
-    this.pointerScale = this.data.scale;
     this.pressure = 0;
     this.size = this.el.sceneEl.renderer.getSize();
     // normalized device coordinates position
@@ -55,31 +42,6 @@ AFRAME.registerComponent('ar-paint-normal', {
   onBrushChanged: function (evt) {
     this.el.setAttribute('material', 'color', evt.detail.brush.color);
     this.pressure = evt.detail.pressure;
-    this.setPointerScale(evt.detail.brush.size, evt.detail.uiTouched);
-  },
-  setPointerScale: function (size, uiTouched) {
-    if (size > this.data.defaultSize) {
-      this.pointerScale = THREE.Math.mapLinear(size, this.data.defaultSize, this.data.max, 1, 30);
-    } else {
-      this.pointerScale = THREE.Math.mapLinear(size, this.data.defaultSize, this.data.min, 1, 0.25);
-    }
-    if (this.stylusActive) {
-      var stylusPressureScale = Math.max(0.1, this.pointerScale * this.pressure);
-      if (uiTouched) {
-        stylusPressureScale = this.pointerScale * 0.1;
-      }
-      this.el.setAttribute('scale', {
-        x: stylusPressureScale,
-        y: stylusPressureScale,
-        z: stylusPressureScale
-      });
-    } else {
-      this.el.setAttribute('scale', {
-        x: this.pointerScale,
-        y: this.pointerScale,
-        z: this.pointerScale
-      });
-    }
   },
   onPaintPlaced: function (e) {
     this.el.setAttribute('visible', true);
@@ -89,14 +51,6 @@ AFRAME.registerComponent('ar-paint-normal', {
     // console.log('paint started');
   },
   onPaintPainting: function (e) {
-    // End stylus mode
-    if (!e.detail.stylusActive && this.stylusActive) {
-      this.el.setAttribute('scale', {
-        x: this.pointerScale,
-        y: this.pointerScale,
-        z: this.pointerScale
-      });
-    }
     this.stylusActive = e.detail.stylusActive;
     this.updatePointerPosition(e.detail.touchEvent);
   },

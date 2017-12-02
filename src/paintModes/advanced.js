@@ -42,13 +42,10 @@ AFRAME.registerComponent('ar-paint-advanced', {
     this.pointerPosition = new THREE.Vector3();
     this.raycaster = new THREE.Raycaster();
     this.ray = this.raycaster.ray;
+    this.tempCamera = new THREE.PerspectiveCamera();
   },
   addPointer: function () {
-    var pointerGeometry = new THREE.SphereGeometry(0.004, 32, 32);
-    var pointerMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(this.data.color)
-    });
-    this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
+    this.pointer = new THREE.Group();
     document.querySelector('#drawing-container').object3D.add(this.pointer);
   },
   addPointerShadow: function () {
@@ -115,7 +112,6 @@ AFRAME.registerComponent('ar-paint-advanced', {
     this.impliedPlane.add(impliedGlass);
   },
   onBrushChanged: function (evt) {
-    this.pointer.material.color = new THREE.Color(evt.detail.brush.color);
     this.pressure = evt.detail.pressure;
     this.setPointerScale(evt.detail.brush.size, evt.detail.uiTouched);
   },
@@ -173,45 +169,16 @@ AFRAME.registerComponent('ar-paint-advanced', {
       this.normalizedCoordinatedPositionPointer.y = 0;
     }
 
-    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.el.sceneEl.camera);
+    this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.tempCamera);
 
     this.pointerPosition.copy(this.ray.direction);
     this.pointerPosition.multiplyScalar(0.5);
     this.pointerPosition.add(this.ray.origin);
 
-    // if (this.tweenPointer) {
-    //   this.tweenPointer.stop();
-    // }
-
-    // if (!e) {
-    //   var self = this;
-    //   this.tweenPointer = new AFRAME.TWEEN.Tween({
-    //     valuePosX: self.pointer.position.x,
-    //     valuePosY: self.pointer.position.y,
-    //     valuePosZ: self.pointer.position.z
-    //   })
-    //   .to({
-    //     valuePosX: self.futurePointerPosition.x,
-    //     valuePosY: self.futurePointerPosition.y,
-    //     valuePosZ: self.futurePointerPosition.z
-    //   }, 250)
-    //   .onUpdate(function () {
-    //     self.pointer.position.set(this.valuePosX, this.valuePosY, this.valuePosZ);
-    //     self.pointerShadow.position.set(this.valuePosX, AFRAME.scenes[0].object3D.drawingOffset.y, this.valuePosZ);
-    //     self.connectedLine.position.set(this.valuePosX, AFRAME.scenes[0].object3D.drawingOffset.y, this.valuePosZ);
-    //   });
-    //   this.tweenPointer.start();
-    // }
     this.el.object3D.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
     this.pointer.position.set(this.pointerPosition.x, this.pointerPosition.y, this.pointerPosition.z);
     this.pointerShadow.position.set(this.pointerPosition.x, AFRAME.scenes[0].object3D.drawingOffset.y, this.pointerPosition.z);
     this.connectedLine.position.set(this.pointerPosition.x, AFRAME.scenes[0].object3D.drawingOffset.y, this.pointerPosition.z);
-
-    if (this.el.object3D.position.y > AFRAME.scenes[0].object3D.drawingOffset.y) {
-      this.pointer.material.wireframe = false;
-    } else {
-      this.pointer.material.wireframe = true;
-    }
   },
   pause: function () {
     document.querySelector('[ar-paint-controls]').removeEventListener('bushchanged', this.onBrushChanged);
@@ -226,7 +193,7 @@ AFRAME.registerComponent('ar-paint-advanced', {
     document.querySelector('#drawing-container').object3D.remove(this.pointerShadow);
     document.querySelector('#drawing-container').object3D.remove(this.connectedLine);
   },
-  updateFrame: function (frame) {
+  updateFrame: function (data) {
     this.pointer.lookAt(this.el.sceneEl.camera.getWorldPosition());
     var distY = this.pointer.getWorldPosition().y - this.pointerShadow.getWorldPosition().y;
     if (distY > 0) {
@@ -249,5 +216,32 @@ AFRAME.registerComponent('ar-paint-advanced', {
     if (!this.isPainting) {
       this.updatePointerPosition();
     }
+
+    var frame = data.detail;
+    var headPose = frame.getDisplayPose(frame.getCoordinateSystem(XRCoordinateSystem.HEAD_MODEL));
+    var headMatrix = new THREE.Matrix4();
+    var headPosition = new THREE.Vector3();
+    var headQuaternion = new THREE.Quaternion();
+    var headScale = new THREE.Vector3();
+
+    headMatrix.fromArray(headPose.poseModelMatrix).decompose(headPosition, headQuaternion, headScale);
+
+    var cameraPosition = new THREE.Vector3();
+    var cameraQuaternion = new THREE.Quaternion();
+    var cameraScale = new THREE.Vector3();
+
+    var interpolationFactor = 0.1;
+
+    cameraPosition = this.tempCamera.getWorldPosition();
+    cameraQuaternion = this.tempCamera.getWorldQuaternion();
+    cameraScale = this.tempCamera.getWorldScale();
+
+    cameraPosition.lerp(headPosition, interpolationFactor);
+    cameraQuaternion.slerp(headQuaternion, interpolationFactor);
+    cameraScale.lerp(headScale, interpolationFactor);
+
+    this.tempCamera.matrixAutoUpdate = false;
+    this.tempCamera.matrix.compose(cameraPosition, cameraQuaternion, cameraScale);
+    this.tempCamera.updateMatrixWorld(true);
   }
 });
