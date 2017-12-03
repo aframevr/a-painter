@@ -99,11 +99,13 @@ AFRAME.registerComponent('ar-paint-normal', {
     }
   },
   pause: function () {
-    document.querySelector('[ar-paint-controls]').removeEventListener('bushchanged', this.onBrushChanged);
-    document.querySelector('[ar-paint-controls]').removeEventListener('paintplaced', this.onPaintPlaced);
-    document.querySelector('[ar-paint-controls]').removeEventListener('paintstarted', this.onPaintStarted);
-    document.querySelector('[ar-paint-controls]').removeEventListener('paintpainting', this.onPaintPainting);
-    document.querySelector('[ar-paint-controls]').removeEventListener('paintended', this.onPaintEnded);
+    if (document.querySelector('[ar-paint-controls]')) {
+      document.querySelector('[ar-paint-controls]').removeEventListener('bushchanged', this.onBrushChanged);
+      document.querySelector('[ar-paint-controls]').removeEventListener('paintplaced', this.onPaintPlaced);
+      document.querySelector('[ar-paint-controls]').removeEventListener('paintstarted', this.onPaintStarted);
+      document.querySelector('[ar-paint-controls]').removeEventListener('paintpainting', this.onPaintPainting);
+      document.querySelector('[ar-paint-controls]').removeEventListener('paintended', this.onPaintEnded);
+    }
     document.querySelector('a-scene').removeEventListener('updateFrame', this.updateFrame);
   },
   updateFrame: function (data) {

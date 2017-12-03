@@ -179,7 +179,7 @@ AFRAME.registerSystem('brush', {
     this.version = VERSION;
     this.clear();
     this.controllerName = null;
-
+    this.offset = new THREE.Vector3();
     var self = this;
     this.sceneEl.addEventListener('controllerconnected', function (evt) {
       self.controllerName = evt.detail.name;
