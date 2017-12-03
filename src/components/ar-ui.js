@@ -487,7 +487,7 @@ AFRAME.registerComponent('ar-ui', {
   onPinSelected: function () {
     this.hideEl(this, 'dragTapPin', false);
     var self = this;
-    setTimeout(() => {
+    setTimeout(function () {
       self.enterPainterMode();
     }, 1000);
   },
@@ -1492,7 +1492,7 @@ AFRAME.registerComponent('ar-ui', {
     this.intersection = null;
     var firstSelectable = null;
     if (intersections.length > 0) {
-      for (let i = 0; i < intersections.length; i++) {
+      for (var i = 0; i < intersections.length; i++) {
         if (intersections[i].object.el.selectable) {
           firstSelectable = intersections[i];
           break;
@@ -1596,7 +1596,7 @@ AFRAME.registerComponent('ar-ui', {
       obj.object3D.height = geometryChildren.layout.height * 0.001;
     } else {
       var firstSelectable = null;
-      for (let i = 0; i < obj.object3D.children.length; i++) {
+      for (var i = 0; i < obj.object3D.children.length; i++) {
         if (obj.object3D.children[i].el.selectable) {
           firstSelectable = i;
           break;
@@ -1667,7 +1667,7 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'strokeDragDot', true, 1700);
     this.showEl(this, 'brushBtn', true, 2000);
     this.playSound('#uiClick0');
-    setTimeout(() => {
+    setTimeout(function () {
       self.el.emit('activate', false);
     }, 2100);
   },

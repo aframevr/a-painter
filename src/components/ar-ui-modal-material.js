@@ -36,7 +36,6 @@ AFRAME.registerComponent('ar-ui-modal-material', {
     opacity: {type: 'number'}
   },
   init: function () {
-    var data = this.data;
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         // time: { value: 0.0 },

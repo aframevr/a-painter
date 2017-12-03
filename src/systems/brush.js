@@ -335,8 +335,6 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
 
-    var usedBrushes = [];
-
     for (var i = 0; i < data.strokes.length; i++) {
       var strokeData = data.strokes[i];
       var brush = strokeData.brush;

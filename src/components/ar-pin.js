@@ -160,12 +160,10 @@ AFRAME.registerComponent('ar-pin', {
 
   },
   moveHandler: function (e) {
-    var el = this.el;
     // this.setCoordinates(e);
     this.setPinIntersected(e);
   },
   endHandler: function (e) {
-    var el = this.el;
     this.ringTop.material.opacity = 0.6;
     this.pin.scale.set(1, 1, 1);
     this.pinIntersected = false;
