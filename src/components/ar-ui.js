@@ -1586,7 +1586,8 @@ AFRAME.registerComponent('ar-ui', {
   place: function (obj) {
     var w = this.width;
     var h = this.height;
-    this.scaleFactor = Math.max(1, (1.2 / Math.abs(this.depth)) / 2);
+    // this.scaleFactor = Math.max(1, (1.2 / Math.abs(this.depth)) / 2);
+    this.scaleFactor = window.devicePixelRatio * Math.max(1, w / h) * 2;
     obj.object3D.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
     var geometryChildren = obj.object3D.children[0].geometry;
