@@ -963,8 +963,8 @@ AFRAME.registerComponent('ar-ui', {
 
     uiEl.setAttribute('geometry', {
       primitive: 'plane',
-      width: 0.17,
-      height: 0.17
+      width: 0.24,
+      height: 0.24
     });
 
     uiEl.setAttribute('ar-ui-modal-material', {
