@@ -416,9 +416,12 @@ AFRAME.registerSystem('brush', {
       self.bufferLoaded = buffer;
       self.isBufferLoadedBinary = binary;
       // If was added offset first
-      if (self.offset) {
-        self.loadOnceAllIsDone();
-      }
+      // A hack to load only on VR mode
+      setTimeout(function (){
+        if (!AFRAME.scenes[0].systems.xr.supportAR) {
+          self.loadOnceAllIsDone();
+        }
+      }, 2000);
     });
   },
   addOffset: function (offset) {
