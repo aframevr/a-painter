@@ -3,6 +3,10 @@ var VERSION = 1;
 
 AFRAME.BRUSHES = {};
 
+APAINTER_STATS = {
+  brushes: {}
+};
+
 AFRAME.registerBrush = function (name, definition, options) {
   var proto = {};
 
@@ -219,6 +223,11 @@ AFRAME.registerSystem('brush', {
     }
   },
   addNewStroke: function (brushName, color, size, owner, timestamp) {
+    if (!APAINTER_STATS.brushes[brushName]) {
+      APAINTER_STATS.brushes[brushName] = 0;
+    }
+    APAINTER_STATS.brushes[brushName]++;
+
     owner = owner || 'local';
     timestamp = timestamp || Date.now();
     var Brush = this.getBrushByName(brushName);
@@ -241,12 +250,12 @@ AFRAME.registerSystem('brush', {
       document.querySelector('a-scene').appendChild(drawing);
     }
 
-    var entity = document.createElement('a-entity');
-    entity.className = "a-stroke";
-    drawing.appendChild(entity);
-
-    entity.setObject3D('mesh', stroke.object3D);
-    stroke.entity = entity;
+    //var entity = document.createElement('a-entity');
+    //entity.className = "a-stroke";
+    //drawing.appendChild(entity);
+    drawing.object3D.add(stroke.object3D);
+    //entity.setObject3D('mesh', stroke.object3D);
+    //stroke.entity = entity;
 
     return stroke;
   },
