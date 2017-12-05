@@ -43,18 +43,30 @@ AFRAME.registerComponent('ar-ui', {
 
     this.objects = {};
 
-    this.setPressure();
-    this.bindMethods();
-    this.initRaycaster();
-    this.addContainers();
-    this.setLayoutSettings();
-    this.addEvents();
-    this.addUIElements();
-    this.initUI();
-    // Hack to wait until created entities are init
-    setTimeout(function () {
-      self.onWindowResize();
-    }, 500);
+    var img = document.getElementById('ar_ui');
+
+    function loaded () {
+      self.setPressure();
+      self.bindMethods();
+      self.initRaycaster();
+      self.addContainers();
+      self.setLayoutSettings();
+      self.addEvents();
+      self.addUIElements();
+      self.initUI();
+      // Hack to wait until created entities are init
+      setTimeout(function () {
+        self.onWindowResize();
+      }, 500);
+    }
+
+    if (img.complete) {
+      loaded();
+    } else {
+      img.addEventListener('load', loaded);
+    };
+
+
   },
   tick: function (t, dt) {
 
