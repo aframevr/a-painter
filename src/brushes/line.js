@@ -1,5 +1,33 @@
 /* globals AFRAME THREE */
 (function () {
+  var optionsBasic = {
+    vertexColors: THREE.VertexColors,
+    side: THREE.DoubleSide
+  };
+
+  var optionsStandard = {
+    roughness: 0.75,
+    metalness: 0.25,
+    vertexColors: THREE.VertexColors,
+    side: THREE.DoubleSide
+  };
+
+  var optionTextured = {
+    roughness: 0.75,
+    metalness: 0.25,
+    vertexColors: THREE.VertexColors,
+    side: THREE.DoubleSide,
+    map: window.atlas.map,
+    transparent: true,
+    alphaTest: 0.5
+  }
+
+  var materials = {
+    flat: new THREE.MeshBasicMaterial(optionsStandard),
+    shaded: new THREE.MeshStandardMaterial(optionsBasic),
+    textured: new THREE.MeshStandardMaterial(optionTextured)
+  };
+
   var line = {
 
     init: function (color, brushSize) {
@@ -8,11 +36,13 @@
       this.vertices = new Float32Array(this.options.maxPoints * 3 * 3);
       this.normals = new Float32Array(this.options.maxPoints * 3 * 3);
       this.uvs = new Float32Array(this.options.maxPoints * 2 * 2);
-
+      this.colors = new Float32Array(this.options.maxPoints * 2 * 2);
+      
       this.geometry.setDrawRange(0, 0);
       this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
       this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
       this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
+      this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
 
       var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
       mesh.drawMode = THREE.TriangleStripDrawMode;
@@ -24,50 +54,19 @@
     },
 
     getMaterial: function () {
-      var map = this.materialOptions.map;
-      var type = this.materialOptions.type;
-
-      var defaultOptions = {};
-      var defaultTextureOptions = {};
-      if (map) {
-        defaultTextureOptions = {
-          map: map,
-          transparent: true,
-          alphaTest: 0.5
-        };
-      }
-
-      if (type === 'shaded') {
-        defaultOptions = {
-          color: this.data.color,
-          roughness: 0.75,
-          metalness: 0.25,
-          side: THREE.DoubleSide
-        };
-      } else {
-        defaultOptions = {
-          color: this.data.color,
-          side: THREE.DoubleSide
-        };
-      }
-
-      var options = Object.assign(defaultOptions, defaultTextureOptions, this.materialOptions);
-      delete options.type;
-
-      if (type === 'shaded') {
-        return new THREE.MeshStandardMaterial(options);
-      } else {
-        return new THREE.MeshBasicMaterial(options);
-      }
+      return materials[this.materialOptions.type];
     },
+
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
       var uv = 0;
-      for (i = 0; i < this.data.numPoints; i++) {
-        this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-        this.uvs[ uv++ ] = 0;
+      var converter = this.materialOptions.converter;
 
-        this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-        this.uvs[ uv++ ] = 1;
+      for (i = 0; i < this.data.numPoints; i++) {
+        this.uvs[uv++] = converter.convertU(i / (this.data.numPoints - 1));
+        this.uvs[uv++] = converter.convertV(0);
+
+        this.uvs[uv++] = converter.convertU(i / (this.data.numPoints - 1));
+        this.uvs[uv++] = converter.convertV(1);
       }
 
       var direction = new THREE.Vector3();
@@ -81,13 +80,34 @@
       posA.add(direction.clone().multiplyScalar(brushSize / 2));
       posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
-      this.vertices[ this.idx++ ] = posA.x;
-      this.vertices[ this.idx++ ] = posA.y;
-      this.vertices[ this.idx++ ] = posA.z;
+      /*
+        2---3
+        | \ |
+        0---1
 
-      this.vertices[ this.idx++ ] = posB.x;
-      this.vertices[ this.idx++ ] = posB.y;
-      this.vertices[ this.idx++ ] = posB.z;
+      */
+      var idx = this.idx;
+
+      this.vertices[ idx++ ] = posA.x;
+      this.vertices[ idx++ ] = posA.y;
+      this.vertices[ idx++ ] = posA.z;
+
+      this.vertices[ idx++ ] = posB.x;
+      this.vertices[ idx++ ] = posB.y;
+      this.vertices[ idx++ ] = posB.z;
+
+      idx = this.idx;
+
+      // Colors
+      this.colors[ idx++ ] = this.data.color.r;
+      this.colors[ idx++ ] = this.data.color.g;
+      this.colors[ idx++ ] = this.data.color.b;
+
+      this.colors[ idx++ ] = this.data.color.r;
+      this.colors[ idx++ ] = this.data.color.g;
+      this.colors[ idx++ ] = this.data.color.b;
+
+      this.idx += 6;
 
       this.computeVertexNormals();
       this.geometry.attributes.normal.needsUpdate = true;
@@ -284,14 +304,14 @@
     }
   ];
 
-  var textureLoader = new THREE.TextureLoader();
-
   for (var i = 0; i < lines.length; i++) {
     var definition = lines[i];
     if (definition.materialOptions.textureSrc) {
-      definition.materialOptions.map = textureLoader.load(definition.materialOptions.textureSrc);
-      delete definition.materialOptions.textureSrc;
+      definition.materialOptions.converter = window.atlas.getUVConverters(definition.materialOptions.textureSrc);
+    } else {
+      definition.materialOptions.converter = window.atlas.getUVConverters(null);
     }
+    
     AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
   }
 })();

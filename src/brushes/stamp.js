@@ -1,5 +1,24 @@
 /* global AFRAME THREE */
 (function () {
+  var materials = {
+    shaded: new THREE.MeshStandardMaterial({
+      side: THREE.DoubleSide,
+      map: window.atlas.map,
+      vertexColors: THREE.VertexColors,
+      transparent: true,
+      alphaTest: 0.5,
+      roughness: 0.75,
+      metalness: 0.25
+    }),
+    flat: new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+      map: window.atlas.map,
+      vertexColors: THREE.VertexColors,
+      transparent: true,
+      alphaTest: 0.5
+    })
+  };
+
   var stamp = {
 
     init: function (color, brushSize) {
@@ -8,11 +27,13 @@
       this.vertices = new Float32Array(this.options.maxPoints * 3 * 3 * 2);
       this.normals = new Float32Array(this.options.maxPoints * 3 * 3 * 2);
       this.uvs = new Float32Array(this.options.maxPoints * 2 * 3 * 2);
+      this.colors = new Float32Array(this.options.maxPoints * 2 * 2);
 
       this.geometry.setDrawRange(0, 0);
       this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
       this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
       this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
+      this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
 
       var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
       this.currAngle = 0;
@@ -37,26 +58,7 @@
     },
 
     getMaterial: function () {
-      var map = this.materialOptions.map;
-      var type = this.materialOptions.type;
-      if (type === 'shaded') {
-        return new THREE.MeshStandardMaterial({
-          color: this.data.color,
-          side: THREE.DoubleSide,
-          map: map,
-          transparent: true,
-          alphaTest: 0.5,
-          roughness: 0.75,
-          metalness: 0.25
-        });
-      }
-      return new THREE.MeshBasicMaterial({
-        color: this.data.color,
-        side: THREE.DoubleSide,
-        map: map,
-        transparent: true,
-        alphaTest: 0.5
-      });
+      return materials[this.materialOptions.type];
     },
 
     addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
@@ -87,6 +89,8 @@
       var d = pointerPosition.clone().add(dir.applyAxisAngle(axis, pi2).multiplyScalar(brushSize));
 
       var nidx = this.idx;
+      var cidx = this.idx;
+
       // triangle 1
       this.vertices[ this.idx++ ] = a.x;
       this.vertices[ this.idx++ ] = a.y;
@@ -114,11 +118,16 @@
       this.vertices[ this.idx++ ] = a.y;
       this.vertices[ this.idx++ ] = a.z;
 
-      // normals
+
+      // normals & color
       for (var i = 0; i < 6; i++) {
         this.normals[ nidx++ ] = axis.x;
         this.normals[ nidx++ ] = axis.y;
         this.normals[ nidx++ ] = axis.z;
+
+        this.colors[ cidx++ ] = this.data.color.r;
+        this.colors[ cidx++ ] = this.data.color.g;
+        this.colors[ cidx++ ] = this.data.color.b;
       }
 
       // UVs
@@ -132,21 +141,24 @@
         Umin = 1.0 / this.subTextures * subt;
         Umax = Umin + 1.0 / this.subTextures;
       }
+
+      var converter = this.materialOptions.converter;
+
       // triangle 1 uv
-      this.uvs[ uv++ ] = Umin;
-      this.uvs[ uv++ ] = 1;
-      this.uvs[ uv++ ] = Umin;
-      this.uvs[ uv++ ] = 0;
-      this.uvs[ uv++ ] = Umax;
-      this.uvs[ uv++ ] = 0;
+      this.uvs[ uv++ ] = converter.convertU(Umin);
+      this.uvs[ uv++ ] = converter.convertV(1);
+      this.uvs[ uv++ ] = converter.convertU(Umin);
+      this.uvs[ uv++ ] = converter.convertV(0);
+      this.uvs[ uv++ ] = converter.convertU(Umax);
+      this.uvs[ uv++ ] = converter.convertV(0);
 
       // triangle2 uv
-      this.uvs[ uv++ ] = Umax;
-      this.uvs[ uv++ ] = 0;
-      this.uvs[ uv++ ] = Umax;
-      this.uvs[ uv++ ] = 1;
-      this.uvs[ uv++ ] = Umin;
-      this.uvs[ uv++ ] = 1;
+      this.uvs[ uv++ ] = converter.convertU(Umax);
+      this.uvs[ uv++ ] = converter.convertV(0);
+      this.uvs[ uv++ ] = converter.convertU(Umax);
+      this.uvs[ uv++ ] = converter.convertV(1);
+      this.uvs[ uv++ ] = converter.convertU(Umin);
+      this.uvs[ uv++ ] = converter.convertV(1);
 
       this.geometry.attributes.normal.needsUpdate = true;
       this.geometry.attributes.position.needsUpdate = true;
@@ -342,11 +354,12 @@
     }
   ];
 
-  var textureLoader = new THREE.TextureLoader();
+  // var textureLoader = new THREE.TextureLoader();
   for (var i = 0; i < stamps.length; i++) {
     var definition = stamps[i];
     if (definition.materialOptions.textureSrc) {
-      definition.materialOptions.map = textureLoader.load(definition.materialOptions.textureSrc);
+      definition.materialOptions.map = window.atlas.map; //textureLoader.load(definition.materialOptions.textureSrc);
+      definition.materialOptions.converter = window.atlas.getUVConverters(definition.materialOptions.textureSrc);
       delete definition.materialOptions.textureSrc;
     }
     AFRAME.registerBrush(definition.name, Object.assign({}, stamp, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, spacing: definition.spacing, maxPoints: 3000});

@@ -1,5 +1,6 @@
 window.saveAs = require('../vendor/saveas.js').saveAs;
 
+require('./atlas.js');
 require('./dragndrop.js');
 require('./binarymanager.js');
 require('../vendor/OrbitControls.js');
