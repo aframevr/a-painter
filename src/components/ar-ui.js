@@ -369,8 +369,8 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       enabled: false,
       padding: [0, 0, 0.01, 0],
-      title: 'Advanced',
-      description: 'Paint with helpers',
+      title: 'Paint with Helpers',
+      description: 'Show additional feedback',
       active: false,
       onclick: this.changePaintMode.bind(this, 2)
     });
