@@ -409,12 +409,12 @@ AFRAME.registerComponent('ar-ui', {
     this.addButton({
       id: 'closeSettingsBtn',
       atlasId: 'closeBtn',
-      layout: 'top-right',
+      layout: 'bottom-right',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0.005, 0, 0, 0.0025],
+      padding: [0, 0, 0.0175, 0.0025],
       onclick: this.closeBrushSettings.bind(this),
       renderOrder: this.renderOrderModal
     });
@@ -1602,25 +1602,27 @@ AFRAME.registerComponent('ar-ui', {
     this.scaleFactor = window.devicePixelRatio * Math.max(1, w / h) * 2;
     obj.object3D.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     var positionTmp = {x: 0, y: 0, z: this.depth};
-    var geometryChildren = obj.object3D.children[0].geometry;
-    if (geometryChildren && geometryChildren.layout) {
-      obj.object3D.width = geometryChildren.layout.width * 0.001;
-      obj.object3D.height = geometryChildren.layout.height * 0.001;
-    } else {
-      var firstSelectable = null;
-      for (var i = 0; i < obj.object3D.children.length; i++) {
-        if (obj.object3D.children[i].el.selectable) {
-          firstSelectable = i;
-          break;
-        }
-      }
-      if (firstSelectable) {
-        obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D.children[firstSelectable]);
+    if (!obj.object3D.width && !obj.object3D.height) {
+      var geometryChildren = obj.object3D.children[0].geometry;
+      if (geometryChildren && geometryChildren.layout) {
+        obj.object3D.width = geometryChildren.layout.width * 0.001;
+        obj.object3D.height = geometryChildren.layout.height * 0.001;
       } else {
-        obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D);
+        var firstSelectable = null;
+        for (var i = 0; i < obj.object3D.children.length; i++) {
+          if (obj.object3D.children[i].el.selectable) {
+            firstSelectable = i;
+            break;
+          }
+        }
+        if (firstSelectable) {
+          obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D.children[firstSelectable]);
+        } else {
+          obj.object3D.box3Obj = new THREE.Box3().setFromObject(obj.object3D);
+        }
+        obj.object3D.width = (obj.object3D.box3Obj.max.x - obj.object3D.box3Obj.min.x) / this.scaleFactor;
+        obj.object3D.height = (obj.object3D.box3Obj.max.y - obj.object3D.box3Obj.min.y) / this.scaleFactor;
       }
-      obj.object3D.width = (obj.object3D.box3Obj.max.x - obj.object3D.box3Obj.min.x) / this.scaleFactor;
-      obj.object3D.height = (obj.object3D.box3Obj.max.y - obj.object3D.box3Obj.min.y) / this.scaleFactor;
     }
 
     switch (obj.layout) {
