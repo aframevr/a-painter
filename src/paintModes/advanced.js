@@ -174,6 +174,8 @@ AFRAME.registerComponent('ar-paint-advanced', {
       this.normalizedCoordinatedPositionPointer.y = 0;
     }
 
+    this.tempCamera.matrixWorld = this.el.sceneEl.camera.matrixWorld;
+    this.tempCamera.projectionMatrix = this.el.sceneEl.camera.projectionMatrix;
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.tempCamera);
 
     this.pointerPosition.copy(this.ray.direction);
