@@ -1406,14 +1406,12 @@ AFRAME.registerComponent('ar-ui', {
   },
   onmove: function (e) {
     var el = this.el;
-    this.size = el.sceneEl.renderer.getSize();
     var t = e;
     if (e.touches) {
       t = e.touches[0];
     }
-    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
-
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.el.sceneEl.canvas.clientWidth) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.el.sceneEl.canvas.clientHeight) * 2 + 1;
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects(), true);
     this.intersection = (intersections.length) > 0 ? intersections[ 0 ] : null;
@@ -1490,14 +1488,13 @@ AFRAME.registerComponent('ar-ui', {
   },
   tap: function (e) {
     var el = this.el;
-    this.size = el.sceneEl.renderer.getSize();
     var t = e;
     if (e.touches) {
       t = e.touches[0];
     }
     this.tapped = true;
-    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.el.sceneEl.canvas.clientWidth) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.el.sceneEl.canvas.clientHeight) * 2 + 1;
 
     this.raycaster.setFromCamera(this.normalizedCoordinatedPositionPointer, this.orthoCamera);
     var intersections = this.raycaster.intersectObjects(this.getIntersectedObjects(), true);
@@ -1576,8 +1573,6 @@ AFRAME.registerComponent('ar-ui', {
     }
   },
   onWindowResize: function (e) {
-    var el = this.el;
-    this.size = el.sceneEl.canvas.getBoundingClientRect();
     this.width = window.innerWidth / window.innerHeight;
     this.height = 1;
 

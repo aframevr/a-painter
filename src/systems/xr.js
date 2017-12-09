@@ -3,7 +3,7 @@ AFRAME.registerSystem('xr', {
     AR_AUTOSTART: { default: true }
   },
   init: function () {
-    // this.el.sceneEl.renderer.setPixelRatio(1);
+    this.el.sceneEl.renderer.setPixelRatio(1);
     this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: false});
     this.sceneEl.addEventListener('loaded', this.sceneLoaded.bind(this));
   },
@@ -105,8 +105,6 @@ AFRAME.registerSystem('xr', {
         };
         camera.aspect = size.width / size.height;
         camera.updateProjectionMatrix();
-        // Notify renderer of size change.
-        this.renderer.setSize(size.width, size.height, false);
       }
     };
 
@@ -117,6 +115,8 @@ AFRAME.registerSystem('xr', {
       if (sceneEl.isPlaying) { sceneEl.tick(sceneEl.time, delta); }
       renderer.animate(sceneEl.render.bind(sceneEl));
       if (sceneEl.renderer.xr && (!sceneEl.renderer.xr.session ||sceneEl.renderer.xr.session && !sceneEl.renderer.xr.sessionActive)) {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
         renderer.render(sceneEl.object3D, sceneEl.camera, sceneEl.renderTarget);
       }
 

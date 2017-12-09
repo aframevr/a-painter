@@ -209,9 +209,8 @@ AFRAME.registerComponent('ar-pin', {
     if (e.touches) {
       t = e.touches[0];
     }
-    this.size = this.el.sceneEl.renderer.getSize();
-    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
+    this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.el.sceneEl.canvas.clientWidth) * 2 - 1;
+    this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.el.sceneEl.canvas.clientHeight) * 2 + 1;
     this.coordinatesToFindAnchors.x = t.clientX / window.innerWidth;
     this.coordinatesToFindAnchors.y = t.clientY / window.innerHeight;
   },

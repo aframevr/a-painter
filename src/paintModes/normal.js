@@ -32,7 +32,6 @@ AFRAME.registerComponent('ar-paint-normal', {
   },
   initVars: function () {
     this.pressure = 0;
-    this.size = this.el.sceneEl.renderer.getSize();
     // normalized device coordinates position
     this.normalizedCoordinatedPositionPointer = new THREE.Vector2();
     this.pointerPosition = new THREE.Vector3();
@@ -66,13 +65,12 @@ AFRAME.registerComponent('ar-paint-normal', {
   },
   updatePointerPosition: function (e) {
     if (e) {
-      this.size = this.el.sceneEl.renderer.getSize();
       var t = e;
       if (e.touches) {
         t = e.touches[0];
       }
-      this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.size.width) * 2 - 1;
-      this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.size.height) * 2 + 1;
+      this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.el.sceneEl.canvas.clientWidth) * 2 - 1;
+      this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.el.sceneEl.canvas.clientHeight) * 2 + 1;
     } else {
       this.normalizedCoordinatedPositionPointer.x = 0;
       this.normalizedCoordinatedPositionPointer.y = 0;

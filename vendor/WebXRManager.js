@@ -1,4 +1,3 @@
-
 THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, updateCallback) {
   // Default options
   var defaultOptions = {
@@ -11,8 +10,6 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
   this.scene = scene;
 
   var boundHandleFrame = handleFrame.bind(this); // Useful for setting up the requestAnimationFrame callback
-
-  var devicePixelRatio = window.devicePixelRatio;
 
   // A provisional hack until XRSession end method works
   this.sessions = [];
@@ -45,7 +42,7 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
 
     // Prep THREE.js for the render of each XRView
     this.renderer.autoClear = false;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.session.baseLayer.framebufferWidth, this.session.baseLayer.framebufferHeight, false);
     this.renderer.clear();
 
     if (this.sessionActive) {
@@ -68,7 +65,7 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
         // Set up the renderer to the XRView's viewport and then render
         this.renderer.clearDepth();
         const viewport = view.getViewport(this.session.baseLayer);
-        this.renderer.setViewport(viewport.x / devicePixelRatio, viewport.y / devicePixelRatio, viewport.width / devicePixelRatio, viewport.height / devicePixelRatio);
+        this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
         this.doRender();
       }
     } else {
@@ -118,10 +115,11 @@ THREE.WebXRManager = function (options = {}, displays, renderer, camera, scene, 
       session.addEventListener('blur', ev => { this.handleSessionBlur(ev) })
       session.addEventListener('end', ev => { this.handleSessionEnded(ev) })
 
-      renderer.domElement.style.width = '';
-      renderer.domElement.style.height = '';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
       // Set the session's base layer into which the app will render
       session.baseLayer = new XRWebGLLayer(session, renderer.context);
+
       // Handle layer focus events
       session.baseLayer.addEventListener('focus', ev => { this.handleLayerFocus(ev) });
       session.baseLayer.addEventListener('blur', ev => { this.handleLayerBlur(ev) });

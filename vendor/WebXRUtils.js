@@ -27,39 +27,36 @@ THREE.WebXRUtils = {
               vr: false,
               ar: false
             };
-            // Hack to receive WebVR 1.1 display info
-            setTimeout(() => {
-              for (var displayObj of displays) {
-                // Reinit realities
-                realities = {
-                  vr: false,
-                  ar: false
-                };
-                if (displayObj.supportsSession(ARParamers)) {
-                  if (
-                    !displayObj._reality._vrDisplay &&
-                    isMobileDevice() &&
-                    !isAppleWebView()
-                  ) {
-                    // Mobile browsers except WebARonARCore and iOS App XR app
-                    realities.ar = false;
-                  } else if (!isMobileDevice()) {
-                    // Desktop browsers
-                    realities.ar = false;
-                  } else {
-                    realities.ar = true;
-                  }
-                }
+            for (var displayObj of displays) {
+              // Reinit realities
+              realities = {
+                vr: false,
+                ar: false
+              };
+              if (displayObj.supportsSession(ARParamers)) {
                 if (
-                  displayObj.supportsSession(VRParamers) &&
-                  displayObj._displayName.indexOf('polyfill') === -1
+                  !displayObj._reality._vrDisplay &&
+                  isMobileDevice() &&
+                  !isAppleWebView()
                 ) {
-                  realities.vr = true;
+                  // Mobile browsers except WebARonARCore and iOS App XR app
+                  realities.ar = false;
+                } else if (!isMobileDevice()) {
+                  // Desktop browsers
+                  realities.ar = false;
+                } else {
+                  realities.ar = true;
                 }
-                displayObj.supportedRealities = realities;
               }
-              resolve(displays);
-            }, 1000);
+              if (
+                displayObj.supportsSession(VRParamers) &&
+                displayObj._displayName.indexOf('polyfill') === -1
+              ) {
+                realities.vr = true;
+              }
+              displayObj.supportedRealities = realities;
+            }
+            resolve(displays);
 
             function isAppleWebView () {
               return (

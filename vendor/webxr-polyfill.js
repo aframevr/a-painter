@@ -2648,6 +2648,8 @@ var XRPolyfill = function (_EventHandlerBase) {
 		window.XRLayer = _XRLayer2.default;
 		window.XRWebGLLayer = _XRWebGLLayer2.default;
 
+		_this._getVRDisplaysFinished = false;
+
 		// Reality instances that may be shared by multiple XRSessions
 		_this._sharedRealities = [new _CameraReality2.default(_this)];
 		_this._privateRealities = [];
@@ -2683,7 +2685,12 @@ var XRPolyfill = function (_EventHandlerBase) {
 						}
 					}
 				}
+
+				_this._getVRDisplaysFinished = true;
 			});
+		} else {
+			// if no WebVR, we don't need to wait
+			_this._getVRDisplaysFinished = true;
 		}
 
 		// These elements are at the beginning of the body and absolutely positioned to fill the entire window
@@ -2712,10 +2719,16 @@ var XRPolyfill = function (_EventHandlerBase) {
 	_createClass(XRPolyfill, [{
 		key: 'getDisplays',
 		value: function getDisplays() {
-			var _this2 = this;
-
+			var self = this;
+			var waitTillDisplaysChecked = function waitTillDisplaysChecked(resolve) {
+				if (!self._getVRDisplaysFinished) {
+					setTimeout(waitTillDisplaysChecked.bind(self, resolve), 30);
+				} else {
+					resolve(self._displays);
+				}
+			};
 			return new Promise(function (resolve, reject) {
-				resolve(_this2._displays);
+				waitTillDisplaysChecked(resolve);
 			});
 		}
 
@@ -3472,6 +3485,8 @@ var XRWebGLLayer = function (_XRLayer) {
 
 		_this._session = session;
 		_this._context = context;
+		_this._width = _this._context.canvas.width;
+		_this._height = _this._context.canvas.height;
 		_this._framebuffer = null; // TODO
 		return _this;
 	}
@@ -3524,13 +3539,27 @@ var XRWebGLLayer = function (_XRLayer) {
 		}
 	}, {
 		key: 'framebufferWidth',
+		set: function set(w) {
+			this._width = w;
+			this._context.canvas.width = w;
+		},
 		get: function get() {
-			return this._context.drawingBufferWidth;
+			// not using this for now, on iOS it's not good.  
+			// var pr = window.devicePixelRatio || 1;
+			//return this._context.canvas.clientWidth;
+			return this._width;
 		}
 	}, {
 		key: 'framebufferHeight',
+		set: function set(h) {
+			this._height = h;
+			this._context.canvas.height = h;
+		},
 		get: function get() {
-			return this._context.drawingBufferHeight;
+			// not using this for now, on iOS it's not good.  
+			// var pr = window.devicePixelRatio || 1;
+			//return this._context.canvas.clientHeight;
+			return this._height;
 		}
 	}]);
 
@@ -3692,8 +3721,17 @@ var FlatDisplay = function (_XRDisplay) {
 	}, {
 		key: '_handleNewBaseLayer',
 		value: function _handleNewBaseLayer(baseLayer) {
-			baseLayer._context.canvas.width = window.innerWidth;
-			baseLayer._context.canvas.height = window.innerHeight;
+			baseLayer._context.canvas.style.width = "100%";
+			baseLayer._context.canvas.style.height = "100%";
+			baseLayer._context.canvas.width = this._xr._sessionEls.clientWidth;
+			baseLayer._context.canvas.height = this._xr._sessionEls.clientHeight;
+
+			// TODO:  Need to remove this listener if a new base layer is set
+			window.addEventListener('resize', function () {
+				baseLayer.framebufferWidth = baseLayer._context.canvas.clientWidth;
+				baseLayer.framebufferHeight = baseLayer._context.canvas.clientHeight;
+			}, false);
+
 			this._xr._sessionEls.appendChild(baseLayer._context.canvas);
 		}
 
@@ -3955,15 +3993,25 @@ var HeadMountedDisplay = function (_XRDisplay) {
 			}]).then(function () {
 				var leftEye = _this2._vrDisplay.getEyeParameters('left');
 				var rightEye = _this2._vrDisplay.getEyeParameters('right');
-				baseLayer._context.canvas.width = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
-				baseLayer._context.canvas.height = Math.max(leftEye.renderHeight, rightEye.renderHeight);
+				baseLayer.framebufferWidth = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
+				baseLayer.framebufferHeight = Math.max(leftEye.renderHeight, rightEye.renderHeight);
 				baseLayer._context.canvas.style.position = 'absolute';
 				baseLayer._context.canvas.style.bottom = '1px';
 				baseLayer._context.canvas.style.right = '1px';
+				baseLayer._context.canvas.style.width = "100%";
+				baseLayer._context.canvas.style.height = "100%";
 				document.body.appendChild(baseLayer._context.canvas);
 			}).catch(function (e) {
 				console.error('Unable to init WebVR 1.1 display', e);
 			});
+		}
+	}, {
+		key: '_stop',
+		value: function _stop() {
+			// TODO figure out how to stop ARKit and ARCore so that CameraReality can still work
+			if (this.running === false) return;
+			this.running = false;
+			this._reality._stop();
 		}
 
 		/*
@@ -4322,7 +4370,7 @@ var CameraReality = function (_Reality) {
 					_this4._arKitWrapper.hitTest(normalizedScreenX, normalizedScreenY, _ARKitWrapper2.default.HIT_TEST_TYPE_EXISTING_PLANES).then(function (hits) {
 						if (hits.length === 0) {
 							resolve(null);
-							// console.log('miss');
+							console.log('miss');
 							return;
 						}
 						var hit = _this4._pickARKitHit(hits);
