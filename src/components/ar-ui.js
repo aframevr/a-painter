@@ -36,7 +36,7 @@ AFRAME.registerComponent('ar-ui', {
 
     this.paintMode = 1;
 
-    this.atlasData = '{"total": {"w": 2048, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 1536, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 1536, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 1280, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 1536, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 1280, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 },"saved": { "x": 1792, "y": 640, "w": 256, "h": 256 },"moveAroundDevice": { "x": 0, "y": 0, "w": 512, "h": 512 },"moveAround": { "x": 1024, "y": 1792, "w": 1024, "h": 256 },"dragTapPin": { "x": 1024, "y": 1536, "w": 1024, "h": 256 },"saving": { "x": 1024, "y": 1024, "w": 512, "h": 512 },"paintMode1": { "x": 512, "y": 1280, "w": 256, "h": 256 },"paintMode2": { "x": 256, "y": 1280, "w": 256, "h": 256 },"paintMode1Btn": { "x": 512, "y": 1024, "w": 256, "h": 256 },"paintMode2Btn": { "x": 256, "y": 1024, "w": 256, "h": 256 }}}';
+    this.atlasData = '{"total": {"w": 2048, "h": 2048 }, "images": {"apainterBtn": { "x": 0, "y": 1536, "w": 512, "h": 512 },"trackingLost": { "x": 1536, "y": 1536, "w": 512, "h": 512 },"brushBtn": { "x": 0, "y": 1024, "w": 512, "h": 512 },"closeBtn": { "x": 1536, "y": 1280, "w": 256, "h": 256 },"trackingDevice": { "x": 1280, "y": 1280, "w": 256, "h": 256 },"undoBtn": { "x": 1536, "y": 1024, "w": 256, "h": 256 },"saveBtn": { "x": 1280, "y": 1024, "w": 256, "h": 256 },"strokeDragBar": { "x": 0, "y": 896, "w": 1024, "h": 128 },"strokeDragDot": { "x": 0, "y": 640, "w": 256, "h": 256 },"saved": { "x": 1792, "y": 640, "w": 256, "h": 256 },"moveAroundDevice": { "x": 0, "y": 0, "w": 512, "h": 512 },"moveAround": { "x": 1024, "y": 1792, "w": 1024, "h": 256 },"dragTapPin": { "x": 1024, "y": 1536, "w": 1024, "h": 256 },"saving": { "x": 1024, "y": 1024, "w": 512, "h": 512 },"paintMode1": { "x": 512, "y": 1280, "w": 256, "h": 256 },"paintMode2": { "x": 256, "y": 1280, "w": 256, "h": 256 },"paintMode1Btn": { "x": 512, "y": 1024, "w": 256, "h": 256 },"paintMode2Btn": { "x": 256, "y": 1024, "w": 256, "h": 256 },"showUIAlert": { "x": 1024, "y": 768, "w": 1024, "h": 256 },"hideUIBtn": { "x": 256, "y": 512, "w": 256, "h": 256 }}}';
     this.atlas = JSON.parse(this.atlasData);
 
     this.paintControlsEl = document.querySelector('#ar-paint-controls');
@@ -281,6 +281,24 @@ AFRAME.registerComponent('ar-ui', {
       height: 0.01,
       padding: [0, 0.0015, 0.0325, 0],
       onclick: this.openPaintMode.bind(this)
+    });
+    this.addButton({
+      id: 'hideUIBtn',
+      layout: 'bottom-right',
+      visible: false,
+      enabled: false,
+      width: 0.0125,
+      height: 0.0125,
+      padding: [0, 0, 0.01, 0],
+      onclick: this.hideUI.bind(this)
+    });
+    this.addImage({
+      id: 'showUIAlert',
+      layout: 'top-center',
+      visible: false,
+      width: 0.06,
+      height: 0.015,
+      padding: [0, 0, 0, 0]
     });
   },
   addCommonEls: function () {
@@ -1492,6 +1510,9 @@ AFRAME.registerComponent('ar-ui', {
     if (e.touches) {
       t = e.touches[0];
     }
+    if (this.UIHided) {
+      this.showUI();
+    }
     this.tapped = true;
     this.normalizedCoordinatedPositionPointer.x = (t.clientX / this.el.sceneEl.canvas.clientWidth) * 2 - 1;
     this.normalizedCoordinatedPositionPointer.y = -(t.clientY / this.el.sceneEl.canvas.clientHeight) * 2 + 1;
@@ -1672,9 +1693,11 @@ AFRAME.registerComponent('ar-ui', {
     this.showEl(this, 'undoBtn', true, 500);
     this.showEl(this, 'saveBtn', true, 800);
     this.showEl(this, 'paintModeBtn', true, 1100);
-    this.showEl(this, 'strokeDragBar', false, 1400);
-    this.showEl(this, 'strokeDragDot', true, 1700);
-    this.showEl(this, 'brushBtn', true, 2000);
+    this.showEl(this, 'hideUIBtn', true, 1400);
+    this.showEl(this, 'strokeDragBar', false, 1700);
+    this.showEl(this, 'strokeDragDot', true, 2200);
+    this.showEl(this, 'brushBtn', true, 2300);
+    
     this.playSound('#uiClick0');
     setTimeout(function () {
       self.el.emit('activate', false);
@@ -1735,6 +1758,7 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.closeBtn.setAttribute('enabled', false);
     this.objects.saveBtn.setAttribute('enabled', false);
     this.objects.undoBtn.setAttribute('enabled', false);
+    this.objects.hideUIBtn.setAttribute('enabled', false);
     this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
       case 'saving':
@@ -1767,6 +1791,7 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.closeBtn.setAttribute('enabled', true);
     this.objects.saveBtn.setAttribute('enabled', true);
     this.objects.undoBtn.setAttribute('enabled', true);
+    this.objects.hideUIBtn.setAttribute('enabled', true);
     this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
       case 'saving':
@@ -1812,7 +1837,7 @@ AFRAME.registerComponent('ar-ui', {
     .start();
   },
   undo: function () {
-    // console.log('undo', this);
+    console.log('undo', this);
     // this.el.sceneEl.systems.brush.clear();
     this.el.sceneEl.systems.brush.undo();
     this.playSound('#uiUndo');
@@ -1894,6 +1919,42 @@ AFRAME.registerComponent('ar-ui', {
       this.openModal('paintMode');
       this.playSound('#uiClick0');
     }
+  },
+  hideUI: function () {
+    this.UIHided = true;
+    document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
+    // Show and activate close button
+    this.objects['closeBtn'].setAttribute('visible', false);
+    this.objects['undoBtn'].setAttribute('visible', false);
+    this.objects['saveBtn'].setAttribute('visible', false);
+    this.objects['paintModeBtn'].setAttribute('visible', false);
+    this.objects['hideUIBtn'].setAttribute('visible', false);
+    this.objects['strokeDragBar'].setAttribute('visible', false);
+    this.objects['strokeDragDot'].setAttribute('visible', false);
+    this.objects['brushBtn'].setAttribute('visible', false);
+
+    this.showEl(this, 'showUIAlert', false, 50);
+    var self = this;
+    this.showUIAlertTimeOut = setTimeout(function () {
+      self.hideEl(self, 'showUIAlert', false);
+    }, 2000);
+  },
+  showUI: function () {
+    this.UIHided = false;
+    clearTimeout(this.showUIAlertTimeOut);
+    document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
+    document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
+    this.hideEl(this, 'showUIAlert', false);
+
+    this.objects['closeBtn'].setAttribute('visible', true);
+    this.objects['undoBtn'].setAttribute('visible', true);
+    this.objects['saveBtn'].setAttribute('visible', true);
+    this.objects['paintModeBtn'].setAttribute('visible', true);
+    this.objects['hideUIBtn'].setAttribute('visible', true);
+    this.objects['strokeDragBar'].setAttribute('visible', true);
+    this.objects['strokeDragDot'].setAttribute('visible', true);
+    this.objects['brushBtn'].setAttribute('visible', true);
   },
   closePaintMode: function () {
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
