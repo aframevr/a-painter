@@ -3,7 +3,6 @@ AFRAME.registerSystem('xr', {
     AR_AUTOSTART: { default: true }
   },
   init: function () {
-    this.el.sceneEl.renderer.setPixelRatio(1);
     this.el.sceneEl.setAttribute('vr-mode-ui', {enabled: false});
     this.sceneEl.addEventListener('loaded', this.sceneLoaded.bind(this));
   },
