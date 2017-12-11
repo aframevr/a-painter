@@ -1758,6 +1758,7 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.closeBtn.setAttribute('enabled', false);
     this.objects.saveBtn.setAttribute('enabled', false);
     this.objects.undoBtn.setAttribute('enabled', false);
+    this.objects.paintModeBtn.setAttribute('enabled', false);
     this.objects.hideUIBtn.setAttribute('enabled', false);
     this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
@@ -1791,6 +1792,7 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.closeBtn.setAttribute('enabled', true);
     this.objects.saveBtn.setAttribute('enabled', true);
     this.objects.undoBtn.setAttribute('enabled', true);
+    this.objects.paintModeBtn.setAttribute('enabled', true);
     this.objects.hideUIBtn.setAttribute('enabled', true);
     this.objects.brushBtn.setAttribute('enabled', false);
     switch (id) {
@@ -1925,14 +1927,22 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
     // Show and activate close button
-    this.objects['closeBtn'].setAttribute('visible', false);
-    this.objects['undoBtn'].setAttribute('visible', false);
-    this.objects['saveBtn'].setAttribute('visible', false);
-    this.objects['paintModeBtn'].setAttribute('visible', false);
-    this.objects['hideUIBtn'].setAttribute('visible', false);
-    this.objects['strokeDragBar'].setAttribute('visible', false);
-    this.objects['strokeDragDot'].setAttribute('visible', false);
-    this.objects['brushBtn'].setAttribute('visible', false);
+    this.objects.closeBtn.setAttribute('visible', false);
+    this.objects.undoBtn.setAttribute('visible', false);
+    this.objects.saveBtn.setAttribute('visible', false);
+    this.objects.paintModeBtn.setAttribute('visible', false);
+    this.objects.hideUIBtn.setAttribute('visible', false);
+    this.objects.strokeDragBar.setAttribute('visible', false);
+    this.objects.strokeDragDot.setAttribute('visible', false);
+    this.objects.brushBtn.setAttribute('visible', false);
+
+    this.objects.closeBtn.setAttribute('enabled', false);
+    this.objects.undoBtn.setAttribute('enabled', false);
+    this.objects.saveBtn.setAttribute('enabled', false);
+    this.objects.paintModeBtn.setAttribute('enabled', false);
+    this.objects.hideUIBtn.setAttribute('enabled', false);
+    this.objects.strokeDragDot.setAttribute('enabled', false);
+    this.objects.brushBtn.setAttribute('enabled', false);
 
     this.showEl(this, 'showUIAlert', false, 50);
     var self = this;
@@ -1947,14 +1957,25 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     this.hideEl(this, 'showUIAlert', false);
 
-    this.objects['closeBtn'].setAttribute('visible', true);
-    this.objects['undoBtn'].setAttribute('visible', true);
-    this.objects['saveBtn'].setAttribute('visible', true);
-    this.objects['paintModeBtn'].setAttribute('visible', true);
-    this.objects['hideUIBtn'].setAttribute('visible', true);
-    this.objects['strokeDragBar'].setAttribute('visible', true);
-    this.objects['strokeDragDot'].setAttribute('visible', true);
-    this.objects['brushBtn'].setAttribute('visible', true);
+    this.objects.closeBtn.setAttribute('visible', true);
+    this.objects.undoBtn.setAttribute('visible', true);
+    this.objects.saveBtn.setAttribute('visible', true);
+    this.objects.paintModeBtn.setAttribute('visible', true);
+    this.objects.hideUIBtn.setAttribute('visible', true);
+    this.objects.strokeDragBar.setAttribute('visible', true);
+    this.objects.strokeDragDot.setAttribute('visible', true);
+    this.objects.brushBtn.setAttribute('visible', true);
+
+    var self = this;
+    setTimeout(function () {
+      self.objects.closeBtn.setAttribute('enabled', true);
+      self.objects.undoBtn.setAttribute('enabled', true);
+      self.objects.saveBtn.setAttribute('enabled', true);
+      self.objects.paintModeBtn.setAttribute('enabled', true);
+      self.objects.hideUIBtn.setAttribute('enabled', true);
+      self.objects.strokeDragDot.setAttribute('enabled', true);
+      self.objects.brushBtn.setAttribute('enabled', true);
+    }, 50);
   },
   closePaintMode: function () {
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
