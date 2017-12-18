@@ -102,8 +102,6 @@
 
         this.sharedBuffer.update();
 
-        //      this.geometry.setDrawRange(0, this.data.numPoints * 6);
-
         return true;
       }
     })()

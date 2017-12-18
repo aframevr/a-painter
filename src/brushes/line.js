@@ -207,7 +207,6 @@
       this.current.attributes.normal.needsUpdate = true;
       this.current.attributes.position.needsUpdate = true;
       this.current.attributes.uv.needsUpdate = true;      
-
     }
   };
   var geometryManager = null;

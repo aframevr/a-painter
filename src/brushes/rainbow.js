@@ -55,43 +55,49 @@
 
         this.object3D.add(mesh);
       },
-      addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
-        var uv = 0;
-        for (i = 0; i < this.data.numPoints; i++) {
-          this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-          this.uvs[ uv++ ] = 0;
-
-          this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-          this.uvs[ uv++ ] = 1;
-        }
-
+      addPoint: (function () {
         var direction = new THREE.Vector3();
-        direction.set(1, 0, 0);
-        direction.applyQuaternion(orientation);
-        direction.normalize();
+        var posA = new THREE.Vector3();
+        var posB = new THREE.Vector3();
+        var auxDir = new THREE.Vector3();
 
-        var posA = pointerPosition.clone();
-        var posB = pointerPosition.clone();
-        var brushSize = this.data.size * pressure;
-        posA.add(direction.clone().multiplyScalar(brushSize / 2));
-        posB.add(direction.clone().multiplyScalar(-brushSize / 2));
+        return function (position, orientation, pointerPosition, pressure, timestamp) {
+          var uv = 0;
+          for (i = 0; i < this.data.numPoints; i++) {
+            this.uvs[uv++] = i / (this.data.numPoints - 1);
+            this.uvs[uv++] = 0;
 
-        this.vertices[ this.idx++ ] = posA.x;
-        this.vertices[ this.idx++ ] = posA.y;
-        this.vertices[ this.idx++ ] = posA.z;
+            this.uvs[uv++] = i / (this.data.numPoints - 1);
+            this.uvs[uv++] = 1;
+          }
 
-        this.vertices[ this.idx++ ] = posB.x;
-        this.vertices[ this.idx++ ] = posB.y;
-        this.vertices[ this.idx++ ] = posB.z;
+          direction.set(1, 0, 0);
+          direction.applyQuaternion(orientation);
+          direction.normalize();
 
-        this.geometry.attributes.position.needsUpdate = true;
-        this.geometry.attributes.uv.needsUpdate = true;
+          posA.copy(pointerPosition);
+          posB.copy(pointerPosition);
 
-        this.geometry.setDrawRange(0, this.data.numPoints * 2);
+          var brushSize = this.data.size * pressure;
+          posA.add(auxDir.copy(direction).multiplyScalar(brushSize / 2));
+          posB.add(auxDir.copy(direction).multiplyScalar(-brushSize / 2));
 
-        return true;
-      },
+          this.vertices[this.idx++] = posA.x;
+          this.vertices[this.idx++] = posA.y;
+          this.vertices[this.idx++] = posA.z;
 
+          this.vertices[this.idx++] = posB.x;
+          this.vertices[this.idx++] = posB.y;
+          this.vertices[this.idx++] = posB.z;
+
+          this.geometry.attributes.position.needsUpdate = true;
+          this.geometry.attributes.uv.needsUpdate = true;
+
+          this.geometry.setDrawRange(0, this.data.numPoints * 2);
+
+          return true;
+        }        
+      })(),
       tick: function(timeOffset, delta) {
         this.material.uniforms.time.value = timeOffset;
       },
