@@ -39,7 +39,10 @@ var onLoaded = require('../onloaded.js');
 
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('strip-' + this.materialOptions.type);
-      this.idx = this.sharedBuffer.idx.positions / 3;
+      this.positionsIdx = {
+        start: this.sharedBuffer.idx.positions,
+        end: this.sharedBuffer.idx.positions
+      }
       this.UVidx = this.sharedBuffer.idx.uvs;
 
       this.sharedBuffer.restartPrimitive();
@@ -63,7 +66,7 @@ var onLoaded = require('../onloaded.js');
         posA.add(direction.clone().multiplyScalar(brushSize / 2));
         posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
-        if (this.first && this.idx > 0) {
+        if (this.first && this.positionsIdx.start > 0) {
           // Degenerated triangle
           this.first = false;
           this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
@@ -96,19 +99,112 @@ var onLoaded = require('../onloaded.js');
           | \ |
           0---1
         */
-        var idx = this.idx;
-
         this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
         this.sharedBuffer.addVertice(posB.x, posB.y, posB.z);
 
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
 
+        this.positionsIdx.end = this.sharedBuffer.idx.positions;
+
         this.sharedBuffer.update();
-        this.sharedBuffer.computeVertexNormals();
+        this.computeStripVertexNormals();
         return true;
       }
+    })(),
+
+    computeStripVertexNormals: (function () {
+      var pA = new THREE.Vector3();
+      var pB = new THREE.Vector3();
+      var pC = new THREE.Vector3();
+      var cb = new THREE.Vector3();
+      var ab = new THREE.Vector3();
+      var vector = new THREE.Vector3();
+
+      return function () {
+        var end = this.positionsIdx.end;
+        var start = this.positionsIdx.start;
+        
+        var normals = this.sharedBuffer.current.attributes.normal.array;
+
+        for (var i = start; i < end; i++) {
+          normals[i] = 0;
+        }
+
+        var vertices = this.sharedBuffer.current.attributes.position.array;
+
+        var pair = true;
+        for (i = start; i < end; i += 3) {
+          if (pair) {
+            pA.fromArray(vertices, i);
+            pB.fromArray(vertices, i + 3);
+            pC.fromArray(vertices, i + 6);
+          } else {
+            pA.fromArray(vertices, i + 3);
+            pB.fromArray(vertices, i);
+            pC.fromArray(vertices, i + 6);
+          }
+          pair = !pair;
+
+          cb.subVectors(pC, pB);
+          ab.subVectors(pA, pB);
+          cb.cross(ab);
+          cb.normalize();
+
+          normals[i] += cb.x;
+          normals[i + 1] += cb.y;
+          normals[i + 2] += cb.z;
+
+          normals[i + 3] += cb.x;
+          normals[i + 4] += cb.y;
+          normals[i + 5] += cb.z;
+
+          normals[i + 6] += cb.x;
+          normals[i + 7] += cb.y;
+          normals[i + 8] += cb.z;
+        }
+
+        /*
+        first and last vertice (0 and 8) belongs just to one triangle
+        second and penultimate (1 and 7) belongs to two triangles
+        the rest of the vertices belongs to three triangles
+   
+          1_____3_____5_____7
+          /\    /\    /\    /\
+         /  \  /  \  /  \  /  \
+        /____\/____\/____\/____\
+        0    2     4     6     8
+        */
+
+        // Vertices that are shared across three triangles
+        for (i = start + 2 * 3, il = end - 2 * 3; i < il; i++) {
+          normals[i] = normals[i] / 3;
+        }
+
+        // Second and penultimate triangle, that shares just two triangles
+        normals[start + 3] = normals[start + 3] / 2;
+        normals[start + 3 + 1] = normals[start + 3 + 1] / 2;
+        normals[start + 3 + 2] = normals[start + 3 * 1 + 2] / 2;
+
+        normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
+        normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
+        normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
+
+        var normals = this.sharedBuffer.current.attributes.normal;
+
+        for (var i = start; i < end / 3; i++) {
+
+          vector.x = normals.getX(i);
+          vector.y = normals.getY(i);
+          vector.z = normals.getZ(i);
+
+          vector.normalize();
+
+          normals.setXYZ(i, vector.x, vector.y, vector.z);
+        }
+      }
     })()
+
   };
 
   var lines = [
