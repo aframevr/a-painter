@@ -1,52 +1,11 @@
-/* global AFRAME THREE */
+ /* global AFRAME THREE */
 (function () {
-/*var materials = {
-    shaded: new THREE.MeshStandardMaterial({
-      side: THREE.DoubleSide,
-      map: window.atlas.map,
-      vertexColors: THREE.VertexColors,
-      transparent: true,
-      alphaTest: 0.5,
-      roughness: 0.75,
-      metalness: 0.25
-    }),
-    flat: new THREE.MeshBasicMaterial({
-      side: THREE.DoubleSide,
-      map: window.atlas.map,
-      vertexColors: THREE.VertexColors,
-      transparent: true,
-      alphaTest: 0.5
-    })
-  };
-/*
-  var buffers = {
-    vertices: new Float32Array(this.options.maxPoints * 3 * 3 * 2),
-    normals: new Float32Array(this.options.maxPoints * 3 * 3 * 2),
-    uvs: new Float32Array(this.options.maxPoints * 2 * 3 * 2),
-    colors: new Float32Array(this.options.maxPoints * 2 * 2)
-  };
-*/
   var stamp = {
 
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
       this.idx = this.sharedBuffer.idx.positions / 3;
-/*
-      this.idx = 0;
-      this.geometry = new THREE.BufferGeometry();
-      this.vertices = new Float32Array(this.options.maxPoints * 3 * 3 * 2);
-      this.normals = new Float32Array(this.options.maxPoints * 3 * 3 * 2);
-      this.uvs = new Float32Array(this.options.maxPoints * 2 * 3 * 2);
-      this.colors = new Float32Array(this.options.maxPoints * 2 * 2);
 
-      this.geometry.setDrawRange(0, 0);
-      this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
-      this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
-      this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
-      this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
-
-      var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
-  */
       this.currAngle = 0;
       this.subTextures = 1;
       this.angleJitter = 0;
@@ -62,99 +21,93 @@
         this.angleJitter = this.materialOptions['angleJitter'];
         this.angleJitter = this.angleJitter * 2 - this.angleJitter;
       }
-
-      /*
-      mesh.frustumCulled = false;
-      mesh.vertices = this.vertices;
-      this.object3D.add(mesh);
-
-      var drawing = document.querySelector('.a-drawing');
-      if (!drawing) {
-        drawing = document.createElement('a-entity');
-        drawing.className = "a-drawing";
-        document.querySelector('a-scene').appendChild(drawing);
-      }
-      drawing.object3D.add(this.object3D);
-*/
     },
 
-    addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
-      // brush side
-      var pi2 = Math.PI / 2;
-      var dir = new THREE.Vector3();
-      dir.set(1, 0, 0);
-      dir.applyQuaternion(rotation);
-      dir.normalize();
-
-      // brush normal
+    addPoint: (function () {
       var axis = new THREE.Vector3();
-      axis.set(0, 1, 0);
-      axis.applyQuaternion(rotation);
-      axis.normalize();
+      var dir = new THREE.Vector3();
+      var a = new THREE.Vector3();
+      var b = new THREE.Vector3();
+      var c = new THREE.Vector3();
+      var d = new THREE.Vector3();
+      var auxDir = new THREE.Vector3();
+      var pi2 = Math.PI / 2;
 
-      var brushSize = this.data.size * pressure / 2;
-      var brushAngle = Math.PI / 4 + Math.random() * this.angleJitter;
+      return function (position, rotation, pointerPosition, pressure, timestamp) {
+        // brush side
+        dir.set(1, 0, 0);
+        dir.applyQuaternion(rotation);
+        dir.normalize();
 
-      if (this.autoRotate) {
-        this.currAngle += 0.1;
-        brushAngle += this.currAngle;
+        // brush normal
+        axis.set(0, 1, 0);
+        axis.applyQuaternion(rotation);
+        axis.normalize();
+
+        var brushSize = this.data.size * pressure / 2;
+        var brushAngle = Math.PI / 4 + Math.random() * this.angleJitter;
+
+        if (this.autoRotate) {
+          this.currAngle += 0.1;
+          brushAngle += this.currAngle;
+        }
+        
+        a.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, brushAngle)).multiplyScalar(brushSize));
+        b.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, pi2)).multiplyScalar(brushSize));
+        c.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, pi2)).multiplyScalar(brushSize));
+        d.copy(pointerPosition).add(dir.applyAxisAngle(axis, pi2).multiplyScalar(brushSize));
+
+        var nidx = this.idx;
+        var cidx = this.idx;
+
+        // triangle 1
+        this.sharedBuffer.addVertice(a.x, a.y, a.z);
+        this.sharedBuffer.addVertice(b.x, b.y, b.z);
+        this.sharedBuffer.addVertice(c.x, c.y, c.z);
+
+        // triangle 2
+        this.sharedBuffer.addVertice(c.x, c.y, c.z);
+        this.sharedBuffer.addVertice(d.x, d.y, d.z);
+        this.sharedBuffer.addVertice(a.x, a.y, a.z);
+
+        // normals & color
+        for (var i = 0; i < 6; i++) {
+          this.sharedBuffer.addNormal(axis.x, axis.y, axis.z);
+          this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+        }
+
+        // UVs
+        var uv = this.data.numPoints * 6 * 2;
+
+        // subTextures?
+        var Umin = 0;
+        var Umax = 1;
+        if (this.subTextures > 1) {
+          var subt = Math.floor(Math.random() * this.subTextures);
+          Umin = 1.0 / this.subTextures * subt;
+          Umax = Umin + 1.0 / this.subTextures;
+        }
+
+        var converter = this.materialOptions.converter;
+
+        // triangle 1 uv
+        this.sharedBuffer.addUV(converter.convertU(Umin), converter.convertV(1));
+        this.sharedBuffer.addUV(converter.convertU(Umin), converter.convertV(0));
+        this.sharedBuffer.addUV(converter.convertU(Umax), converter.convertV(0));
+
+        // triangle2 uv
+        this.sharedBuffer.addUV(converter.convertU(Umax), converter.convertV(0));
+        this.sharedBuffer.addUV(converter.convertU(Umax), converter.convertV(1));
+        this.sharedBuffer.addUV(converter.convertU(Umin), converter.convertV(1));
+
+        this.sharedBuffer.update();
+
+        //      this.geometry.setDrawRange(0, this.data.numPoints * 6);
+
+        return true;
       }
-
-      var a = pointerPosition.clone().add(dir.applyAxisAngle(axis, brushAngle).clone().multiplyScalar(brushSize));
-      var b = pointerPosition.clone().add(dir.applyAxisAngle(axis, pi2).clone().multiplyScalar(brushSize));
-      var c = pointerPosition.clone().add(dir.applyAxisAngle(axis, pi2).clone().multiplyScalar(brushSize));
-      var d = pointerPosition.clone().add(dir.applyAxisAngle(axis, pi2).multiplyScalar(brushSize));
-
-      var nidx = this.idx;
-      var cidx = this.idx;
-
-      // triangle 1
-      this.sharedBuffer.addVertice(a.x, a.y, a.z);
-      this.sharedBuffer.addVertice(b.x, b.y, b.z);
-      this.sharedBuffer.addVertice(c.x, c.y, c.z);
-
-      // triangle 2
-      this.sharedBuffer.addVertice(c.x, c.y, c.z);
-      this.sharedBuffer.addVertice(d.x, d.y, d.z);
-      this.sharedBuffer.addVertice(a.x, a.y, a.z);
-
-      // normals & color
-      for (var i = 0; i < 6; i++) {
-        this.sharedBuffer.addNormal(axis.x, axis.y, axis.z);
-
-        this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
-      }
-
-      // UVs
-      var uv = this.data.numPoints * 6 * 2;
-
-      // subTextures?
-      var Umin = 0;
-      var Umax = 1;
-      if (this.subTextures > 1) {
-        var subt = Math.floor(Math.random() * this.subTextures);
-        Umin = 1.0 / this.subTextures * subt;
-        Umax = Umin + 1.0 / this.subTextures;
-      }
-
-      var converter = this.materialOptions.converter;
-
-      // triangle 1 uv
-      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(1) );
-      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(0) );
-      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(0) );
-
-      // triangle2 uv
-      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(0) );
-      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(1) );
-      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(1) );
-
-      this.sharedBuffer.update();
-
-//      this.geometry.setDrawRange(0, this.data.numPoints * 6);
-
-      return true;
-    }
+    })()
+    
   };
 
   var stamps = [
