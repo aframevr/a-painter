@@ -50,7 +50,7 @@ AFRAME.registerSystem('painter', {
       AFRAME.registerInputMappings(mappings);
     });
 
-    this.version = '1.1';
+    this.version = '1.2';
     this.brushSystem = this.sceneEl.systems.brush;
     this.showTemplateItems = true;
 
