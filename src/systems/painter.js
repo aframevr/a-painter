@@ -145,6 +145,12 @@ AFRAME.registerSystem('painter', {
           hand.setAttribute('brush', 'brush', brushesNames[index]);
         });
       }
+
+      if (event.keyCode === 84) {
+        // Random stroke (t)
+        self.brushSystem.generateTestLines();
+      }
+
       if (event.keyCode === 82) {
         // Random stroke (r)
         self.brushSystem.generateRandomStrokes(1);

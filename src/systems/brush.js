@@ -192,6 +192,53 @@ AFRAME.registerSystem('brush', {
       this.strokes[i].tick(time, delta);
     }
   },
+  generateTestLines: function () {
+    function randNeg() { return 2 * Math.random() - 1; }
+    var z = -2;
+    var y = 1;
+    var size = 0.5;
+    var width = 3;
+    var pressure = 1;
+    var numPoints = 5;
+
+    var steps = width / numPoints;
+    var numStrokes = 1;
+    var brushesNames = Object.keys(AFRAME.BRUSHES);
+    brushesNames2 = [
+      // 'flat',
+      'lines5',
+      //'squared-textured',
+      'lines5'
+    ];
+
+    var x = -(size + 0.1) * brushesNames.length / 2;
+    x= 0;
+    var y = - width / 2;
+    brushesNames.forEach(brushName => {
+      var color = new THREE.Color(Math.random(), Math.random(), Math.random());
+
+      var stroke = this.addNewStroke(brushName, color, size);
+      var entity = document.querySelector('#left-hand');
+      entity.emit('stroke-started', { entity: entity, stroke: stroke });
+
+      var position = new THREE.Vector3(x, y, z);
+      var aux = new THREE.Vector3();
+
+      for (var i = 0; i < numPoints; i++) {
+        var orientation = new THREE.Quaternion();
+        aux.set(0, steps, 0.1);
+        var euler = new THREE.Euler(0, Math.PI, 0);
+        orientation.setFromEuler(euler);
+        position = position.add(aux);
+        var timestamp = 0;
+
+        var pointerPosition = this.getPointerPosition(position, orientation);
+        stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
+      }
+
+      x+= size + 0.1;
+    });
+  },
   generateRandomStrokes: function (numStrokes) {
     function randNeg () { return 2 * Math.random() - 1; }
 
@@ -253,7 +300,7 @@ AFRAME.registerSystem('brush', {
     //var entity = document.createElement('a-entity');
     //entity.className = "a-stroke";
     //drawing.appendChild(entity);
-    drawing.object3D.add(stroke.object3D);
+//    drawing.object3D.add(stroke.object3D);
     //entity.setObject3D('mesh', stroke.object3D);
     //stroke.entity = entity;
 

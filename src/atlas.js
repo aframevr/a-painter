@@ -13,7 +13,7 @@ Atlas.prototype = {
           var totalSize = AtlasJSON.meta.size;
           var data = AtlasJSON.frames[filename];
           if (u>1 || u<0) {
-            console.log(filename, u);
+            u = 0;
           }
           return data.frame.x / totalSize.w + u * data.frame.w / totalSize.w;
         },
@@ -21,8 +21,11 @@ Atlas.prototype = {
         convertV(v) {
           var totalSize = AtlasJSON.meta.size;
           var data = AtlasJSON.frames[filename];
+          if (v > 1 || v < 0) {
+            v = 0;
+          }
 
-          return 1- (data.frame.y / totalSize.h + v * data.frame.h / totalSize.h);
+          return 1 - (data.frame.y / totalSize.h + v * data.frame.h / totalSize.h);
         }
       }
     } else {

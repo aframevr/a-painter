@@ -1,6 +1,6 @@
 /* global AFRAME THREE */
 (function () {
-  var materials = {
+/*var materials = {
     shaded: new THREE.MeshStandardMaterial({
       side: THREE.DoubleSide,
       map: window.atlas.map,
@@ -18,10 +18,20 @@
       alphaTest: 0.5
     })
   };
-
+/*
+  var buffers = {
+    vertices: new Float32Array(this.options.maxPoints * 3 * 3 * 2),
+    normals: new Float32Array(this.options.maxPoints * 3 * 3 * 2),
+    uvs: new Float32Array(this.options.maxPoints * 2 * 3 * 2),
+    colors: new Float32Array(this.options.maxPoints * 2 * 2)
+  };
+*/
   var stamp = {
 
     init: function (color, brushSize) {
+      this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
+      this.idx = this.sharedBuffer.idx.positions / 3;
+/*
       this.idx = 0;
       this.geometry = new THREE.BufferGeometry();
       this.vertices = new Float32Array(this.options.maxPoints * 3 * 3 * 2);
@@ -36,6 +46,7 @@
       this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
 
       var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
+  */
       this.currAngle = 0;
       this.subTextures = 1;
       this.angleJitter = 0;
@@ -52,13 +63,19 @@
         this.angleJitter = this.angleJitter * 2 - this.angleJitter;
       }
 
+      /*
       mesh.frustumCulled = false;
       mesh.vertices = this.vertices;
       this.object3D.add(mesh);
-    },
 
-    getMaterial: function () {
-      return materials[this.materialOptions.type];
+      var drawing = document.querySelector('.a-drawing');
+      if (!drawing) {
+        drawing = document.createElement('a-entity');
+        drawing.className = "a-drawing";
+        document.querySelector('a-scene').appendChild(drawing);
+      }
+      drawing.object3D.add(this.object3D);
+*/
     },
 
     addPoint: function (position, rotation, pointerPosition, pressure, timestamp) {
@@ -92,42 +109,20 @@
       var cidx = this.idx;
 
       // triangle 1
-      this.vertices[ this.idx++ ] = a.x;
-      this.vertices[ this.idx++ ] = a.y;
-      this.vertices[ this.idx++ ] = a.z;
-
-      this.vertices[ this.idx++ ] = b.x;
-      this.vertices[ this.idx++ ] = b.y;
-      this.vertices[ this.idx++ ] = b.z;
-
-      this.vertices[ this.idx++ ] = c.x;
-      this.vertices[ this.idx++ ] = c.y;
-      this.vertices[ this.idx++ ] = c.z;
+      this.sharedBuffer.addVertice(a.x, a.y, a.z);
+      this.sharedBuffer.addVertice(b.x, b.y, b.z);
+      this.sharedBuffer.addVertice(c.x, c.y, c.z);
 
       // triangle 2
-
-      this.vertices[ this.idx++ ] = c.x;
-      this.vertices[ this.idx++ ] = c.y;
-      this.vertices[ this.idx++ ] = c.z;
-
-      this.vertices[ this.idx++ ] = d.x;
-      this.vertices[ this.idx++ ] = d.y;
-      this.vertices[ this.idx++ ] = d.z;
-
-      this.vertices[ this.idx++ ] = a.x;
-      this.vertices[ this.idx++ ] = a.y;
-      this.vertices[ this.idx++ ] = a.z;
-
+      this.sharedBuffer.addVertice(c.x, c.y, c.z);
+      this.sharedBuffer.addVertice(d.x, d.y, d.z);
+      this.sharedBuffer.addVertice(a.x, a.y, a.z);
 
       // normals & color
       for (var i = 0; i < 6; i++) {
-        this.normals[ nidx++ ] = axis.x;
-        this.normals[ nidx++ ] = axis.y;
-        this.normals[ nidx++ ] = axis.z;
+        this.sharedBuffer.addNormal(axis.x, axis.y, axis.z);
 
-        this.colors[ cidx++ ] = this.data.color.r;
-        this.colors[ cidx++ ] = this.data.color.g;
-        this.colors[ cidx++ ] = this.data.color.b;
+        this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
       }
 
       // UVs
@@ -145,26 +140,18 @@
       var converter = this.materialOptions.converter;
 
       // triangle 1 uv
-      this.uvs[ uv++ ] = converter.convertU(Umin);
-      this.uvs[ uv++ ] = converter.convertV(1);
-      this.uvs[ uv++ ] = converter.convertU(Umin);
-      this.uvs[ uv++ ] = converter.convertV(0);
-      this.uvs[ uv++ ] = converter.convertU(Umax);
-      this.uvs[ uv++ ] = converter.convertV(0);
+      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(1) );
+      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(0) );
+      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(0) );
 
       // triangle2 uv
-      this.uvs[ uv++ ] = converter.convertU(Umax);
-      this.uvs[ uv++ ] = converter.convertV(0);
-      this.uvs[ uv++ ] = converter.convertU(Umax);
-      this.uvs[ uv++ ] = converter.convertV(1);
-      this.uvs[ uv++ ] = converter.convertU(Umin);
-      this.uvs[ uv++ ] = converter.convertV(1);
+      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(0) );
+      this.sharedBuffer.addUV( converter.convertU(Umax), converter.convertV(1) );
+      this.sharedBuffer.addUV( converter.convertU(Umin), converter.convertV(1) );
 
-      this.geometry.attributes.normal.needsUpdate = true;
-      this.geometry.attributes.position.needsUpdate = true;
-      this.geometry.attributes.uv.needsUpdate = true;
+      this.sharedBuffer.update();
 
-      this.geometry.setDrawRange(0, this.data.numPoints * 6);
+//      this.geometry.setDrawRange(0, this.data.numPoints * 6);
 
       return true;
     }
