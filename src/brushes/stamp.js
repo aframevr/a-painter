@@ -1,5 +1,31 @@
  /* global AFRAME THREE */
-(function () {
+var sharedBufferGeometryManager = require('../sharedbuffergeometrymanager.js');
+var onLoaded = require('../onloaded.js');
+
+ (function () {
+
+   onLoaded(function () {
+     var shaded = new THREE.MeshStandardMaterial({
+        side: THREE.DoubleSide,
+        map: window.atlas.map,
+        vertexColors: THREE.VertexColors,
+        transparent: true,
+        alphaTest: 0.5,
+        roughness: 0.75,
+        metalness: 0.25
+      });
+    var flat = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        map: window.atlas.map,
+        vertexColors: THREE.VertexColors,
+        transparent: true,
+        alphaTest: 0.5
+    });
+
+    sharedBufferGeometryManager.addSharedBuffer('tris-flat', flat, THREE.TrianglesDrawMode);
+    sharedBufferGeometryManager.addSharedBuffer('tris-shaded', shaded, THREE.TrianglesDrawMode);
+  });
+
   var stamp = {
 
     init: function (color, brushSize) {

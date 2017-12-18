@@ -4,6 +4,8 @@ require('./atlas.js');
 require('./dragndrop.js');
 require('./binarymanager.js');
 require('../vendor/OrbitControls.js');
+require('./sharedbuffergeometrymanager.js');
+require('./sharedbuffergeometry.js');
 
 require('./utils.js');
 require('./ui2d.js');

@@ -388,6 +388,8 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
 
+    console.time('JSON Loading');
+
     var usedBrushes = [];
 
     for (var i = 0; i < data.strokes.length; i++) {
@@ -412,6 +414,8 @@ AFRAME.registerSystem('brush', {
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
+
+    console.timeEnd('JSON Loading');    
   },
   loadBinary: function (buffer) {
     var binaryManager = new BinaryManager(buffer);
@@ -420,11 +424,13 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid `magic` header');
       return;
     }
-
+    
     var version = binaryManager.readUint16();
     if (version !== VERSION) {
       console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');
     }
+
+    console.time('Binary Loading');
 
     var numUsedBrushes = binaryManager.readUint8();
     var usedBrushes = [];
@@ -452,6 +458,7 @@ AFRAME.registerSystem('brush', {
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
+    console.timeEnd('Binary Loading');
   },
   loadFromUrl: function (url, binary) {
     var loader = new THREE.XHRLoader(this.manager);
