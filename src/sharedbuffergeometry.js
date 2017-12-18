@@ -2,7 +2,7 @@ function SharedBufferGeometry (material, primitiveMode) {
   this.material = material;
   this.primitiveMode = primitiveMode;
 
-  this.maxBufferSize = 40000;
+  this.maxBufferSize = 50;
   this.geometries = [];
   this.current = null;
   this.addBuffer();
@@ -11,15 +11,18 @@ function SharedBufferGeometry (material, primitiveMode) {
 SharedBufferGeometry.prototype = {
   restartPrimitive: function () {
     if (this.idx.positions !== 0) {
-      var prev = this.idx.positions - 3;
-      var col = this.idx.colors - 3;
+      var prev = (this.idx.positions - 1) * 3;
+      var col = (this.idx.colors - 1) * 3;
+      var uv = (this.idx.uvs - 1) * 3;
 
       var position = this.current.attributes.position.array;
       this.addVertice(position[prev++], position[prev++], position[prev++]);
 
       var color = this.current.attributes.color.array;
       this.addColor(color[col++], color[col++], color[col++]);
-      this.addUV(0, 0);
+
+      var uvs = this.current.attributes.uv.array;
+      this.addUV(uvs[uv++], uvs[uv++]);
     }
   },
 
@@ -54,6 +57,10 @@ SharedBufferGeometry.prototype = {
     geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3).setDynamic(true));
     geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
 
+    if (this.geometries.length > 0) {
+
+    }
+
     this.idx = {
       positions: 0,
       uvs: 0,
@@ -66,47 +73,28 @@ SharedBufferGeometry.prototype = {
   },
 
   addColor: function (r, g, b) {
-    var color = this.current.attributes.color.array;
-
-    color[this.idx.colors++] = r;
-    color[this.idx.colors++] = g;
-    color[this.idx.colors++] = b;
+    this.current.attributes.color.setXYZ(this.idx.colors++, r, g, b);
   },
 
   addNormal: function (x, y, z) {
-    var normal = this.current.attributes.normal.array;
-
-    normal[this.idx.normals++] = x;
-    normal[this.idx.normals++] = y;
-    normal[this.idx.normals++] = z;
+    this.current.attributes.normal.setXYZ(this.idx.normals++, x, y, z);
   },
 
   addVertice: function (x, y, z) {
-    var position = this.current.attributes.position.array;
-
-    position[this.idx.positions++] = x;
-    position[this.idx.positions++] = y;
-    position[this.idx.positions++] = z;
+    var buffer = this.current.attributes.position;
+    buffer.setXYZ(this.idx.positions++, x, y, z);
+    if (this.idx.positions > buffer.count) {
+      console.log('ADDDing buffer');
+      this.addBuffer();
+    }
   },
-
-  addNormal: function (x, y, z) {
-    var normal = this.current.attributes.normal.array;
-
-    normal[this.idx.normals++] = x;
-    normal[this.idx.normals++] = y;
-    normal[this.idx.normals++] = z;
-  },
-
 
   addUV: function (u, v) {
-    var uvs = this.current.attributes.uv.array;
-
-    uvs[this.idx.uvs++] = u;
-    uvs[this.idx.uvs++] = v;
+    this.current.attributes.uv.setXY(this.idx.uvs++, u, v);
   },
 
   update: function () {
-    this.current.setDrawRange(0, this.idx.positions / 3);
+    this.current.setDrawRange(0, this.idx.positions);
 
     this.current.attributes.color.needsUpdate = true;
     this.current.attributes.normal.needsUpdate = true;

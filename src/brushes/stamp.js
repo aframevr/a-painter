@@ -30,7 +30,7 @@ var onLoaded = require('../onloaded.js');
 
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
-      this.idx = this.sharedBuffer.idx.positions / 3;
+      this.idx = this.sharedBuffer.idx.positions;
 
       this.currAngle = 0;
       this.subTextures = 1;

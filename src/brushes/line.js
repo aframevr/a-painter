@@ -72,7 +72,7 @@ var onLoaded = require('../onloaded.js');
           this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
           this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         }
-
+        
         if (this.materialOptions.type === 'textured') {
           var uvs = this.sharedBuffer.current.attributes.uv.array;
           var UVidx = this.UVidx;
@@ -83,7 +83,7 @@ var onLoaded = require('../onloaded.js');
             } else {
               u = i / this.data.numPoints;
             }
-            var offset = 4 * i + UVidx;
+            var offset = 4 * i + UVidx * 2;
 
             uvs[offset] = converter.convertU(u);
             uvs[offset + 1] = converter.convertV(0);
@@ -91,7 +91,7 @@ var onLoaded = require('../onloaded.js');
             uvs[offset + 2] = converter.convertU(u);
             uvs[offset + 3] = converter.convertV(1);
           }
-          this.sharedBuffer.idx.uvs = this.UVidx + (this.data.numPoints + 1) * 4 + 4;
+          this.sharedBuffer.idx.uvs = this.UVidx + (this.data.numPoints + 1) * 2 + 2;
         }
 
         /*
@@ -122,8 +122,8 @@ var onLoaded = require('../onloaded.js');
       var vector = new THREE.Vector3();
 
       return function () {
-        var end = this.positionsIdx.end;
-        var start = this.positionsIdx.start;
+        var end = this.positionsIdx.end * 3;
+        var start = this.positionsIdx.start * 3;
         
         var normals = this.sharedBuffer.current.attributes.normal.array;
 
@@ -190,8 +190,8 @@ var onLoaded = require('../onloaded.js');
         normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
         normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
 
+/*
         var normals = this.sharedBuffer.current.attributes.normal;
-
         for (var i = start; i < end / 3; i++) {
 
           vector.x = normals.getX(i);
@@ -202,6 +202,7 @@ var onLoaded = require('../onloaded.js');
 
           normals.setXYZ(i, vector.x, vector.y, vector.z);
         }
+*/        
       }
     })()
 

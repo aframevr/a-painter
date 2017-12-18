@@ -195,7 +195,6 @@ AFRAME.registerSystem('brush', {
   generateTestLines: function () {
     function randNeg() { return 2 * Math.random() - 1; }
     var z = -2;
-    var y = 1;
     var size = 0.5;
     var width = 3;
     var pressure = 1;
@@ -206,14 +205,13 @@ AFRAME.registerSystem('brush', {
     var brushesNames = Object.keys(AFRAME.BRUSHES);
     brushesNames2 = [
       // 'flat',
-      'lines5',
-      //'squared-textured',
+      'squared-textured',
       'lines5'
     ];
 
     var x = -(size + 0.1) * brushesNames.length / 2;
     x= 0;
-    var y = - width / 2;
+    var y = 0;
     brushesNames.forEach(brushName => {
       var color = new THREE.Color(Math.random(), Math.random(), Math.random());
 
@@ -240,16 +238,20 @@ AFRAME.registerSystem('brush', {
     });
   },
   generateRandomStrokes: function (numStrokes) {
+    numStrokes = 10;
     function randNeg () { return 2 * Math.random() - 1; }
 
+    var entity = document.querySelector('#left-hand');
+
+    var brushesNames = Object.keys(AFRAME.BRUSHES);
+
     for (var l = 0; l < numStrokes; l++) {
-      var brushName = 'flat';
+      var brushName = brushesNames[parseInt(Math.random() * 13)]; //'flat';
       var color = new THREE.Color(Math.random(), Math.random(), Math.random());
-      var size = Math.random() * 0.1;
+      var size = Math.random() * 0.3;
       var numPoints = parseInt(Math.random() * 500);
 
       var stroke = this.addNewStroke(brushName, color, size);
-      var entity = document.querySelector('#left-hand');
       entity.emit('stroke-started', {entity: entity, stroke: stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
@@ -262,7 +264,13 @@ AFRAME.registerSystem('brush', {
         aux.multiplyScalar(randNeg() / 20);
         orientation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
         position = position.add(aux);
+        if (position.y < 0) {
+          position.y = -position.y;
+        }
         var timestamp = 0;
+        pressure += 1 - 2 * Math.random();
+        if (pressure < 0) pressure = 0.2;
+        if (pressure > 1) pressure = 1;
 
         var pointerPosition = this.getPointerPosition(position, orientation);
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);

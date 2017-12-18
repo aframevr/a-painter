@@ -153,7 +153,7 @@ AFRAME.registerSystem('painter', {
 
       if (event.keyCode === 82) {
         // Random stroke (r)
-        self.brushSystem.generateRandomStrokes(1);
+        self.brushSystem.generateRandomStrokes(100);
       }
       if (event.keyCode === 76) {
         // load binary from file (l)
