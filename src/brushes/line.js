@@ -44,7 +44,6 @@ var onLoaded = require('../onloaded.js');
         end: this.sharedBuffer.idx.positions
       }
       this.UVidx = this.sharedBuffer.idx.uvs;
-
       this.sharedBuffer.restartPrimitive();
       this.first = true;
     },

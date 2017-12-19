@@ -198,14 +198,14 @@ AFRAME.registerSystem('brush', {
     var size = 0.5;
     var width = 3;
     var pressure = 1;
-    var numPoints = 5;
+    var numPoints = 4;
 
     var steps = width / numPoints;
     var numStrokes = 1;
     var brushesNames = Object.keys(AFRAME.BRUSHES);
     brushesNames2 = [
-      // 'flat',
-      'squared-textured',
+      //'flat',
+      //'squared-textured',
       'lines5'
     ];
 
