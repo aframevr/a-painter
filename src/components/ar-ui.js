@@ -1594,22 +1594,25 @@ AFRAME.registerComponent('ar-ui', {
     }
   },
   onWindowResize: function (e) {
-    this.width = window.innerWidth / window.innerHeight;
-    this.height = 1;
-
     var self = this;
-    Object.keys(this.objects).forEach(function (key) {
-      if (self.objects[key].getAttribute('visible')) {
-        self.place(self.objects[key], self.width, self.height);
-      }
-    });
 
-    this.aspect = window.innerWidth / window.innerHeight;
-    this.orthoCamera.left = -this.frustumSize * this.aspect / 2;
-    this.orthoCamera.right = this.frustumSize * this.aspect / 2;
-    this.orthoCamera.top = this.frustumSize / 2;
-    this.orthoCamera.bottom = -this.frustumSize / 2;
-    this.orthoCamera.updateProjectionMatrix();
+    setTimeout(function () {
+      self.width = window.innerWidth / window.innerHeight;
+      self.height = 1;
+
+      Object.keys(self.objects).forEach(function (key) {
+        if (self.objects[key].getAttribute('visible')) {
+          self.place(self.objects[key], self.width, self.height);
+        }
+      });
+
+      self.aspect = window.innerWidth / window.innerHeight;
+      self.orthoCamera.left = -self.frustumSize * self.aspect / 2;
+      self.orthoCamera.right = self.frustumSize * self.aspect / 2;
+      self.orthoCamera.top = self.frustumSize / 2;
+      self.orthoCamera.bottom = -self.frustumSize / 2;
+      self.orthoCamera.updateProjectionMatrix();
+    }, 150);
   },
   place: function (obj) {
     var w = this.width;
@@ -1667,8 +1670,14 @@ AFRAME.registerComponent('ar-ui', {
         break;
       case 'fader':
         positionTmp = {x: 0, y: 0, z: this.depth};
-        var faderScaleFactor = this.scaleFactor * this.width / this.height;
-        obj.object3D.scale.set(faderScaleFactor, this.scaleFactor, this.scaleFactor);
+        var faderScaleFactor = 1;
+        if (this.width > this.height) {
+          faderScaleFactor = this.scaleFactor * this.width / this.height;
+          obj.object3D.scale.set(faderScaleFactor, this.scaleFactor, this.scaleFactor);
+        } else {
+          faderScaleFactor = this.scaleFactor * this.height / this.width;
+          obj.object3D.scale.set(this.scaleFactor, faderScaleFactor, this.scaleFactor);
+        }
         break;
       case 'center':
         positionTmp.x = obj.padding[3] * this.scaleFactor - obj.padding[1] * this.scaleFactor;

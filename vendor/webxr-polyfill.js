@@ -1731,7 +1731,7 @@ var ARKitWrapper = function (_EventHandlerBase) {
 		}
 
 		// Set up some named global methods that the ARKit to JS bridge uses and send out custom events when they are called
-		var eventCallbacks = [['arkitStartRecording', ARKitWrapper.RECORD_START_EVENT], ['arkitStopRecording', ARKitWrapper.RECORD_STOP_EVENT], ['arkitDidMoveBackground', ARKitWrapper.DID_MOVE_BACKGROUND_EVENT], ['arkitWillEnterForeground', ARKitWrapper.WILL_ENTER_FOREGROUND_EVENT], ['arkitInterrupted', ARKitWrapper.INTERRUPTED_EVENT], ['arkitInterruptionEnded', ARKitWrapper.INTERRUPTION_ENDED_EVENT], ['arkitShowDebug', ARKitWrapper.SHOW_DEBUG_EVENT]];
+		var eventCallbacks = [['arkitStartRecording', ARKitWrapper.RECORD_START_EVENT], ['arkitStopRecording', ARKitWrapper.RECORD_STOP_EVENT], ['arkitDidMoveBackground', ARKitWrapper.DID_MOVE_BACKGROUND_EVENT], ['arkitWillEnterForeground', ARKitWrapper.WILL_ENTER_FOREGROUND_EVENT], ['arkitInterrupted', ARKitWrapper.INTERRUPTED_EVENT], ['arkitInterruptionEnded', ARKitWrapper.INTERRUPTION_ENDED_EVENT], ['arkitShowDebug', ARKitWrapper.SHOW_DEBUG_EVENT], ['arkitWindowResize', ARKitWrapper.WINDOW_RESIZE_EVENT]];
 
 		var _loop = function _loop(_i) {
 			window[eventCallbacks[_i][0]] = function (detail) {
@@ -2192,6 +2192,7 @@ ARKitWrapper.WILL_ENTER_FOREGROUND_EVENT = 'arkit-will-enter-foreground';
 ARKitWrapper.INTERRUPTED_EVENT = 'arkit-interrupted';
 ARKitWrapper.INTERRUPTION_ENDED_EVENT = 'arkit-interruption-ended';
 ARKitWrapper.SHOW_DEBUG_EVENT = 'arkit-show-debug';
+ARKitWrapper.WINDOW_RESIZE_EVENT = 'arkit-window-resize';
 
 // hit test types
 ARKitWrapper.HIT_TEST_TYPE_FEATURE_POINT = 1;
@@ -3684,6 +3685,7 @@ var FlatDisplay = function (_XRDisplay) {
 					this._arKitWrapper = _ARKitWrapper2.default.GetOrCreate();
 					this._arKitWrapper.addEventListener(_ARKitWrapper2.default.INIT_EVENT, this._handleARKitInit.bind(this));
 					this._arKitWrapper.addEventListener(_ARKitWrapper2.default.WATCH_EVENT, this._handleARKitUpdate.bind(this));
+					this._arKitWrapper.addEventListener(_ARKitWrapper2.default.WINDOW_RESIZE_EVENT, this._handleARKitWindowResize.bind(this));
 					this._arKitWrapper.waitForInit().then(function () {
 						_this2._arKitWrapper.watch();
 					});
@@ -3721,16 +3723,19 @@ var FlatDisplay = function (_XRDisplay) {
 	}, {
 		key: '_handleNewBaseLayer',
 		value: function _handleNewBaseLayer(baseLayer) {
+			this.baseLayer = baseLayer;
 			baseLayer._context.canvas.style.width = "100%";
 			baseLayer._context.canvas.style.height = "100%";
 			baseLayer._context.canvas.width = this._xr._sessionEls.clientWidth;
 			baseLayer._context.canvas.height = this._xr._sessionEls.clientHeight;
 
-			// TODO:  Need to remove this listener if a new base layer is set
-			window.addEventListener('resize', function () {
-				baseLayer.framebufferWidth = baseLayer._context.canvas.clientWidth;
-				baseLayer.framebufferHeight = baseLayer._context.canvas.clientHeight;
-			}, false);
+			if (this._arKitWrapper === null) {
+				// TODO:  Need to remove this listener if a new base layer is set
+				window.addEventListener('resize', function () {
+					baseLayer.framebufferWidth = baseLayer._context.canvas.clientWidth;
+					baseLayer.framebufferHeight = baseLayer._context.canvas.clientHeight;
+				}, false);
+			}
 
 			this._xr._sessionEls.appendChild(baseLayer._context.canvas);
 		}
@@ -3803,6 +3808,12 @@ var FlatDisplay = function (_XRDisplay) {
 					light_intensity: true
 				});
 			}, 1000);
+		}
+	}, {
+		key: '_handleARKitWindowResize',
+		value: function _handleARKitWindowResize(ev) {
+			this.baseLayer.framebufferWidth = ev.detail.width;
+			this.baseLayer.framebufferHeight = ev.detail.height;
 		}
 	}, {
 		key: '_createSession',
