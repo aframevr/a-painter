@@ -30,7 +30,9 @@ var onLoaded = require('../onloaded.js');
 
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
-      this.idx = this.sharedBuffer.idx.positions;
+      this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
+      this.idx = Object.assign({}, this.sharedBuffer.idx);
+      
 
       this.currAngle = 0;
       this.subTextures = 1;
@@ -47,6 +49,14 @@ var onLoaded = require('../onloaded.js');
         this.angleJitter = this.materialOptions['angleJitter'];
         this.angleJitter = this.angleJitter * 2 - this.angleJitter;
       }
+    },
+
+    remove: function () {
+      this.sharedBuffer.remove(this.prevIdx, this.idx);
+    },
+
+    undo: function () {
+      this.sharedBuffer.undo(this.prevIdx);
     },
 
     addPoint: (function () {
@@ -83,8 +93,8 @@ var onLoaded = require('../onloaded.js');
         c.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, pi2)).multiplyScalar(brushSize));
         d.copy(pointerPosition).add(dir.applyAxisAngle(axis, pi2).multiplyScalar(brushSize));
 
-        var nidx = this.idx;
-        var cidx = this.idx;
+        var nidx = this.idx.position;
+        var cidx = this.idx.position;
 
         // triangle 1
         this.sharedBuffer.addVertice(a.x, a.y, a.z);
@@ -125,6 +135,8 @@ var onLoaded = require('../onloaded.js');
         this.sharedBuffer.addUV(converter.convertU(Umax), converter.convertV(0));
         this.sharedBuffer.addUV(converter.convertU(Umax), converter.convertV(1));
         this.sharedBuffer.addUV(converter.convertU(Umin), converter.convertV(1));
+
+        this.idx = Object.assign({}, this.sharedBuffer.idx);
 
         this.sharedBuffer.update();
 

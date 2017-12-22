@@ -153,7 +153,7 @@ AFRAME.registerSystem('painter', {
 
       if (event.keyCode === 82) {
         // Random stroke (r)
-        self.brushSystem.generateRandomStrokes(100);
+        self.brushSystem.generateRandomStrokes(1);
       }
       if (event.keyCode === 76) {
         // load binary from file (l)
@@ -174,6 +174,9 @@ AFRAME.registerSystem('painter', {
         for (var i = 0; i < templateItems.length; i++) {
             templateItems[i].setAttribute('visible', self.showTemplateItems);
         }
+      }
+      if (event.keyCode === 88) { // x remove 2nd
+        self.brushSystem.removeById(2);
       }
     });
 

@@ -10,12 +10,13 @@ function SharedBufferGeometry (material, primitiveMode) {
 
 SharedBufferGeometry.prototype = {
   restartPrimitive: function () {
-    if (this.idx.positions >= this.current.attributes.position.count) {
+    if (this.idx.position >= this.current.attributes.position.count) {
       this.addBuffer(false);
-    } else if (this.idx.positions !== 0) {
-      var prev = (this.idx.positions - 1) * 3;
-      var col = (this.idx.colors - 1) * 3;
-      var uv = (this.idx.uvs - 1) * 3;
+    } else if (this.idx.position !== 0) {
+      var prev = (this.idx.position - 1) * 3;
+      var col = (this.idx.color - 1) * 3;
+      var uv = (this.idx.uv - 1) * 3;
+      var normal = (this.idx.normal - 1) * 3;
 
       var position = this.current.attributes.position.array;
       this.addVertice(position[prev++], position[prev++], position[prev++]);
@@ -26,6 +27,42 @@ SharedBufferGeometry.prototype = {
       var uvs = this.current.attributes.uv.array;
       this.addUV(uvs[uv++], uvs[uv++]);
     }
+  },
+
+  remove: function (prevIdx, idx) {
+    console.log(prevIdx, idx);
+    var pos = this.current.attributes.position.array;
+    //debugger;
+
+    // Loop through all the attributes: position, color, uv, normal,...
+    if (this.idx.position > idx.position) {
+      console.log(this.current.attributes.uv.array);
+      for (key in this.idx) {
+        var componentSize = key === 'uv' ? 2 : 3;
+        var pos = (prevIdx[key]) * componentSize;
+        var start = (idx[key] + 1) * componentSize;
+        var end = this.idx[key] * componentSize;
+        for (var i = start; i < end; i++) {
+          console.log(key, pos, '<<', i);
+          this.current.attributes[key].array[pos++] = this.current.attributes[key].array[i];
+        }
+      }
+      console.log(this.current.attributes.uv.array);
+    }
+
+    console.log(this.current.attributes.uv.array);
+  
+    for (key in this.idx) {
+      var diff = (idx[key] - prevIdx[key]);
+      this.idx[key] -= diff;
+    }
+
+    this.update();
+  },
+
+  undo: function (prevIdx) {
+    this.idx = prevIdx;
+    this.update();
   },
 
   addBuffer: function (copyLast) {
@@ -65,18 +102,16 @@ SharedBufferGeometry.prototype = {
     }
 
     this.idx = {
-      positions: 0,
-      uvs: 0,
-      normals: 0,
-      colors: 0
+      position: 0,
+      uv: 0,
+      normal: 0,
+      color: 0
     };
 
     this.geometries.push(geometry);
     this.current = geometry;
 
-    console.log()
     if (this.previous && copyLast) {
-//      debugger;
       var prev = (this.maxBufferSize - 2) * 3;
       var col = (this.maxBufferSize - 2) * 3;
       var uv = (this.maxBufferSize - 2) * 2;
@@ -99,36 +134,32 @@ SharedBufferGeometry.prototype = {
       this.addUV(uvs[uv++], uvs[uv++]);
 
     }
-    if (this.previous) {
-      console.log(this.previous.attributes.position, this.current.attributes.position);
-      console.log(this.previous.attributes.uv, this.current.attributes.uv);
-    }
   },
 
   addColor: function (r, g, b) {
-    this.current.attributes.color.setXYZ(this.idx.colors++, r, g, b);
+    this.current.attributes.color.setXYZ(this.idx.color++, r, g, b);
   },
 
   addNormal: function (x, y, z) {
-    this.current.attributes.normal.setXYZ(this.idx.normals++, x, y, z);
+    this.current.attributes.normal.setXYZ(this.idx.normal++, x, y, z);
   },
 
   addVertice: function (x, y, z) {
     var buffer = this.current.attributes.position;
-    if (this.idx.positions === buffer.count) {
-      console.log('Need new buffer', this.idx.positions, buffer.count);
+    if (this.idx.position === buffer.count) {
+      console.log('Need new buffer', this.idx.position, buffer.count);
       this.addBuffer(true);
       buffer = this.current.attributes.position;
     }
-    buffer.setXYZ(this.idx.positions++, x, y, z);
+    buffer.setXYZ(this.idx.position++, x, y, z);
   },
 
   addUV: function (u, v) {
-    this.current.attributes.uv.setXY(this.idx.uvs++, u, v);
+    this.current.attributes.uv.setXY(this.idx.uv++, u, v);
   },
 
   update: function () {
-    this.current.setDrawRange(0, this.idx.positions);
+    this.current.setDrawRange(0, this.idx.position);
 
     this.current.attributes.color.needsUpdate = true;
     this.current.attributes.normal.needsUpdate = true;

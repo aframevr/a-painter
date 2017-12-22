@@ -39,15 +39,19 @@ var onLoaded = require('../onloaded.js');
 
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('strip-' + this.materialOptions.type);
-      this.positionsIdx = {
-        start: this.sharedBuffer.idx.positions,
-        end: this.sharedBuffer.idx.positions
-      }
-      this.UVidx = this.sharedBuffer.idx.uvs;
       this.sharedBuffer.restartPrimitive();
+
+      this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
+      this.idx = Object.assign({}, this.sharedBuffer.idx);
+
       this.first = true;
     },
-
+    remove: function () {
+      this.sharedBuffer.remove(this.prevIdx, this.idx);
+    },
+    undo: function () {
+      this.sharedBuffer.undo(this.prevIdx);
+    },
     addPoint: (function () {
       var direction = new THREE.Vector3();
 
@@ -65,34 +69,14 @@ var onLoaded = require('../onloaded.js');
         posA.add(direction.clone().multiplyScalar(brushSize / 2));
         posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
-        if (this.first && this.positionsIdx.start > 0) {
+        if (this.first && this.prevIdx.position > 0) {
           // Degenerated triangle
           this.first = false;
           this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
-          this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+          this.sharedBuffer.addColor(0, 0 ,0);
+          this.sharedBuffer.addUV(-1, -1);
         }
         
-        if (this.materialOptions.type === 'textured') {
-          var uvs = this.sharedBuffer.current.attributes.uv.array;
-          var UVidx = this.UVidx;
-          var u;
-          for (var i = 0; i < this.data.numPoints + 1; i++) {
-            if (i === 0) {
-              u = 0;
-            } else {
-              u = i / this.data.numPoints;
-            }
-            var offset = 4 * i + UVidx * 2;
-
-            uvs[offset] = converter.convertU(u);
-            uvs[offset + 1] = converter.convertV(0);
-
-            uvs[offset + 2] = converter.convertU(u);
-            uvs[offset + 3] = converter.convertV(1);
-          }
-          this.sharedBuffer.idx.uvs = this.UVidx + (this.data.numPoints + 1) * 2 + 2;
-        }
-
         /*
           2---3
           | \ |
@@ -100,11 +84,32 @@ var onLoaded = require('../onloaded.js');
         */
         this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
         this.sharedBuffer.addVertice(posB.x, posB.y, posB.z);
+        this.idx.position = this.sharedBuffer.idx.position;
 
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+        this.idx.color = this.sharedBuffer.idx.color;
 
-        this.positionsIdx.end = this.sharedBuffer.idx.positions;
+        this.sharedBuffer.addUV(0, 0);
+        this.sharedBuffer.addUV(0, 0);
+
+        if (this.materialOptions.type === 'textured') {
+          var uvs = this.sharedBuffer.current.attributes.uv.array;
+          var u;
+          for (var i = 0; i < this.data.numPoints + 1; i++) {
+              u = i / this.data.numPoints;
+            var offset = 4 * i + (this.prevIdx.uv + (this.prevIdx.uv === 0 ? 0 : 2)) * 2;
+
+            uvs[offset] = converter.convertU(u);
+            uvs[offset + 1] = converter.convertV(0);
+
+            uvs[offset + 2] = converter.convertU(u);
+            uvs[offset + 3] = converter.convertV(1);
+          }
+          this.idx.uv = this.sharedBuffer.idx.uv;
+        }
+
+        this.idx = Object.assign({}, this.sharedBuffer.idx);
 
         this.sharedBuffer.update();
         this.computeStripVertexNormals();
@@ -121,8 +126,8 @@ var onLoaded = require('../onloaded.js');
       var vector = new THREE.Vector3();
 
       return function () {
-        var end = this.positionsIdx.end * 3;
-        var start = this.positionsIdx.start * 3;
+        var end = this.idx.position * 3;
+        var start = this.prevIdx.position * 3;
         
         var normals = this.sharedBuffer.current.attributes.normal.array;
 
