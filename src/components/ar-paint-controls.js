@@ -20,7 +20,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     document.querySelector('[ar-ui]').addEventListener('deactivate', this.deactivate.bind(this));
     document.querySelector('[ar-ui]').addEventListener('onBrushChanged', this.onBrushChanged.bind(this));
     document.querySelector('[ar-ui]').addEventListener('objectsUIIntersected', this.objectsUIIntersected.bind(this));
-    document.querySelector('a-scene').addEventListener('updateFrame', this.updateFrame);
+    document.querySelector('a-scene').addEventListener('updateFrame', this.updateFrame.bind(this));
   },
   bindMethods: function () {
     this.onStrokeStarted = this.onStrokeStarted.bind(this);
@@ -137,7 +137,7 @@ AFRAME.registerComponent('ar-paint-controls', {
     }
   },
   updateFrame: function (frame) {
-    if (this.el.components.brush.active) {
+    if (this.el.components.brush && this.el.components.brush.active) {
       this.el.emit('paintpainting', {
         touchEvent: this.eventTouch,
         stylusActive: this.stylusActive

@@ -9,12 +9,14 @@ AFRAME.registerComponent('ar-pin', {
   },
   xrInitialized: function () {
     // this.scene.removeEventListener('XRInitialized', this.XRInitialized);
+    this.el.sceneEl.setAttribute('visible', true);
     this.xrIsInit = true;
     this.drawingOffset = new THREE.Vector3();
     
     if (!AFRAME.scenes[0].systems.xr.supportAR) {
       var arPaintControls = document.querySelector('#ar-paint-controls');
       arPaintControls.parentNode.removeChild(arPaintControls);
+      this.el.sceneEl.setAttribute('background', { transparent: false });
       return;
     }
 
