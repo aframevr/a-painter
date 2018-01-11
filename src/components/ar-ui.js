@@ -245,23 +245,13 @@ AFRAME.registerComponent('ar-ui', {
   addPaintingEls: function () {
     // Add 'painting' section elements
     this.addButton({
-      id: 'closeBtn',
-      layout: 'top-left',
-      visible: false,
-      enabled: false,
-      width: 0.01,
-      height: 0.01,
-      padding: [0.005, 0.0015, 0, 0],
-      onclick: this.exitPainterMode
-    });
-    this.addButton({
       id: 'undoBtn',
       layout: 'bottom-left',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0.0015, 0.0175, 0],
+      padding: [0, 0.0015, 0, 0],
       onclick: this.undo
     });
     this.addButton({
@@ -271,7 +261,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0.005, 0, 0, 0.0015],
+      padding: [0, 0, 0, 0.0015],
       onclick: this.save
     });
     this.addButton({
@@ -282,7 +272,7 @@ AFRAME.registerComponent('ar-ui', {
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0.0015, 0.0325, 0],
+      padding: [0, 0.0015, 0.015, 0],
       onclick: this.openPaintMode.bind(this)
     });
     this.addButton({
@@ -290,9 +280,9 @@ AFRAME.registerComponent('ar-ui', {
       layout: 'bottom-right',
       visible: false,
       enabled: false,
-      width: 0.0125,
-      height: 0.0125,
-      padding: [0, 0, 0.01, 0],
+      width: 0.01,
+      height: 0.01,
+      padding: [0, 0, 0, 0.0015],
       onclick: this.hideUI.bind(this)
     });
     this.addImage({
@@ -311,16 +301,6 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       enabled: false
     });
-    // this.addButton({
-    //   id: 'brushBtn',
-    //   layout: 'bottom-center',
-    //   visible: false,
-    //   enabled: false,
-    //   width: 0.0175,
-    //   height: 0.0175,
-    //   padding: [0, 0, 0.0125, 0],
-    //   onclick: this.brushBtnClicked
-    // });
     this.addBrushButton({
       id: 'brushBtn',
       layout: 'bottom-center',
@@ -361,12 +341,12 @@ AFRAME.registerComponent('ar-ui', {
     this.addButton({
       id: 'closePaintModeBtn',
       atlasId: 'closeBtn',
-      layout: 'top-right',
+      layout: 'top-left',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0.005, 0, 0, 0.0025],
+      padding: [0, 0.0015, 0, 0],
       onclick: this.closePaintMode.bind(this),
       renderOrder: this.renderOrderModal
     });
@@ -439,12 +419,12 @@ AFRAME.registerComponent('ar-ui', {
     this.addButton({
       id: 'closeSettingsBtn',
       atlasId: 'closeBtn',
-      layout: 'bottom-right',
+      layout: 'top-left',
       visible: false,
       enabled: false,
       width: 0.01,
       height: 0.01,
-      padding: [0, 0, 0.0175, 0.0025],
+      padding: [0, 0.0015, 0, 0],
       onclick: this.closeBrushSettings.bind(this),
       renderOrder: this.renderOrderModal
     });
@@ -1781,7 +1761,6 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').addEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     // Show and activate close button
-    this.showEl(this, 'closeBtn', true, 200);
     this.showEl(this, 'undoBtn', true, 500);
     this.showEl(this, 'saveBtn', true, 800);
     this.showEl(this, 'paintModeBtn', true, 1100);
@@ -1801,7 +1780,6 @@ AFRAME.registerComponent('ar-ui', {
     // document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
     // this.el.emit('deactivate', false);
     // // Hide close buttons
-    // this.hideEl(this, 'closeBtn', true);
     // this.hideEl(this, 'strokeDragDot', false, 25);
     // this.hideEl(this, 'strokeDragBar', true, 50);
     // this.hideEl(this, 'brushBtn', true, 100);
@@ -1847,7 +1825,6 @@ AFRAME.registerComponent('ar-ui', {
     })
     .start();
 
-    this.objects.closeBtn.setAttribute('enabled', false);
     this.objects.saveBtn.setAttribute('enabled', false);
     this.objects.undoBtn.setAttribute('enabled', false);
     this.objects.paintModeBtn.setAttribute('enabled', false);
@@ -1881,7 +1858,6 @@ AFRAME.registerComponent('ar-ui', {
     var uiEl = document.querySelector('#fader-' + id);
 
     // this.orthoCamera.setAttribute('look-controls', {enabled: true});
-    this.objects.closeBtn.setAttribute('enabled', true);
     this.objects.saveBtn.setAttribute('enabled', true);
     this.objects.undoBtn.setAttribute('enabled', true);
     this.objects.paintModeBtn.setAttribute('enabled', true);
@@ -2019,7 +1995,6 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').removeEventListener('poseLost', this.onPoseLost);
     document.querySelector('a-scene').removeEventListener('poseFound', this.onPoseFound);
     // Show and activate close button
-    this.objects.closeBtn.setAttribute('visible', false);
     this.objects.undoBtn.setAttribute('visible', false);
     this.objects.saveBtn.setAttribute('visible', false);
     this.objects.paintModeBtn.setAttribute('visible', false);
@@ -2028,7 +2003,6 @@ AFRAME.registerComponent('ar-ui', {
     this.objects.strokeDragDot.setAttribute('visible', false);
     this.objects.brushBtn.setAttribute('visible', false);
 
-    this.objects.closeBtn.setAttribute('enabled', false);
     this.objects.undoBtn.setAttribute('enabled', false);
     this.objects.saveBtn.setAttribute('enabled', false);
     this.objects.paintModeBtn.setAttribute('enabled', false);
@@ -2049,7 +2023,6 @@ AFRAME.registerComponent('ar-ui', {
     document.querySelector('a-scene').addEventListener('poseFound', this.onPoseFound);
     this.hideEl(this, 'showUIAlert', false);
 
-    this.objects.closeBtn.setAttribute('visible', true);
     this.objects.undoBtn.setAttribute('visible', true);
     this.objects.saveBtn.setAttribute('visible', true);
     this.objects.paintModeBtn.setAttribute('visible', true);
@@ -2060,7 +2033,6 @@ AFRAME.registerComponent('ar-ui', {
 
     var self = this;
     setTimeout(function () {
-      self.objects.closeBtn.setAttribute('enabled', true);
       self.objects.undoBtn.setAttribute('enabled', true);
       self.objects.saveBtn.setAttribute('enabled', true);
       self.objects.paintModeBtn.setAttribute('enabled', true);
