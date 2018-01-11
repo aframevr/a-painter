@@ -26,6 +26,9 @@ AFRAME.registerComponent('ar-ui', {
     this.pressedObjects = {};
     this.selectedObjects = {};
 
+    this.brushSelectedName = 'brush0';
+    this.brushSelectedPage = 0;
+
     this.pressure = 1;
     this.tapped = false;
     this.strokeNormalized = 0.5;
@@ -308,15 +311,24 @@ AFRAME.registerComponent('ar-ui', {
       visible: false,
       enabled: false
     });
-    // this.el.setAttribute('brush', 'brush', 'smooth');
-    this.addButton({
+    // this.addButton({
+    //   id: 'brushBtn',
+    //   layout: 'bottom-center',
+    //   visible: false,
+    //   enabled: false,
+    //   width: 0.0175,
+    //   height: 0.0175,
+    //   padding: [0, 0, 0.0125, 0],
+    //   onclick: this.brushBtnClicked
+    // });
+    this.addBrushButton({
       id: 'brushBtn',
       layout: 'bottom-center',
       visible: false,
       enabled: false,
-      width: 0.015,
-      height: 0.015,
-      padding: [0, 0, 0.0125, 0],
+      width: 0.0175,
+      height: 0.0175,
+      padding: [0, 0, 0.0175, 0],
       onclick: this.brushBtnClicked
     });
     this.addImage({
@@ -448,7 +460,7 @@ AFRAME.registerComponent('ar-ui', {
       shader: 'flat',
       transparent: true,
       fog: false,
-      src: '#uinormal'
+      src: '#aruinormal'
     });
     this.settingsUI.setAttribute('position', '0 -0.06 -0.098');
     
@@ -473,7 +485,6 @@ AFRAME.registerComponent('ar-ui', {
     this.objectsSettings.hueWheel = model.getObjectByName('hue');
     this.objectsSettings.hueWheel.geometry.computeBoundingSphere();
     this.colorWheelSize = this.objectsSettings.hueWheel.geometry.boundingSphere.radius;
-
     this.objectsSettings.colorHistory = [];
     for (var i = 0; i < 7; i++) {
       this.objectsSettings.colorHistory[i] = model.getObjectByName('colorhistory' + i);
@@ -606,7 +617,15 @@ AFRAME.registerComponent('ar-ui', {
       var thumbnail;
       var brushIndex;
       var self = this;
-      var i;
+      var i, j;
+      // Hide all brushes background
+      for (j = 0; j < pageSize; j++) {
+        uiEl.getObjectByName('brush' + j + 'bg').visible = false;
+      }
+      if (this.brushSelectedPage === page) {
+        uiEl.getObjectByName(this.brushSelectedName + 'bg').visible = true;
+      }
+
       if (page < 0 || page >= this.brushesPagesNum) { return; }
       if (page === 0) {
         this.objectsSettings.previousPage.visible = false;
@@ -635,10 +654,10 @@ AFRAME.registerComponent('ar-ui', {
         function onLoadThumbnail (texture) {
           var button = uiEl.getObjectByName('brush' + id);
           self.brushButtonsMapping['brush' + id] = brushName;
-          setBrushThumbnail(texture, button);
+          setBrushThumbnail(texture, button, uiEl.getObjectByName('brush' + id + 'bg').visible);
         }
       }
-      function setBrushThumbnail (texture, button) {
+      function setBrushThumbnail (texture, button, isSelected) {
         var brushName = self.brushButtonsMapping[button.name];
         var material = brushesMaterials[brushName] || new THREE.MeshBasicMaterial();
         if (texture) {
@@ -655,6 +674,14 @@ AFRAME.registerComponent('ar-ui', {
         //   pressed: material,
         //   selected: material
         // };
+        material.blending = THREE.CustomBlending;
+        if (isSelected) {
+          material.blendEquation = THREE.ReverseSubtractEquation;
+        } else {
+          material.blendEquation = THREE.AddEquation; //default
+        }
+        material.blendSrc = THREE.OneMinusDstColorFactor;
+        material.blendDst = THREE.OneFactor;
         button.material = material;
       }
     };
@@ -802,24 +829,19 @@ AFRAME.registerComponent('ar-ui', {
   },
   onBrushDown: function (name) {
     var brushName = this.brushButtonsMapping[name];
+    // Hide bg of previous selected brush
+    if (this.brushesPage === this.brushSelectedPage) {
+      this.settingsUI.getObject3D('mesh').getObjectByName(this.brushSelectedName + 'bg').visible = false;
+      this.settingsUI.getObject3D('mesh').getObjectByName(this.brushSelectedName).material.blendEquation = THREE.AddEquation;
+    }
+    // Show bg to the selected brush
+    this.brushSelectedName = name;
+    this.brushSelectedPage = this.brushesPage;
+    this.settingsUI.getObject3D('mesh').getObjectByName(name + 'bg').visible = true;
+    this.settingsUI.getObject3D('mesh').getObjectByName(name).material.blendEquation = THREE.ReverseSubtractEquation;
     if (!brushName) { return; }
-    this.selectBrushButton(name);
     this.el.setAttribute('brush', 'brush', brushName.toLowerCase());
     this.onBrushChanged();
-  },
-  selectBrushButton: function (brushName) {
-    var object = this.settingsUI.getObject3D('mesh').getObjectByName(brushName + 'bg');
-    var selectedObjects = this.selectedObjects;
-    var selectedBrush = this.selectedBrush;
-    if (selectedBrush) {
-      // if (!this.highlightMaterials[selectedBrush.name]) {
-      //   this.initHighlightMaterial(object);
-      // }
-      // selectedBrush.material = this.highlightMaterials[selectedBrush.name].normal;
-      delete selectedObjects[selectedBrush.name];
-    }
-    selectedObjects[object.name] = object;
-    this.selectedBrush = object;
   },
   onColorHistoryButtonDown: function (object) {
     var color = object.material.color.getHexString();
@@ -832,14 +854,28 @@ AFRAME.registerComponent('ar-ui', {
     this.strokeOnButton.setAttribute('material', 'color', this.el.getAttribute('brush').color);
   },
   updateBrushButton: function () {
-    var buttonObj = this.objects.brushBtn.getObject3D('mesh');
+    var buttonObj = this.el.querySelector('#bg-brushBtn').getObject3D('mesh');
+    var buttonBrushObj = this.el.querySelector('#brush-brushBtn').getObject3D('mesh');
     if (this.el.getAttribute('brush').brush !== buttonObj.brush) {
       var urlBrushThumbnail = AFRAME.BRUSHES[this.el.getAttribute('brush').brush].prototype.options.thumbnail;
       var alphaTexture = new THREE.TextureLoader().load(urlBrushThumbnail);
       buttonObj.brush = this.el.getAttribute('brush').brush;
-      buttonObj.material.map = alphaTexture;
+
+      buttonBrushObj.material.blending = THREE.CustomBlending;
+      buttonBrushObj.material.blendEquation = THREE.AddEquation;
+
+      buttonBrushObj.material.map = alphaTexture;
     }
     buttonObj.material.color = new THREE.Color(this.el.getAttribute('brush').color);
+    if ((buttonObj.material.color.r + buttonObj.material.color.g + buttonObj.material.color.b) > 2.5) {
+      buttonBrushObj.material.blendSrc = THREE.SrcAlphaFactor;
+      buttonBrushObj.material.blendDst = THREE.OneMinusSrcAlphaFactor;
+      buttonBrushObj.material.color = new THREE.Color(0xaaaaaa);
+    } else {
+      buttonBrushObj.material.blendSrc = THREE.OneFactor;
+      buttonBrushObj.material.blendDst = THREE.DstAlphaFactor;
+      buttonBrushObj.material.color = new THREE.Color(0xffffff);
+    }
   },
   onComponentChanged: function (evt) {
     if (evt.detail.name === 'brush') { this.syncUI(); }
@@ -1080,6 +1116,53 @@ AFRAME.registerComponent('ar-ui', {
     uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
     this.containerUI.appendChild(uiEl);
   },
+  addBrushButton: function (params) {
+    this.objects[params.id] = document.createElement('a-entity');
+    var uiEl = this.objects[params.id];
+
+    // top, right, bottom, left
+    uiEl.padding = params.padding || [0, 0, 0, 0];
+    uiEl.id = params.id;
+    uiEl.class = 'ar-ui';
+    uiEl.layout = params.layout;
+    uiEl.onclick = params.onclick;
+
+    uiEl.setAttribute('position', {
+      x: 0,
+      y: 0,
+      z: 1000
+    });
+    uiEl.setAttribute('visible', params.visible);
+    uiEl.object3D.renderOrder = params.renderOrder || this.renderOrderUI;
+
+    this.addImageToGroup(uiEl, {
+      id: 'bg-' + params.id,
+      atlasId: params.id,
+      color: '#ffffff',
+      width: params.width,
+      height: params.height,
+      position: [0, 0, 0]
+    });
+
+    this.addImageToGroup(uiEl, {
+      id: 'brush-' + params.id,
+      atlasId: params.id,
+      color: '#ffffff',
+      width: params.width * 0.55,
+      height: params.height * 0.55,
+      position: [0, 0, 0]
+    });
+
+    this.addColliderToGroup(uiEl, {
+      id: 'collider-' + params.id,
+      width: params.width,
+      height: params.height,
+      position: [0, 0, 0],
+      size: params.width
+    });
+
+    this.containerUI.appendChild(uiEl);
+  },
   addGroupBtn: function (params) {
     this.objects[params.id] = document.createElement('a-entity');
     var uiEl = this.objects[params.id];
@@ -1230,7 +1313,7 @@ AFRAME.registerComponent('ar-ui', {
       transparent: true,
       fog: false,
       src: '#ar_ui',
-      color: '#333333',
+      color: params.color || '#333333',
       repeat: {x: this.atlas.images[uiEl.atlasId].w / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].h / this.atlas.total.h},
       offset: {x: (this.atlas.total.w - this.atlas.images[uiEl.atlasId].x) / this.atlas.total.w, y: this.atlas.images[uiEl.atlasId].y / this.atlas.total.h}
     });
