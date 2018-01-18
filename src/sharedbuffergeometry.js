@@ -24,33 +24,26 @@ SharedBufferGeometry.prototype = {
       var color = this.current.attributes.color.array;
       this.addColor(color[col++], color[col++], color[col++]);
 
-      var uvs = this.current.attributes.uv.array;
-      this.addUV(uvs[uv++], uvs[uv++]);
+      this.idx.normal++;
+      this.idx.uv++;
     }
   },
 
   remove: function (prevIdx, idx) {
-    console.log(prevIdx, idx);
     var pos = this.current.attributes.position.array;
-    //debugger;
 
     // Loop through all the attributes: position, color, uv, normal,...
     if (this.idx.position > idx.position) {
-      console.log(this.current.attributes.uv.array);
       for (key in this.idx) {
         var componentSize = key === 'uv' ? 2 : 3;
         var pos = (prevIdx[key]) * componentSize;
         var start = (idx[key] + 1) * componentSize;
         var end = this.idx[key] * componentSize;
         for (var i = start; i < end; i++) {
-          console.log(key, pos, '<<', i);
           this.current.attributes[key].array[pos++] = this.current.attributes[key].array[i];
         }
       }
-      console.log(this.current.attributes.uv.array);
     }
-
-    console.log(this.current.attributes.uv.array);
   
     for (key in this.idx) {
       var diff = (idx[key] - prevIdx[key]);
@@ -74,6 +67,7 @@ SharedBufferGeometry.prototype = {
     var colors = new Float32Array(this.maxBufferSize * 3);
 
     var mesh = new THREE.Mesh(geometry, this.material);
+
     mesh.drawMode = this.primitiveMode;
 
     mesh.frustumCulled = false;
@@ -95,6 +89,7 @@ SharedBufferGeometry.prototype = {
     geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2).setDynamic(true));
     geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3).setDynamic(true));
     geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
+
 
     this.previous = null;
     if (this.geometries.length > 0) {
@@ -147,7 +142,6 @@ SharedBufferGeometry.prototype = {
   addVertice: function (x, y, z) {
     var buffer = this.current.attributes.position;
     if (this.idx.position === buffer.count) {
-      console.log('Need new buffer', this.idx.position, buffer.count);
       this.addBuffer(true);
       buffer = this.current.attributes.position;
     }

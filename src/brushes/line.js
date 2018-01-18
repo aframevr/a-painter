@@ -74,8 +74,11 @@ var onLoaded = require('../onloaded.js');
           // Degenerated triangle
           this.first = false;
           this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
-          this.sharedBuffer.addColor(0, 0 ,0);
-          this.sharedBuffer.addUV(-1, -1);
+          this.sharedBuffer.idx.normal++;
+          this.sharedBuffer.idx.color++;
+          this.sharedBuffer.idx.uv++;
+
+          this.idx = Object.assign({}, this.sharedBuffer.idx);
         }
         
         /*
@@ -85,22 +88,25 @@ var onLoaded = require('../onloaded.js');
         */
         this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
         this.sharedBuffer.addVertice(posB.x, posB.y, posB.z);
+        this.sharedBuffer.idx.normal+=2;
+
         this.idx.position = this.sharedBuffer.idx.position;
 
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.idx.color = this.sharedBuffer.idx.color;
 
-        this.sharedBuffer.addUV(0, 0);
-        this.sharedBuffer.addUV(0, 0);
-
         if (this.materialOptions.type === 'textured') {
+          this.sharedBuffer.idx.uv+= 2;
           var uvs = this.sharedBuffer.current.attributes.uv.array;
           var u;
           for (var i = 0; i < this.data.numPoints + 1; i++) {
               u = i / this.data.numPoints;
-            //var offset = 4 * i + (this.prevIdx.uv + (this.prevIdx.uv === 0 ? 0 : 2)) * 2;
-            var offset = 4 * i + (this.prevIdx.uv + (this.prevIdx.uv === 0 ? 0 : 2)) * 2;
+            if (this.prevIdx.uv === 0) {
+              var offset = 4 * i;
+            } else {
+              var offset = 4 * i + (this.prevIdx.uv + 1) * 2;
+            }
 
             uvs[offset] = converter.convertU(u);
             uvs[offset + 1] = converter.convertV(0);
@@ -128,19 +134,22 @@ var onLoaded = require('../onloaded.js');
       var vector = new THREE.Vector3();
 
       return function () {
-        var end = this.idx.position * 3;
-        var start = this.prevIdx.position * 3;
-        
-        var normals = this.sharedBuffer.current.attributes.normal.array;
-
-        for (var i = start; i < end; i++) {
-          normals[i] = 0;
-        }
+        var start = this.prevIdx.position === 0 ? 0 : (this.prevIdx.position + 1) * 3;
+        var end = (this.idx.position) * 3;
 
         var vertices = this.sharedBuffer.current.attributes.position.array;
+        
+        var normals = this.sharedBuffer.current.attributes.normal.array;
+        window.sharedBuffer = this.sharedBuffer.current;
 
+        // console.info(start, end, this.prevIdx.position, this.idx.position);
+
+        for (var i = start; i <= end; i++) {
+          normals[i] = i;
+        }
+/*
         var pair = true;
-        for (i = start; i < end; i += 3) {
+        for (i = start; i <= end; i += 9) {
           if (pair) {
             pA.fromArray(vertices, i);
             pB.fromArray(vertices, i + 3);
@@ -156,6 +165,7 @@ var onLoaded = require('../onloaded.js');
           ab.subVectors(pA, pB);
           cb.cross(ab);
           cb.normalize();
+          cb.set(i,i,i);
 
           normals[i] += cb.x;
           normals[i + 1] += cb.y;
@@ -170,6 +180,7 @@ var onLoaded = require('../onloaded.js');
           normals[i + 8] += cb.z;
         }
 
+
         /*
         first and last vertice (0 and 8) belongs just to one triangle
         second and penultimate (1 and 7) belongs to two triangles
@@ -182,6 +193,7 @@ var onLoaded = require('../onloaded.js');
         0    2     4     6     8
         */
 
+/*
         // Vertices that are shared across three triangles
         for (i = start + 2 * 3, il = end - 2 * 3; i < il; i++) {
           normals[i] = normals[i] / 3;
@@ -195,19 +207,22 @@ var onLoaded = require('../onloaded.js');
         normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
         normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
         normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
+*/
 
 /*
         var normals = this.sharedBuffer.current.attributes.normal;
-        for (var i = start; i < end / 3; i++) {
+        for (var i = start/3; i < end / 3; i++) {
 
           vector.x = normals.getX(i);
           vector.y = normals.getY(i);
           vector.z = normals.getZ(i);
 
           vector.normalize();
-
+          
           normals.setXYZ(i, vector.x, vector.y, vector.z);
         }
+        
+        normals.needsUpdate = true;
 */        
       }
     })()
