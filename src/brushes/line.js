@@ -59,6 +59,7 @@ var onLoaded = require('../onloaded.js');
         var uv = 0;
         var converter = this.materialOptions.converter;
 
+        console.log(this.sharedBuffer.current.attributes.uv.array);
         direction.set(1, 0, 0);
         direction.applyQuaternion(orientation);
         direction.normalize();
@@ -98,6 +99,7 @@ var onLoaded = require('../onloaded.js');
           var u;
           for (var i = 0; i < this.data.numPoints + 1; i++) {
               u = i / this.data.numPoints;
+            //var offset = 4 * i + (this.prevIdx.uv + (this.prevIdx.uv === 0 ? 0 : 2)) * 2;
             var offset = 4 * i + (this.prevIdx.uv + (this.prevIdx.uv === 0 ? 0 : 2)) * 2;
 
             uvs[offset] = converter.convertU(u);
