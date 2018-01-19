@@ -223,7 +223,7 @@ AFRAME.registerSystem('brush', {
     var size = 0.5;
     var width = 3;
     var pressure = 1;
-    var numPoints = 4;
+    var numPoints = 2;
 
     var steps = width / numPoints;
     var numStrokes = 1;
@@ -236,11 +236,12 @@ AFRAME.registerSystem('brush', {
       'star',
       'squared-textured',
       'flat',
-
+*/
       'squared-textured',
-      'squared-textured',*/
       'squared-textured',
-      */
+      'squared-textured',
+      'squared-textured',
+      'squared-textured',
       'squared-textured',
       'lines5'
     ];

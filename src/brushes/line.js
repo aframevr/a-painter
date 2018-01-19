@@ -59,7 +59,6 @@ var onLoaded = require('../onloaded.js');
         var uv = 0;
         var converter = this.materialOptions.converter;
 
-        console.log(this.sharedBuffer.current.attributes.uv.array);
         direction.set(1, 0, 0);
         direction.applyQuaternion(orientation);
         direction.normalize();
@@ -135,21 +134,19 @@ var onLoaded = require('../onloaded.js');
 
       return function () {
         var start = this.prevIdx.position === 0 ? 0 : (this.prevIdx.position + 1) * 3;
-        var end = (this.idx.position) * 3;
+        var end = (this.idx.position - 1) * 3;
 
         var vertices = this.sharedBuffer.current.attributes.position.array;
         
         var normals = this.sharedBuffer.current.attributes.normal.array;
-        window.sharedBuffer = this.sharedBuffer.current;
-
-        // console.info(start, end, this.prevIdx.position, this.idx.position);
 
         for (var i = start; i <= end; i++) {
-          normals[i] = i;
+          normals[i] = 0;
         }
-/*
+
         var pair = true;
-        for (i = start; i <= end; i += 9) {
+        for (i = start; i < end; i += 3) {
+
           if (pair) {
             pA.fromArray(vertices, i);
             pB.fromArray(vertices, i + 3);
@@ -165,21 +162,21 @@ var onLoaded = require('../onloaded.js');
           ab.subVectors(pA, pB);
           cb.cross(ab);
           cb.normalize();
-          cb.set(i,i,i);
 
-          normals[i] += cb.x;
-          normals[i + 1] += cb.y;
-          normals[i + 2] += cb.z;
+          normals[i] = cb.x;
+          normals[i + 1] = cb.y;
+          normals[i + 2] = cb.z;
 
-          normals[i + 3] += cb.x;
-          normals[i + 4] += cb.y;
-          normals[i + 5] += cb.z;
+          normals[i + 3] = cb.x;
+          normals[i + 4] = cb.y;
+          normals[i + 5] = cb.z;
 
-          normals[i + 6] += cb.x;
-          normals[i + 7] += cb.y;
-          normals[i + 8] += cb.z;
+          normals[i + 6] = cb.x;
+          normals[i + 7] = cb.y;
+          normals[i + 8] = cb.z;
         }
 
+        //console.log('!!!!', normals.subarray(0,100));
 
         /*
         first and last vertice (0 and 8) belongs just to one triangle
@@ -192,7 +189,6 @@ var onLoaded = require('../onloaded.js');
         /____\/____\/____\/____\
         0    2     4     6     8
         */
-
 /*
         // Vertices that are shared across three triangles
         for (i = start + 2 * 3, il = end - 2 * 3; i < il; i++) {
@@ -207,7 +203,6 @@ var onLoaded = require('../onloaded.js');
         normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
         normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
         normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
-*/
 
 /*
         var normals = this.sharedBuffer.current.attributes.normal;
@@ -223,7 +218,8 @@ var onLoaded = require('../onloaded.js');
         }
         
         normals.needsUpdate = true;
-*/        
+*/
+        console.log(normals.subarray(0,100));
       }
     })()
 
