@@ -1,6 +1,5 @@
 window.saveAs = require('../vendor/saveas.js').saveAs;
 
-require('three.xr.js');
 require('aframe-xr');
 
 require('./dragndrop.js');

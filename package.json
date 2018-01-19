@@ -22,7 +22,6 @@
     "webpack-dev-server": "^1.16.1"
   },
   "dependencies": {
-    "three.xr.js": "0.1.2",
-    "aframe-xr": "0.0.7"
+    "aframe-xr": "0.0.8"
   }
 }

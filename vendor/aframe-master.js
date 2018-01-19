@@ -78283,7 +78283,7 @@ _dereq_('./core/a-mixin');
 _dereq_('./extras/components/');
 _dereq_('./extras/primitives/');
 
-console.log('A-Frame Version: 0.7.0 (Date 2018-01-08, Commit #752a14a4)');
+console.log('A-Frame Version: 0.7.0 (Date 2018-01-19, Commit #1fc978c6)');
 console.log('three Version:', pkg.dependencies['three']);
 console.log('WebVR Polyfill Version:', pkg.dependencies['webvr-polyfill']);
 
