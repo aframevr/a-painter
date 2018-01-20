@@ -236,12 +236,13 @@ AFRAME.registerSystem('brush', {
       'star',
       'squared-textured',
       'flat',
-*/
+
       'squared-textured',
       'squared-textured',
       'squared-textured',
       'squared-textured',
-      'squared-textured',
+      'squared-textured',      
+      */
       'squared-textured',
       'lines5'
     ];
