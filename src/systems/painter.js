@@ -6,48 +6,52 @@ AFRAME.registerSystem('painter', {
   init: function () {
 
     var mappings = {
-      default: {
-        common: {
-          gripdown: 'undo',
-          triggerchanged: 'paint'
-        },
+      behaviours: {},
+      mappings: {
+        painting: {
+          common: {
+            'grip.down': 'undo',
+            'trigger.changed': 'paint'
+          },
 
-        'vive-controls': {
-          axismove: 'changeBrushSizeInc',
-          trackpadtouchstart: 'startChangeBrushSize',
-          menudown: 'toggleMenu',
+          'vive-controls': {
+            'axis.move': 'changeBrushSizeInc',
+            'trackpad.touchstart': 'startChangeBrushSize',
+            'menu.down': 'toggleMenu',
 
-          // Teleport
-          trackpaddown: 'aim',
-          trackpadup: 'teleport'
-        },
+            // Teleport
+            'trackpad.down': 'aim',
+            'trackpad.up': 'teleport'
+          },
 
-        'oculus-touch-controls': {
-          axismove: 'changeBrushSizeAbs',
-          abuttondown: 'toggleMenu',
-          xbuttondown: 'toggleMenu',
+          'oculus-touch-controls': {
+            'axis.move': 'changeBrushSizeAbs',
+            'abutton.down': 'toggleMenu',
+            'xbutton.down': 'toggleMenu',
 
-          // Teleport
-          ybuttondown: 'aim',
-          ybuttonup: 'teleport',
+            // Teleport
+            'ybutton.down': 'aim',
+            'ybutton.up': 'teleport',
 
-          bbuttondown: 'aim',
-          bbuttonup: 'teleport'
-        },
+            'bbutton.down': 'aim',
+            'bbutton.up': 'teleport'
+          },
 
-        'windows-motion-controls': {
-          axismove: 'changeBrushSizeAbs',
-          menudown: 'toggleMenu',
+          'windows-motion-controls': {
+            'axis.move': 'changeBrushSizeAbs',
+            'menu.down': 'toggleMenu',
 
-          // Teleport
-          trackpaddown: 'aim',
-          trackpadup: 'teleport'
-        },
+            // Teleport
+            'trackpad.down': 'aim',
+            'trackpad.up': 'teleport'
+          },
+        }
       }
     };
 
     this.sceneEl.addEventListener('loaded', function() {
       AFRAME.registerInputMappings(mappings);
+      AFRAME.currentInputMapping = 'painting';
     });
 
     this.version = '1.2';
