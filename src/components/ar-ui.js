@@ -1920,7 +1920,7 @@ AFRAME.registerComponent('ar-ui', {
     this.tweenSaving.stop();
     this.showEl(this, 'saved', false, 10);
     setTimeout(function () {
-      window.location.href = '/?url=' + url + '#save-painting';
+      window.location.href = '/?url=' + url;
     }, 1000);
   },
   dragStroke: function () {

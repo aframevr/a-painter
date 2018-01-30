@@ -16,7 +16,6 @@ AFRAME.registerComponent('ar-pin', {
     if (!AFRAME.scenes[0].systems.xr.supportAR) {
       var arPaintControls = document.querySelector('#ar-paint-controls');
       arPaintControls.parentNode.removeChild(arPaintControls);
-      this.el.sceneEl.setAttribute('background', { transparent: false });
       return;
     }
 

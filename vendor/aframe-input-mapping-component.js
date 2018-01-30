@@ -455,7 +455,7 @@ DoubleTouch.prototype = {
   onButtonDown: function onButtonDown(event) {
     var time = performance.now();
     if (time - this.lastTime < this.timeOut) {
-      this.onActivate(event.detail);
+      this.onActivate(event);
     } else {
       this.lastTime = time;
     }
@@ -490,7 +490,7 @@ DoublePress.prototype = {
   onButtonDown: function onButtonDown(event) {
     var time = performance.now();
     if (time - this.lastTime < this.timeOut) {
-      this.onActivate(event.detail);
+      this.onActivate(event);
     } else {
       this.lastTime = time;
     }
@@ -511,14 +511,20 @@ AFRAME.registerInputActivator('doublepress', DoublePress);
 
 function createSimpleActivator(suffix) {
   return function (el, button, onActivate) {
-    el.addEventListener(button + suffix, onActivate);
+    var eventName = button + suffix;
+
+    el.addEventListener(eventName, onActivate);
+    this.removeListeners = function () {
+      el.removeEventListener(eventName, onActivate);
+    };
   };
 }
 
-AFRAME.registerInputActivator('down', createSimpleActivator('down'));
-AFRAME.registerInputActivator('up', createSimpleActivator('up'));
-AFRAME.registerInputActivator('touchstart', createSimpleActivator('touchstart'));
-AFRAME.registerInputActivator('touchend', createSimpleActivator('touchend'));
+var activators = ['down', 'up', 'touchstart', 'touchend', 'changed', 'move'];
+
+activators.forEach(function (activatorName) {
+  AFRAME.registerInputActivator(activatorName, createSimpleActivator(activatorName));
+});
 
 /***/ }),
 /* 6 */

@@ -763,12 +763,11 @@ AFRAME.registerComponent('ui', {
     var handEl = evt.detail.el;
     // Remove listeners of previous hand
     if (this.handEl) { this.removeHandListeners(); }
-    if(handEl.components.ui){
-      this.handEl = handEl;
-      this.handRayEl = this.handEl.components.ui.rayEl;
-      this.menuEls = this.uiEl.object3D.children;
-      this.syncUI();
-    }
+    this.handEl = handEl;
+    this.handRayEl = this.handEl.components.ui.rayEl;
+    this.menuEls = this.uiEl.object3D.children;
+    this.syncUI();
+    this.addHandListeners();
   },
 
   addHandListeners: function () {
