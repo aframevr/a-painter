@@ -125,8 +125,6 @@ SharedBufferGeometry.prototype = {
       this.addColor(color[col++], color[col++], color[col++]);
 
       var uvs = this.previous.attributes.uv.array;
-      // this.addUV(uvs[uv++], uvs[uv++]);
-      // this.addUV(uvs[uv++], uvs[uv++]);
 
     }
   },

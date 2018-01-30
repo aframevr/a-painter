@@ -223,26 +223,18 @@ AFRAME.registerSystem('brush', {
     var size = 0.5;
     var width = 3;
     var pressure = 1;
-    var numPoints = 2;
+    var numPoints = 4;
 
     var steps = width / numPoints;
     var numStrokes = 1;
     var brushesNames = Object.keys(AFRAME.BRUSHES);
 
-    brushesNames = [
-      /*
+    brushesNames2 = [
       'leaf1',
       'fur2',
       'star',
       'squared-textured',
       'flat',
-
-      'squared-textured',
-      'squared-textured',
-      'squared-textured',
-      'squared-textured',
-      'squared-textured',      
-      */
       'squared-textured',
       'lines5'
     ];

@@ -89,22 +89,18 @@ var onLoaded = require('../onloaded.js');
         this.sharedBuffer.addVertice(posB.x, posB.y, posB.z);
         this.sharedBuffer.idx.normal+=2;
 
-        this.idx.position = this.sharedBuffer.idx.position;
-
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
-        this.idx.color = this.sharedBuffer.idx.color;
 
         if (this.materialOptions.type === 'textured') {
           this.sharedBuffer.idx.uv+= 2;
           var uvs = this.sharedBuffer.current.attributes.uv.array;
-          var u;
+          var u, offset;
           for (var i = 0; i < this.data.numPoints + 1; i++) {
-              u = i / this.data.numPoints;
-            if (this.prevIdx.uv === 0) {
-              var offset = 4 * i;
-            } else {
-              var offset = 4 * i + (this.prevIdx.uv + 1) * 2;
+            u = i / this.data.numPoints;
+            offset = 4 * i;
+            if (this.prevIdx.uv !== 0) {
+              offset += (this.prevIdx.uv + 1) * 2;
             }
 
             uvs[offset] = converter.convertU(u);
@@ -113,7 +109,6 @@ var onLoaded = require('../onloaded.js');
             uvs[offset + 2] = converter.convertU(u);
             uvs[offset + 3] = converter.convertV(1);
           }
-          this.idx.uv = this.sharedBuffer.idx.uv;
         }
 
         this.idx = Object.assign({}, this.sharedBuffer.idx);
@@ -149,7 +144,6 @@ var onLoaded = require('../onloaded.js');
 
         var pair = true;
         for (i = start; i < end - 6; i += 3) {
-          //console.log(i);
           if (pair) {
             pA.fromArray(vertices, i);
             pB.fromArray(vertices, i + 3);
@@ -179,8 +173,6 @@ var onLoaded = require('../onloaded.js');
           normals[i + 8] += cb.z;
         }
 
-        //console.log('!!!!', normals.subarray(0,100));
-
         /*
         first and last vertice (0 and 8) belongs just to one triangle
         second and penultimate (1 and 7) belongs to two triangles
@@ -194,17 +186,8 @@ var onLoaded = require('../onloaded.js');
         */
 
         // Vertices that are shared across three triangles
-        /*
-        for (i = start + (2 * 3); i < end - (3 * 3); i++) {
+        for (i = start + 2 * 3; i < end - 2 * 3; i++) {
           normals[i] = normals[i] / 3;
-        }
-        */
-
-        /*
-        for (i = startI + 2; i < endI - 2; i++) {
-          normals[3 * i] = normals[3 * i] / 3;
-          normals[3 * i + 1] = normals[3 * i + 1] / 3;
-          normals[3 * i + 2] = normals[3 * i + 2] / 3;
         }
 
         // Second and penultimate triangle, that shares just two triangles
@@ -215,25 +198,6 @@ var onLoaded = require('../onloaded.js');
         normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
         normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
         normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
-
-//        console.log(normals.subarray(0, 100));
-*/
-
-        var normals = this.sharedBuffer.current.attributes.normal;
-/*
-        for (var i = startI; i < endI; i++) {
-
-          vector.x = normals.getX(i);
-          vector.y = normals.getY(i);
-          vector.z = normals.getZ(i);
-
-          vector.normalize();
-          
-          normals.setXYZ(i, vector.x, vector.y, vector.z);
-        }
-*/
-        normals.needsUpdate = true;
-        
       }
     })()
 
