@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "description": "A-Painter",
   "scripts": {
+    "atlas": "spritesheet-js --name brush_atlas --path assets/images brushes/*.png",
     "build": "cross-env NODE_ENV=production webpack",
     "start": "webpack-dev-server --host 0.0.0.0",
     "lint": "semistandard -v | snazzy"

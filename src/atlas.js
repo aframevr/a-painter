@@ -1,7 +1,7 @@
-const AtlasJSON = require('../brushes/brush_atlas.json');
+const AtlasJSON = require('../assets/images/brush_atlas.json');
 
 function Atlas () {
-  this.map = new THREE.TextureLoader().load(AtlasJSON.meta.image);
+  this.map = new THREE.TextureLoader().load('assets/images/' + AtlasJSON.meta.image);
 }
 
 Atlas.prototype = {
