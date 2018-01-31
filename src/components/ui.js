@@ -938,8 +938,9 @@ AFRAME.registerComponent('ui', {
     if (!!this.tooltips && this.isTooltipPaused) {
       this.isTooltipPaused = false;
       this.tooltips.forEach(function (tooltip) {
-          tooltip.setAttribute('visible', true);
+        tooltip.setAttribute('visible', true);
       });
+    }
     this.playSound('ui_menu');
   },
 
