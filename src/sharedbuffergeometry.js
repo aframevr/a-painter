@@ -14,16 +14,10 @@ SharedBufferGeometry.prototype = {
       this.addBuffer(false);
     } else if (this.idx.position !== 0) {
       var prev = (this.idx.position - 1) * 3;
-      var col = (this.idx.color - 1) * 3;
-      var uv = (this.idx.uv - 1) * 3;
-      var normal = (this.idx.normal - 1) * 3;
-
       var position = this.current.attributes.position.array;
-      this.addVertice(position[prev++], position[prev++], position[prev++]);
+      this.addVertex(position[prev++], position[prev++], position[prev++]);
 
-      var color = this.current.attributes.color.array;
-      this.addColor(color[col++], color[col++], color[col++]);
-
+      this.idx.color++;
       this.idx.normal++;
       this.idx.uv++;
     }
@@ -44,7 +38,7 @@ SharedBufferGeometry.prototype = {
         }
       }
     }
-  
+
     for (key in this.idx) {
       var diff = (idx[key] - prevIdx[key]);
       this.idx[key] -= diff;
@@ -113,8 +107,8 @@ SharedBufferGeometry.prototype = {
       var norm = (this.maxBufferSize - 2) * 3;
 
       var position = this.previous.attributes.position.array;
-      this.addVertice(position[prev++], position[prev++], position[prev++]);
-      this.addVertice(position[prev++], position[prev++], position[prev++]);
+      this.addVertex(position[prev++], position[prev++], position[prev++]);
+      this.addVertex(position[prev++], position[prev++], position[prev++]);
 
       var normal = this.previous.attributes.normal.array;
       this.addNormal(normal[norm++], normal[norm++], normal[norm++]);
@@ -137,7 +131,7 @@ SharedBufferGeometry.prototype = {
     this.current.attributes.normal.setXYZ(this.idx.normal++, x, y, z);
   },
 
-  addVertice: function (x, y, z) {
+  addVertex: function (x, y, z) {
     var buffer = this.current.attributes.position;
     if (this.idx.position === buffer.count) {
       this.addBuffer(true);

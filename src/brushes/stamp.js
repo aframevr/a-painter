@@ -32,7 +32,7 @@ var onLoaded = require('../onloaded.js');
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
       this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
       this.idx = Object.assign({}, this.sharedBuffer.idx);
-      
+
 
       this.currAngle = 0;
       this.subTextures = 1;
@@ -87,7 +87,7 @@ var onLoaded = require('../onloaded.js');
           this.currAngle += 0.1;
           brushAngle += this.currAngle;
         }
-        
+
         a.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, brushAngle)).multiplyScalar(brushSize));
         b.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, pi2)).multiplyScalar(brushSize));
         c.copy(pointerPosition).add(auxDir.copy(dir.applyAxisAngle(axis, pi2)).multiplyScalar(brushSize));
@@ -97,14 +97,14 @@ var onLoaded = require('../onloaded.js');
         var cidx = this.idx.position;
 
         // triangle 1
-        this.sharedBuffer.addVertice(a.x, a.y, a.z);
-        this.sharedBuffer.addVertice(b.x, b.y, b.z);
-        this.sharedBuffer.addVertice(c.x, c.y, c.z);
+        this.sharedBuffer.addVertex(a.x, a.y, a.z);
+        this.sharedBuffer.addVertex(b.x, b.y, b.z);
+        this.sharedBuffer.addVertex(c.x, c.y, c.z);
 
         // triangle 2
-        this.sharedBuffer.addVertice(c.x, c.y, c.z);
-        this.sharedBuffer.addVertice(d.x, d.y, d.z);
-        this.sharedBuffer.addVertice(a.x, a.y, a.z);
+        this.sharedBuffer.addVertex(c.x, c.y, c.z);
+        this.sharedBuffer.addVertex(d.x, d.y, d.z);
+        this.sharedBuffer.addVertex(a.x, a.y, a.z);
 
         // normals & color
         for (var i = 0; i < 6; i++) {
@@ -143,7 +143,7 @@ var onLoaded = require('../onloaded.js');
         return true;
       }
     })()
-    
+
   };
 
   var stamps = [

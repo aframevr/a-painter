@@ -453,7 +453,7 @@ AFRAME.registerSystem('brush', {
       }
     }
 
-    console.timeEnd('JSON Loading');    
+    console.timeEnd('JSON Loading');
   },
   loadBinary: function (buffer) {
     var binaryManager = new BinaryManager(buffer);
@@ -462,7 +462,7 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid `magic` header');
       return;
     }
-    
+
     var version = binaryManager.readUint16();
     if (version !== VERSION) {
       console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');

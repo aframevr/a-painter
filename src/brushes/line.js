@@ -34,7 +34,7 @@ var onLoaded = require('../onloaded.js');
     sharedBufferGeometryManager.addSharedBuffer('strip-shaded', new THREE.MeshStandardMaterial(optionsStandard), THREE.TriangleStripDrawMode);
     sharedBufferGeometryManager.addSharedBuffer('strip-textured', new THREE.MeshStandardMaterial(optionTextured), THREE.TriangleStripDrawMode);
   });
-  
+
   var line = {
 
     init: function (color, brushSize) {
@@ -56,7 +56,6 @@ var onLoaded = require('../onloaded.js');
       var direction = new THREE.Vector3();
 
       return function (position, orientation, pointerPosition, pressure, timestamp) {
-        var uv = 0;
         var converter = this.materialOptions.converter;
 
         direction.set(1, 0, 0);
@@ -72,28 +71,28 @@ var onLoaded = require('../onloaded.js');
         if (this.first && this.prevIdx.position > 0) {
           // Degenerated triangle
           this.first = false;
-          this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
+          this.sharedBuffer.addVertex(posA.x, posA.y, posA.z);
           this.sharedBuffer.idx.normal++;
           this.sharedBuffer.idx.color++;
           this.sharedBuffer.idx.uv++;
 
           this.idx = Object.assign({}, this.sharedBuffer.idx);
         }
-        
+
         /*
           2---3
           | \ |
           0---1
         */
-        this.sharedBuffer.addVertice(posA.x, posA.y, posA.z);
-        this.sharedBuffer.addVertice(posB.x, posB.y, posB.z);
-        this.sharedBuffer.idx.normal+=2;
+        this.sharedBuffer.addVertex(posA.x, posA.y, posA.z);
+        this.sharedBuffer.addVertex(posB.x, posB.y, posB.z);
+        this.sharedBuffer.idx.normal += 2;
 
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
         this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
 
         if (this.materialOptions.type === 'textured') {
-          this.sharedBuffer.idx.uv+= 2;
+          this.sharedBuffer.idx.uv += 2;
           var uvs = this.sharedBuffer.current.attributes.uv.array;
           var u, offset;
           for (var i = 0; i < this.data.numPoints + 1; i++) {
@@ -116,7 +115,7 @@ var onLoaded = require('../onloaded.js');
         this.sharedBuffer.update();
         this.computeStripVertexNormals();
         return true;
-      }
+      };
     })(),
 
     computeStripVertexNormals: (function () {
@@ -125,17 +124,11 @@ var onLoaded = require('../onloaded.js');
       var pC = new THREE.Vector3();
       var cb = new THREE.Vector3();
       var ab = new THREE.Vector3();
-      var vector = new THREE.Vector3();
 
       return function () {
         var start = this.prevIdx.position === 0 ? 0 : (this.prevIdx.position + 1) * 3;
         var end = (this.idx.position) * 3;
-
-        var startI = this.prevIdx.position === 0 ? 0 : (this.prevIdx.position + 1);
-        var endI = this.idx.position;
-
         var vertices = this.sharedBuffer.current.attributes.position.array;
-        
         var normals = this.sharedBuffer.current.attributes.normal.array;
 
         for (var i = start; i <= end; i++) {
@@ -159,7 +152,7 @@ var onLoaded = require('../onloaded.js');
           ab.subVectors(pA, pB);
           cb.cross(ab);
           cb.normalize();
-        
+
           normals[i] += cb.x;
           normals[i + 1] += cb.y;
           normals[i + 2] += cb.z;
@@ -177,7 +170,7 @@ var onLoaded = require('../onloaded.js');
         first and last vertice (0 and 8) belongs just to one triangle
         second and penultimate (1 and 7) belongs to two triangles
         the rest of the vertices belongs to three triangles
-   
+
           1_____3_____5_____7
           /\    /\    /\    /\
          /  \  /  \  /  \  /  \
@@ -198,9 +191,8 @@ var onLoaded = require('../onloaded.js');
         normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
         normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
         normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
-      }
+      };
     })()
-
   };
 
   var lines = [
@@ -323,7 +315,7 @@ var onLoaded = require('../onloaded.js');
     } else {
       definition.materialOptions.converter = window.atlas.getUVConverters(null);
     }
-    
+
     AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
   }
 })();
