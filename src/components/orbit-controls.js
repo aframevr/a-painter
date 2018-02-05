@@ -1,9 +1,9 @@
 AFRAME.registerComponent('orbit-controls', {
   dependencies: ['camera'],
   schema: {
-    position: { default: '0 1.6 0.1', type: 'vec3'}
+    position: { default: { x: 0, y: 1.6, z: 0.1 }, type: 'vec3'}
   },
-
+  
   init: function () {
     var sceneEl = this.el.sceneEl;
     var setupControls = this.setupControls.bind(this);

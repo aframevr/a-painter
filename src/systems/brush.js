@@ -3,6 +3,10 @@ var VERSION = 1;
 
 AFRAME.BRUSHES = {};
 
+APAINTER_STATS = {
+  brushes: {}
+};
+
 AFRAME.registerBrush = function (name, definition, options) {
   var proto = {};
 
@@ -31,6 +35,8 @@ AFRAME.registerBrush = function (name, definition, options) {
     options: Object.assign(defaultOptions, options),
     reset: function () {},
     tick: function (timeoffset, delta) {},
+    undo: function () {},
+    remove: function () {},
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {},
     getJSON: function (system) {
       var points = [];
@@ -151,18 +157,41 @@ AFRAME.registerSystem('brush', {
       break;
     }
     if (stroke) {
-      var entity = stroke.entity;
-      entity.emit('stroke-removed', {entity: entity});
-      entity.parentNode.removeChild(entity);
+      stroke.undo();
+      var drawing = document.querySelector('.a-drawing');
+      drawing.emit('stroke-removed', {stroke: stroke});
+    }
+  },
+  removeById: function (order) {
+    order = 1;
+    var targetStroke = this.strokes[order];
+    console.log(targetStroke, this.strokes);
+    if (targetStroke) {
+      for (var i = this.strokes.length - 1; i > order; i--) {
+        stroke = this.strokes[i];
+        if (targetStroke.sharedBuffer === stroke.sharedBuffer) {
+          // Update idx and prevIdx
+          console.log('>>>', stroke.prevIdx, '->', stroke.idx, 'target', targetStroke.prevIdx, '->', targetStroke.idx);
+          for (key in targetStroke.idx) {
+            var diff = (targetStroke.idx[key] - targetStroke.prevIdx[key]);
+            stroke.idx[key] -= diff;
+            stroke.prevIdx[key] -= diff;
+          }
+          console.log('<<<', stroke.idx, stroke.prevIdx);
+        }
+      }
+      this.strokes.splice(order, 1)[0].remove();
     }
   },
   clear: function () {
     // Remove all the stroke entities
-    for (var i = 0; i < this.strokes.length; i++) {
+    //for (var i = 0; i < this.strokes.length; i++) {
+    for (var i = this.strokes.length - 1; i >= 0; i--) {
       if(this.strokes[i].data.owner !== 'local') continue;
-      var entity = this.strokes[i].entity;
-      entity.emit('stroke-removed', {entity: entity});
-      entity.parentNode.removeChild(entity);
+      var stroke = this.strokes[i];
+      stroke.undo();
+      var drawing = document.querySelector('.a-drawing');
+      drawing.emit('stroke-removed', { stroke: stroke });
     }
 
     // Reset the used brushes
@@ -188,17 +217,71 @@ AFRAME.registerSystem('brush', {
       this.strokes[i].tick(time, delta);
     }
   },
-  generateRandomStrokes: function (numStrokes) {
-    function randNeg () { return 2 * Math.random() - 1; }
+  generateTestLines: function () {
+    function randNeg() { return 2 * Math.random() - 1; }
+    var z = -2;
+    var size = 0.5;
+    var width = 3;
+    var pressure = 1;
+    var numPoints = 4;
 
-    for (var l = 0; l < numStrokes; l++) {
-      var brushName = 'flat';
+    var steps = width / numPoints;
+    var numStrokes = 1;
+    var brushesNames = Object.keys(AFRAME.BRUSHES);
+
+    brushesNames2 = [
+      'leaf1',
+      'fur2',
+      'star',
+      'squared-textured',
+      'flat',
+      'squared-textured',
+      'lines5'
+    ];
+
+    var x = -(size + 0.1) * brushesNames.length / 2;
+    x= 0;
+    var y = 0;
+    brushesNames.forEach(brushName => {
       var color = new THREE.Color(Math.random(), Math.random(), Math.random());
-      var size = Math.random() * 0.1;
-      var numPoints = parseInt(Math.random() * 500);
 
       var stroke = this.addNewStroke(brushName, color, size);
       var entity = document.querySelector('#left-hand');
+      entity.emit('stroke-started', { entity: entity, stroke: stroke });
+
+      var position = new THREE.Vector3(x, y, z);
+      var aux = new THREE.Vector3();
+
+      for (var i = 0; i < numPoints; i++) {
+        var orientation = new THREE.Quaternion();
+        aux.set(0, steps, 0.1);
+        var euler = new THREE.Euler(0, Math.PI, 0);
+        orientation.setFromEuler(euler);
+        position = position.add(aux);
+        var timestamp = 0;
+
+        var pointerPosition = this.getPointerPosition(position, orientation);
+        stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
+      }
+
+      x+= size + 0.1;
+    });
+  },
+  generateRandomStrokes: function (numStrokes) {
+    function randNeg () { return 2 * Math.random() - 1; }
+
+    var entity = document.querySelector('#left-hand');
+
+    var brushesNames = Object.keys(AFRAME.BRUSHES);
+
+    for (var l = 0; l < numStrokes; l++) {
+      //var brushName = brushesNames[parseInt(Math.random() * 30)];
+      var brushName = brushesNames[parseInt(Math.random() * 13)];
+      var color = new THREE.Color(Math.random(), Math.random(), Math.random());
+      var size = Math.random() * 0.3;
+      var numPoints = parseInt(Math.random() * 500);
+
+      var stroke = this.addNewStroke(brushName, color, size);
       entity.emit('stroke-started', {entity: entity, stroke: stroke});
 
       var position = new THREE.Vector3(randNeg(), randNeg(), randNeg());
@@ -211,7 +294,13 @@ AFRAME.registerSystem('brush', {
         aux.multiplyScalar(randNeg() / 20);
         orientation.setFromUnitVectors(position.clone().normalize(), aux.clone().normalize());
         position = position.add(aux);
+        if (position.y < 0) {
+          position.y = -position.y;
+        }
         var timestamp = 0;
+        pressure += 1 - 2 * Math.random();
+        if (pressure < 0) pressure = 0.2;
+        if (pressure > 1) pressure = 1;
 
         var pointerPosition = this.getPointerPosition(position, orientation);
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
@@ -219,6 +308,11 @@ AFRAME.registerSystem('brush', {
     }
   },
   addNewStroke: function (brushName, color, size, owner, timestamp) {
+    if (!APAINTER_STATS.brushes[brushName]) {
+      APAINTER_STATS.brushes[brushName] = 0;
+    }
+    APAINTER_STATS.brushes[brushName]++;
+
     owner = owner || 'local';
     timestamp = timestamp || Date.now();
     var Brush = this.getBrushByName(brushName);
@@ -241,12 +335,12 @@ AFRAME.registerSystem('brush', {
       document.querySelector('a-scene').appendChild(drawing);
     }
 
-    var entity = document.createElement('a-entity');
-    entity.className = "a-stroke";
-    drawing.appendChild(entity);
-
-    entity.setObject3D('mesh', stroke.object3D);
-    stroke.entity = entity;
+    //var entity = document.createElement('a-entity');
+    //entity.className = "a-stroke";
+    //drawing.appendChild(entity);
+//    drawing.object3D.add(stroke.object3D);
+    //entity.setObject3D('mesh', stroke.object3D);
+    //stroke.entity = entity;
 
     return stroke;
   },
@@ -332,6 +426,8 @@ AFRAME.registerSystem('brush', {
       console.error('Invalid version: ', data.version, '(Expected: ' + VERSION + ')');
     }
 
+    console.time('JSON Loading');
+
     var usedBrushes = [];
 
     for (var i = 0; i < data.strokes.length; i++) {
@@ -356,6 +452,8 @@ AFRAME.registerSystem('brush', {
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
+
+    console.timeEnd('JSON Loading');
   },
   loadBinary: function (buffer) {
     var binaryManager = new BinaryManager(buffer);
@@ -369,6 +467,8 @@ AFRAME.registerSystem('brush', {
     if (version !== VERSION) {
       console.error('Invalid version: ', version, '(Expected: ' + VERSION + ')');
     }
+
+    console.time('Binary Loading');
 
     var numUsedBrushes = binaryManager.readUint8();
     var usedBrushes = [];
@@ -396,6 +496,7 @@ AFRAME.registerSystem('brush', {
         stroke.addPoint(position, orientation, pointerPosition, pressure, timestamp);
       }
     }
+    console.timeEnd('Binary Loading');
   },
   loadFromUrl: function (url, binary) {
     var loader = new THREE.XHRLoader(this.manager);
