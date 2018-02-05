@@ -242,7 +242,7 @@ AFRAME.registerSystem('brush', {
     var x = -(size + 0.1) * brushesNames.length / 2;
     x= 0;
     var y = 0;
-    brushesNames.forEach(brushName => {
+    brushesNames.forEach(function (brushName) {
       var color = new THREE.Color(Math.random(), Math.random(), Math.random());
 
       var stroke = this.addNewStroke(brushName, color, size);

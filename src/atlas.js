@@ -6,11 +6,11 @@ function Atlas () {
 }
 
 Atlas.prototype = {
-  getUVConverters (filename) {
+  getUVConverters: function (filename) {
     if (filename) {
       filename = filename.replace('brushes/', '');
       return {
-        convertU (u) {
+        convertU: function (u) {
           var totalSize = AtlasJSON.meta.size;
           var data = AtlasJSON.frames[filename];
           if (u > 1 || u < 0) {
@@ -19,7 +19,7 @@ Atlas.prototype = {
           return data.frame.x / totalSize.w + u * data.frame.w / totalSize.w;
         },
 
-        convertV (v) {
+        convertV: function (v) {
           var totalSize = AtlasJSON.meta.size;
           var data = AtlasJSON.frames[filename];
           if (v > 1 || v < 0) {
@@ -31,8 +31,8 @@ Atlas.prototype = {
       };
     } else {
       return {
-        convertU (u) { return u; },
-        convertV (v) { return v; }
+        convertU: function (u) { return u; },
+        convertV: function (v) { return v; }
       };
     }
   }
