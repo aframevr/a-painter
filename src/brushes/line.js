@@ -1,174 +1,198 @@
 /* globals AFRAME THREE */
+var sharedBufferGeometryManager = require('../sharedbuffergeometrymanager.js');
+var onLoaded = require('../onloaded.js');
+
 (function () {
+
+  var geometryManager = null;
+
+  onLoaded(function () {
+    var optionsBasic = {
+      vertexColors: THREE.VertexColors,
+      side: THREE.DoubleSide
+    };
+
+    var optionsStandard = {
+      roughness: 0.75,
+      metalness: 0.25,
+      vertexColors: THREE.VertexColors,
+      map: window.atlas.map,
+      side: THREE.DoubleSide
+    };
+
+    var optionTextured = {
+      roughness: 0.75,
+      metalness: 0.25,
+      vertexColors: THREE.VertexColors,
+      side: THREE.DoubleSide,
+      map: window.atlas.map,
+      transparent: true,
+      alphaTest: 0.5
+    };
+
+    sharedBufferGeometryManager.addSharedBuffer('strip-flat', new THREE.MeshBasicMaterial(optionsBasic), THREE.TriangleStripDrawMode);
+    sharedBufferGeometryManager.addSharedBuffer('strip-shaded', new THREE.MeshStandardMaterial(optionsStandard), THREE.TriangleStripDrawMode);
+    sharedBufferGeometryManager.addSharedBuffer('strip-textured', new THREE.MeshStandardMaterial(optionTextured), THREE.TriangleStripDrawMode);
+  });
+
   var line = {
 
     init: function (color, brushSize) {
-      this.idx = 0;
-      this.geometry = new THREE.BufferGeometry();
-      this.vertices = new Float32Array(this.options.maxPoints * 3 * 3);
-      this.normals = new Float32Array(this.options.maxPoints * 3 * 3);
-      this.uvs = new Float32Array(this.options.maxPoints * 2 * 2);
+      this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('strip-' + this.materialOptions.type);
+      this.sharedBuffer.restartPrimitive();
 
-      this.geometry.setDrawRange(0, 0);
-      this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
-      this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
-      this.geometry.addAttribute('normal', new THREE.BufferAttribute(this.normals, 3).setDynamic(true));
+      this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
+      this.idx = Object.assign({}, this.sharedBuffer.idx);
 
-      var mesh = new THREE.Mesh(this.geometry, this.getMaterial());
-      mesh.drawMode = THREE.TriangleStripDrawMode;
-
-      mesh.frustumCulled = false;
-      mesh.vertices = this.vertices;
-
-      this.object3D.add(mesh);
+      this.first = true;
     },
-
-    getMaterial: function () {
-      var map = this.materialOptions.map;
-      var type = this.materialOptions.type;
-
-      var defaultOptions = {};
-      var defaultTextureOptions = {};
-      if (map) {
-        defaultTextureOptions = {
-          map: map,
-          transparent: true,
-          alphaTest: 0.5
-        };
-      }
-
-      if (type === 'shaded') {
-        defaultOptions = {
-          color: this.data.color,
-          roughness: 0.75,
-          metalness: 0.25,
-          side: THREE.DoubleSide
-        };
-      } else {
-        defaultOptions = {
-          color: this.data.color,
-          side: THREE.DoubleSide
-        };
-      }
-
-      var options = Object.assign(defaultOptions, defaultTextureOptions, this.materialOptions);
-      delete options.type;
-
-      if (type === 'shaded') {
-        return new THREE.MeshStandardMaterial(options);
-      } else {
-        return new THREE.MeshBasicMaterial(options);
-      }
+    remove: function () {
+      this.sharedBuffer.remove(this.prevIdx, this.idx);
     },
-    addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
-      var uv = 0;
-      for (i = 0; i < this.data.numPoints; i++) {
-        this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-        this.uvs[ uv++ ] = 0;
-
-        this.uvs[ uv++ ] = i / (this.data.numPoints - 1);
-        this.uvs[ uv++ ] = 1;
-      }
-
+    undo: function () {
+      this.sharedBuffer.undo(this.prevIdx);
+    },
+    addPoint: (function () {
       var direction = new THREE.Vector3();
-      direction.set(1, 0, 0);
-      direction.applyQuaternion(orientation);
-      direction.normalize();
 
-      var posA = pointerPosition.clone();
-      var posB = pointerPosition.clone();
-      var brushSize = this.data.size * pressure;
-      posA.add(direction.clone().multiplyScalar(brushSize / 2));
-      posB.add(direction.clone().multiplyScalar(-brushSize / 2));
+      return function (position, orientation, pointerPosition, pressure, timestamp) {
+        var converter = this.materialOptions.converter;
 
-      this.vertices[ this.idx++ ] = posA.x;
-      this.vertices[ this.idx++ ] = posA.y;
-      this.vertices[ this.idx++ ] = posA.z;
+        direction.set(1, 0, 0);
+        direction.applyQuaternion(orientation);
+        direction.normalize();
 
-      this.vertices[ this.idx++ ] = posB.x;
-      this.vertices[ this.idx++ ] = posB.y;
-      this.vertices[ this.idx++ ] = posB.z;
+        var posA = pointerPosition.clone();
+        var posB = pointerPosition.clone();
+        var brushSize = this.data.size * pressure;
+        posA.add(direction.clone().multiplyScalar(brushSize / 2));
+        posB.add(direction.clone().multiplyScalar(-brushSize / 2));
 
-      this.computeVertexNormals();
-      this.geometry.attributes.normal.needsUpdate = true;
-      this.geometry.attributes.position.needsUpdate = true;
-      this.geometry.attributes.uv.needsUpdate = true;
+        if (this.first && this.prevIdx.position > 0) {
+          // Degenerated triangle
+          this.first = false;
+          this.sharedBuffer.addVertex(posA.x, posA.y, posA.z);
+          this.sharedBuffer.idx.normal++;
+          this.sharedBuffer.idx.color++;
+          this.sharedBuffer.idx.uv++;
 
-      this.geometry.setDrawRange(0, this.data.numPoints * 2);
+          this.idx = Object.assign({}, this.sharedBuffer.idx);
+        }
 
-      return true;
-    },
+        /*
+          2---3
+          | \ |
+          0---1
+        */
+        this.sharedBuffer.addVertex(posA.x, posA.y, posA.z);
+        this.sharedBuffer.addVertex(posB.x, posB.y, posB.z);
+        this.sharedBuffer.idx.normal += 2;
 
-    computeVertexNormals: function () {
+        this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+        this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+
+        if (this.materialOptions.type === 'textured') {
+          this.sharedBuffer.idx.uv += 2;
+          var uvs = this.sharedBuffer.current.attributes.uv.array;
+          var u, offset;
+          for (var i = 0; i < this.data.numPoints + 1; i++) {
+            u = i / this.data.numPoints;
+            offset = 4 * i;
+            if (this.prevIdx.uv !== 0) {
+              offset += (this.prevIdx.uv + 1) * 2;
+            }
+
+            uvs[offset] = converter.convertU(u);
+            uvs[offset + 1] = converter.convertV(0);
+
+            uvs[offset + 2] = converter.convertU(u);
+            uvs[offset + 3] = converter.convertV(1);
+          }
+        }
+
+        this.idx = Object.assign({}, this.sharedBuffer.idx);
+
+        this.sharedBuffer.update();
+        this.computeStripVertexNormals();
+        return true;
+      };
+    })(),
+
+    computeStripVertexNormals: (function () {
       var pA = new THREE.Vector3();
       var pB = new THREE.Vector3();
       var pC = new THREE.Vector3();
       var cb = new THREE.Vector3();
       var ab = new THREE.Vector3();
 
-      for (var i = 0, il = this.idx; i < il; i++) {
-        this.normals[ i ] = 0;
-      }
+      return function () {
+        var start = this.prevIdx.position === 0 ? 0 : (this.prevIdx.position + 1) * 3;
+        var end = (this.idx.position) * 3;
+        var vertices = this.sharedBuffer.current.attributes.position.array;
+        var normals = this.sharedBuffer.current.attributes.normal.array;
 
-      var pair = true;
-      for (i = 0, il = this.idx; i < il; i += 3) {
-        if (pair) {
-          pA.fromArray(this.vertices, i);
-          pB.fromArray(this.vertices, i + 3);
-          pC.fromArray(this.vertices, i + 6);
-        } else {
-          pA.fromArray(this.vertices, i + 3);
-          pB.fromArray(this.vertices, i);
-          pC.fromArray(this.vertices, i + 6);
+        for (var i = start; i <= end; i++) {
+          normals[i] = 0;
         }
-        pair = !pair;
 
-        cb.subVectors(pC, pB);
-        ab.subVectors(pA, pB);
-        cb.cross(ab);
-        cb.normalize();
+        var pair = true;
+        for (i = start; i < end - 6; i += 3) {
+          if (pair) {
+            pA.fromArray(vertices, i);
+            pB.fromArray(vertices, i + 3);
+            pC.fromArray(vertices, i + 6);
+          } else {
+            pB.fromArray(vertices, i);
+            pC.fromArray(vertices, i + 6);
+            pA.fromArray(vertices, i + 3);
+          }
+          pair = !pair;
 
-        this.normals[ i ] += cb.x;
-        this.normals[ i + 1 ] += cb.y;
-        this.normals[ i + 2 ] += cb.z;
+          cb.subVectors(pC, pB);
+          ab.subVectors(pA, pB);
+          cb.cross(ab);
+          cb.normalize();
 
-        this.normals[ i + 3 ] += cb.x;
-        this.normals[ i + 4 ] += cb.y;
-        this.normals[ i + 5 ] += cb.z;
+          normals[i] += cb.x;
+          normals[i + 1] += cb.y;
+          normals[i + 2] += cb.z;
 
-        this.normals[ i + 6 ] += cb.x;
-        this.normals[ i + 7 ] += cb.y;
-        this.normals[ i + 8 ] += cb.z;
-      }
+          normals[i + 3] += cb.x;
+          normals[i + 4] += cb.y;
+          normals[i + 5] += cb.z;
 
-      /*
-      first and last vertice (0 and 8) belongs just to one triangle
-      second and penultimate (1 and 7) belongs to two triangles
-      the rest of the vertices belongs to three triangles
+          normals[i + 6] += cb.x;
+          normals[i + 7] += cb.y;
+          normals[i + 8] += cb.z;
+        }
 
-        1_____3_____5_____7
-        /\    /\    /\    /\
-       /  \  /  \  /  \  /  \
-      /____\/____\/____\/____\
-      0    2     4     6     8
-      */
+        /*
+        first and last vertice (0 and 8) belongs just to one triangle
+        second and penultimate (1 and 7) belongs to two triangles
+        the rest of the vertices belongs to three triangles
 
-      // Vertices that are shared across three triangles
-      for (i = 2 * 3, il = this.idx - 2 * 3; i < il; i++) {
-        this.normals[ i ] = this.normals[ i ] / 3;
-      }
+          1_____3_____5_____7
+          /\    /\    /\    /\
+         /  \  /  \  /  \  /  \
+        /____\/____\/____\/____\
+        0    2     4     6     8
+        */
 
-      // Second and penultimate triangle, that shares just two triangles
-      this.normals[ 3 ] = this.normals[ 3 ] / 2;
-      this.normals[ 3 + 1 ] = this.normals[ 3 + 1 ] / 2;
-      this.normals[ 3 + 2 ] = this.normals[ 3 * 1 + 2 ] / 2;
+        // Vertices that are shared across three triangles
+        for (i = start + 2 * 3; i < end - 2 * 3; i++) {
+          normals[i] = normals[i] / 3;
+        }
 
-      this.normals[ this.idx - 2 * 3 ] = this.normals[ this.idx - 2 * 3 ] / 2;
-      this.normals[ this.idx - 2 * 3 + 1 ] = this.normals[ this.idx - 2 * 3 + 1 ] / 2;
-      this.normals[ this.idx - 2 * 3 + 2 ] = this.normals[ this.idx - 2 * 3 + 2 ] / 2;
+        // Second and penultimate triangle, that shares just two triangles
+        normals[start + 3] = normals[start + 3] / 2;
+        normals[start + 3 + 1] = normals[start + 3 + 1] / 2;
+        normals[start + 3 + 2] = normals[start + 3 * 1 + 2] / 2;
 
-      this.geometry.normalizeNormals();
-    }
+        normals[end - 2 * 3] = normals[end - 2 * 3] / 2;
+        normals[end - 2 * 3 + 1] = normals[end - 2 * 3 + 1] / 2;
+        normals[end - 2 * 3 + 2] = normals[end - 2 * 3 + 2] / 2;
+      };
+    })()
   };
 
   var lines = [
@@ -284,14 +308,14 @@
     }
   ];
 
-  var textureLoader = new THREE.TextureLoader();
-
   for (var i = 0; i < lines.length; i++) {
     var definition = lines[i];
     if (definition.materialOptions.textureSrc) {
-      definition.materialOptions.map = textureLoader.load(definition.materialOptions.textureSrc);
-      delete definition.materialOptions.textureSrc;
+      definition.materialOptions.converter = window.atlas.getUVConverters(definition.materialOptions.textureSrc);
+    } else {
+      definition.materialOptions.converter = window.atlas.getUVConverters(null);
     }
+
     AFRAME.registerBrush(definition.name, Object.assign({}, line, {materialOptions: definition.materialOptions}), {thumbnail: definition.thumbnail, maxPoints: 3000});
   }
 })();

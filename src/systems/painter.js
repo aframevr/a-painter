@@ -54,7 +54,7 @@ AFRAME.registerSystem('painter', {
       AFRAME.currentInputMapping = 'painting';
     });
 
-    this.version = '1.1';
+    this.version = '1.2';
     this.brushSystem = this.sceneEl.systems.brush;
     this.showTemplateItems = true;
 
@@ -149,6 +149,12 @@ AFRAME.registerSystem('painter', {
           hand.setAttribute('brush', 'brush', brushesNames[index]);
         });
       }
+
+      if (event.keyCode === 84) {
+        // Random stroke (t)
+        self.brushSystem.generateTestLines();
+      }
+
       if (event.keyCode === 82) {
         // Random stroke (r)
         self.brushSystem.generateRandomStrokes(1);
@@ -173,6 +179,9 @@ AFRAME.registerSystem('painter', {
             templateItems[i].setAttribute('visible', self.showTemplateItems);
         }
       }
+      if (event.keyCode === 88) { // x remove 2nd
+        self.brushSystem.removeById(2);
+      }
     });
 
     console.info('A-PAINTER Version: ' + this.version);
@@ -192,9 +201,11 @@ AFRAME.registerSystem('painter', {
     var self = this;
 
     var baseUrl = 'https://aframe.io/a-painter/?url=';
+
     if (AFRAME.scenes[0].systems.xr.supportAR) {
       baseUrl = '';
     }
+
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
     var uploader = 'uploadcare'; // or 'fileio'

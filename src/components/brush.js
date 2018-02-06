@@ -44,6 +44,7 @@ AFRAME.registerComponent('brush', {
     this.el.addEventListener('undo', function(evt) {
       if (!self.data.enabled) { return; }
       self.system.undo();
+      document.getElementById('ui_undo').play();
     });
 
     this.el.addEventListener('paint', function (evt) {
@@ -89,6 +90,7 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
+    document.getElementById('ui_paint').play();
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     this.el.emit('stroke-started', {entity: this.el, stroke: this.currentStroke});
   }

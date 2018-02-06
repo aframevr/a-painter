@@ -167,9 +167,10 @@ AFRAME.registerComponent('paint-controls', {
   },
 
   onModelLoaded: function (evt) {
+    if (evt.target !== this.el) { return; }
+
     var controllerObject3D = evt.detail.model;
     var buttonMeshes;
-    if (evt.detail.target !== this.el) { return; }
 
     buttonMeshes = this.buttonMeshes = {};
 
