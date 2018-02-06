@@ -11,9 +11,13 @@ AFRAME.registerComponent('ar-ui', {
     var self = this;
 
     this.depth = -0.1;
-
-    // var logo = document.querySelector('#logo');
-    // logo.setAttribute('visible', false);
+    if (!AFRAME.scenes[0].systems.xr.supportAR) {
+      document.getElementById('logo').setAttribute('visible', false);
+    } else {
+      document.getElementById('apainter-logo').classList.add('hidden');
+      // document.getElementById('apainter-author').classList.add('hidden'); // not used yet
+      document.querySelector('.github-corner').style.display = 'none';
+    }
 
     this.modalOpened = null;
 
