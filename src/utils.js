@@ -8,7 +8,7 @@ window.Utils = (function() {
         for (var i = 0; i < array.length; i++) {
             array[i] = numberToFixed(array[i]);
         }
-        return this;
+        return array;
     }
 
     function getTooltips (controllerName) {
