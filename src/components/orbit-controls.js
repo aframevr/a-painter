@@ -1,7 +1,7 @@
 AFRAME.registerComponent('orbit-controls', {
   dependencies: ['camera'],
   schema: {
-    position: { default: '0 1.6 0.1', type: 'vec3'}
+    position: { default: { x: 0, y: 1.6, z: 0.1 }, type: 'vec3'}
   },
 
   init: function () {
@@ -57,12 +57,12 @@ AFRAME.registerComponent('orbit-controls', {
 
   play: function () {
     if (!this.controls) { return; }
-    this.controls.enable = true;
+    this.controls.enabled = true;
   },
 
   pause: function () {
     if (!this.controls) { return; }
-    this.controls.enable = false;
+    this.controls.enabled = false;
   },
 
   remove: function () {

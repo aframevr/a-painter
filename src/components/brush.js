@@ -41,32 +41,28 @@ AFRAME.registerComponent('brush', {
       self.el.setAttribute('brush', 'size', size);
     });
 */
-    this.el.addEventListener('buttondown', function (evt) {
+    this.el.addEventListener('undo', function(evt) {
       if (!self.data.enabled) { return; }
-      // Grip
-      if (evt.detail.id === 2) {
-        self.system.undo();
-      }
+      self.system.undo();
+      document.getElementById('ui_undo').play();
     });
 
-    this.el.addEventListener('buttonchanged', function (evt) {
+    this.el.addEventListener('paint', function (evt) {
       if (!self.data.enabled) { return; }
       // Trigger
-      if (evt.detail.id === 1) {
-        var value = evt.detail.state.value;
-        self.sizeModifier = value;
-        if (value > 0.1) {
-          if (!self.active) {
-            self.startNewStroke();
-            self.active = true;
-          }
-        } else {
-          if (self.active) {
-            self.previousEntity = self.currentEntity;
-            self.currentStroke = null;
-          }
-          self.active = false;
+      var value = evt.detail.value;
+      self.sizeModifier = value;
+      if (value > 0.1) {
+        if (!self.active) {
+          self.startNewStroke();
+          self.active = true;
         }
+      } else {
+        if (self.active) {
+          self.previousEntity = self.currentEntity;
+          self.currentStroke = null;
+        }
+        self.active = false;
       }
     });
   },
@@ -94,6 +90,7 @@ AFRAME.registerComponent('brush', {
     };
   })(),
   startNewStroke: function () {
+    document.getElementById('ui_paint').play();
     this.currentStroke = this.system.addNewStroke(this.data.brush, this.color, this.data.size);
     this.el.emit('stroke-started', {entity: this.el, stroke: this.currentStroke});
   }

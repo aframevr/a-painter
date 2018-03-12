@@ -8,6 +8,7 @@ AFRAME.registerComponent('ui', {
     var uiEl = this.uiEl = document.createElement('a-entity');
     var rayEl = this.rayEl = document.createElement('a-entity');
     this.closed = true;
+    this.isTooltipPaused = false;
     this.colorStack = ['#272727', '#727272', '#FFFFFF', '#24CAFF', '#249F90', '#F2E646', '#EF2D5E'];
     this.bindMethods();
     this.colorHasChanged = true;
@@ -48,6 +49,7 @@ AFRAME.registerComponent('ui', {
 
     // Ray entity setup
     rayEl.setAttribute('line', '');
+
     //rayEl.setAttribute('visible', false);
     el.appendChild(rayEl);
 
@@ -64,7 +66,7 @@ AFRAME.registerComponent('ui', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
-
+      self.tooltips = Utils.getTooltips(controllerName);
       self.controller = {
         name: controllerName,
         hand: evt.detail.component.data.hand
@@ -79,8 +81,10 @@ AFRAME.registerComponent('ui', {
         });
       } else if (controllerName === 'windows-motion-controls') {
         self.rayAngle = 25;
+        self.rayDistance = 1;
         el.setAttribute('ui-raycaster', {
-          rotation: -30
+          rotation: -30,
+          far: self.rayDistance
         });
       }
 
@@ -189,12 +193,14 @@ AFRAME.registerComponent('ui', {
       case name === 'clear': {
         if (!this.pressedObjects[name]) {
           this.el.sceneEl.systems.brush.clear();
+          this.playSound('ui_click1');
         }
         break;
       }
       case name === 'copy': {
         if (!this.pressedObjects[name]) {
           this.copyBrush();
+          this.playSound('ui_click1');
         }
         break;
       }
@@ -205,6 +211,7 @@ AFRAME.registerComponent('ui', {
       case name === 'save': {
         if (!this.pressedObjects[name]) {
           this.el.sceneEl.systems.painter.upload();
+          this.playSound('ui_click1');
         }
         break;
       }
@@ -266,6 +273,7 @@ AFRAME.registerComponent('ui', {
   onColorHistoryButtonDown: function (object) {
     var color = object.material.color.getHexString();
     this.handEl.setAttribute('brush', 'color', '#' + color);
+    this.playSound('ui_click0', object.name);
   },
 
   onBrushDown: function (name) {
@@ -288,6 +296,7 @@ AFRAME.registerComponent('ui', {
     }
     selectedObjects[object.name] = object;
     this.selectedBrush = object;
+    this.playSound('ui_click1', brushName);
   },
 
   onHueDown: function (position) {
@@ -306,6 +315,7 @@ AFRAME.registerComponent('ui', {
     this.hsv.h = angle / 360;
     this.hsv.s = polarPosition.r / radius;
     this.updateColor();
+    this.playSound('ui_click0', 'hue');
   },
 
   updateColor: function () {
@@ -373,6 +383,7 @@ AFRAME.registerComponent('ui', {
     this.objects.brightnessCursor.rotation.y = brightness * 1.5 - 1.5;
     this.hsv.v = brightness;
     this.updateColor();
+    this.playSound('ui_click0', 'brightness');
   },
 
   onBrushSizeBackgroundDown: function (position) {
@@ -384,6 +395,7 @@ AFRAME.registerComponent('ui', {
     var brushSize = (position.x - sliderBoundingBox.min.x) / sliderWidth;
     brushSize = brushSize * AFRAME.components.brush.schema.size.max;
     this.handEl.setAttribute('brush', 'size', brushSize);
+    this.playSound('ui_click0', 'sizebg');
   },
 
   handleHover: function () {
@@ -450,31 +462,11 @@ AFRAME.registerComponent('ui', {
   })(),
 
   addToggleEvent: function () {
-    var el = this.el;
-
-    if (this.controller.name === 'oculus-touch-controls') {
-      if (this.controller.hand === 'left') {
-        el.addEventListener('xbuttondown', this.toggleMenu);
-      } else {
-        el.addEventListener('abuttondown', this.toggleMenu);
-      }
-    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
-      el.addEventListener('menudown', this.toggleMenu);
-    }
+    this.el.addEventListener('toggleMenu', this.toggleMenu);
   },
 
   removeToggleEvent: function () {
-    var el = this.el;
-
-    if (this.controller.name === 'oculus-touch-controls') {
-      if (this.controller.hand === 'left') {
-        el.removeEventListener('xbuttondown', this.toggleMenu);
-      } else {
-        el.removeEventListener('abuttondown', this.toggleMenu);
-      }
-    } else if (this.controller.name === 'vive-controls' || this.controller.name === 'windows-motion-controls') {
-      el.removeEventListener('menudown', this.toggleMenu);
-    }
+    this.el.removeEventListener('toggleMenu', this.toggleMenu);
   },
 
   play: function () {
@@ -690,12 +682,14 @@ AFRAME.registerComponent('ui', {
     if (this.brushesPage >= this.brushesPagesNum - 1) { return; }
     this.brushesPage++;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
+    this.playSound('ui_click1');
   },
 
   previousPage: function () {
     if (this.brushesPage === 0) { return; }
     this.brushesPage--;
     this.loadBrushes(this.brushesPage, this.brushesPerPage);
+    this.playSound('ui_click1');
   },
 
   initHighlightMaterial: function (object) {
@@ -748,6 +742,17 @@ AFRAME.registerComponent('ui', {
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
+
+    if (!!this.tooltips) {
+      var self = this;
+      this.tooltips.forEach(function (tooltip) {
+        if (tooltip.getAttribute('visible') && uiEl.parentEl.id !== tooltip.parentEl.id) {
+          self.isTooltipPaused = true;
+          tooltip.setAttribute('visible', false);
+        }
+      });
+    }
+    this.playSound('ui_menu');
   },
 
   updateIntersections: (function () {
@@ -929,5 +934,19 @@ AFRAME.registerComponent('ui', {
     tween.start();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
+
+    if (!!this.tooltips && this.isTooltipPaused) {
+      this.isTooltipPaused = false;
+      this.tooltips.forEach(function (tooltip) {
+          tooltip.setAttribute('visible', true);
+      });
+    }
+    this.playSound('ui_menu');
+  },
+
+  playSound: function (sound, objName) {
+    if (objName === undefined || !this.pressedObjects[objName]) {
+      document.getElementById(sound).play();
+    }
   }
 });

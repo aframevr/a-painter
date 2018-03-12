@@ -11,6 +11,14 @@ module.exports = {
     path: __dirname,
     filename: 'build.js'
   },
+  module: {
+    loaders: [
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      }
+    ]
+  },
   plugins: PLUGINS,
   devServer: {
     disableHostCheck: true

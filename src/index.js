@@ -1,8 +1,13 @@
 window.saveAs = require('../vendor/saveas.js').saveAs;
 
+require('aframe-xr');
+
+require('./atlas.js');
 require('./dragndrop.js');
 require('./binarymanager.js');
 require('../vendor/OrbitControls.js');
+require('./sharedbuffergeometrymanager.js');
+require('./sharedbuffergeometry.js');
 
 require('./utils.js');
 require('./ui2d.js');
@@ -10,6 +15,11 @@ require('./ui2d.js');
 require('./systems/brush.js');
 require('./systems/ui.js');
 require('./systems/painter.js');
+
+require('./components/ar-paint-controls.js');
+require('./components/ar-pin.js');
+require('./components/ar-ui.js');
+require('./components/ar-ui-modal-material.js');
 
 require('./components/brush.js');
 require('./components/if-no-vr-headset.js');
@@ -25,3 +35,6 @@ require('./brushes/spheres.js');
 require('./brushes/cubes.js');
 require('./brushes/rainbow.js');
 require('./brushes/single-sphere.js');
+
+require('./paintModes/normal.js');
+require('./paintModes/advanced.js');

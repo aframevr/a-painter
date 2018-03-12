@@ -21,7 +21,7 @@ AFRAME.registerComponent('paint-controls', {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     el.addEventListener('model-loaded', this.onModelLoaded);
 
-    var onAxisMove = function(evt) {
+    el.addEventListener('changeBrushSizeAbs', function (evt) {
       if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
 
       var delta = evt.detail.axis[1] / 300;
@@ -29,63 +29,45 @@ AFRAME.registerComponent('paint-controls', {
       var value = THREE.Math.clamp(self.el.getAttribute('brush').size - delta, size.min, size.max);
 
       self.el.setAttribute('brush', 'size', value);
-    }
+    });
+
+    el.addEventListener('changeBrushSizeInc', function (evt) {
+      if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
+
+      if (self.touchStarted) {
+        self.touchStarted = false;
+        self.startAxis = (evt.detail.axis[1] + 1) / 2;
+      }
+
+      var currentAxis = (evt.detail.axis[1] + 1) / 2;
+      var delta = (self.startAxis - currentAxis) / 2;
+
+      self.startAxis = currentAxis;
+
+      var startValue = self.el.getAttribute('brush').size;
+      var size = el.components.brush.schema.size;
+      var value = THREE.Math.clamp(startValue - delta, size.min, size.max);
+
+      self.el.setAttribute('brush', 'size', value);
+    });
+
+    self.touchStarted = false;
+
+    el.addEventListener('startChangeBrushSize', function () {
+      self.touchStarted = true;
+    });
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
+      tooltips = Utils.getTooltips(controllerName);
       if (controllerName === 'windows-motion-controls') {
-        el.setAttribute('teleport-controls', {button: 'trackpad'});
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.windows-motion-tooltips'));
-
-        el.addEventListener('axismove', function (evt) {
-          onAxisMove(evt);
-        });
-
-        el.addEventListener('trackpadtouchstart', function () {
-          self.touchStarted = true;
-        });
-
-        self.touchStarted = false;
-
+        // el.setAttribute('teleport-controls', {button: 'trackpad'});
       } else if (controllerName === 'oculus-touch-controls') {
         var hand = evt.detail.component.data.hand;
-        el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
+        //el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
         el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.oculus-tooltips'));
-        el.addEventListener('axismove', function (evt) {
-          onAxisMove(evt);
-        });
-
       } else if (controllerName === 'vive-controls') {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
-        el.setAttribute('teleport-controls', {button: 'trackpad'});
-        tooltips = Array.prototype.slice.call(document.querySelectorAll('.vive-tooltips'));
-        el.addEventListener('axismove', function (evt) {
-          if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
-
-          if (self.touchStarted) {
-            self.touchStarted = false;
-            self.startAxis = (evt.detail.axis[1] + 1) / 2;
-          }
-
-          var currentAxis = (evt.detail.axis[1] + 1) / 2;
-          var delta = (self.startAxis - currentAxis) / 2;
-
-          self.startAxis = currentAxis;
-
-          var startValue = self.el.getAttribute('brush').size;
-          var size = el.components.brush.schema.size;
-          var value = THREE.Math.clamp(startValue - delta, size.min, size.max);
-
-          self.el.setAttribute('brush', 'size', value);
-        });
-
-        el.addEventListener('trackpadtouchstart', function () {
-          self.touchStarted = true;
-        });
-
-        self.touchStarted = false;
-
       } else { return; }
 
       if (!!tooltips) {
@@ -123,7 +105,7 @@ AFRAME.registerComponent('paint-controls', {
         var object = { opacity: 1.0 };
 
         var tween = new AFRAME.TWEEN.Tween(object)
-          .to({opacity: 0.0}, 4000)
+          .to({opacity: 0.0}, 1000)
           .onComplete(function () {
             tooltips.forEach(function (tooltip) {
               tooltip.setAttribute('visible', false);
@@ -185,9 +167,10 @@ AFRAME.registerComponent('paint-controls', {
   },
 
   onModelLoaded: function (evt) {
+    if (evt.target !== this.el) { return; }
+
     var controllerObject3D = evt.detail.model;
     var buttonMeshes;
-    if (evt.detail.target !== this.el) { return; }
 
     buttonMeshes = this.buttonMeshes = {};
 
