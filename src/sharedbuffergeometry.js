@@ -80,9 +80,13 @@ SharedBufferGeometry.prototype = {
 
     geometry.setDrawRange(0, 0);
     geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3).setDynamic(true));
+    geometry.attributes.position.updateRange.count = 0;
     geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2).setDynamic(true));
+    geometry.attributes.uv.updateRange.count = 0;
     geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3).setDynamic(true));
+    geometry.attributes.normal.updateRange.count = 0;
     geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
+    geometry.attributes.color.updateRange.count = 0;
 
 
     this.previous = null;
@@ -147,9 +151,13 @@ SharedBufferGeometry.prototype = {
   update: function () {
     this.current.setDrawRange(0, this.idx.position);
 
+    this.current.attributes.color.updateRange.count = this.idx.position * 3;
     this.current.attributes.color.needsUpdate = true;
+    this.current.attributes.normal.updateRange.count = this.idx.position * 3;
     this.current.attributes.normal.needsUpdate = true;
+    this.current.attributes.position.updateRange.count = this.idx.position * 3;
     this.current.attributes.position.needsUpdate = true;
+    this.current.attributes.uv.updateRange.count = this.idx.position * 2;
     this.current.attributes.uv.needsUpdate = true;
   }
 };
