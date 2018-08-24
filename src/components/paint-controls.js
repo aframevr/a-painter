@@ -59,8 +59,21 @@ AFRAME.registerComponent('paint-controls', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
+      if (controllerName === 'windows-motion-controls')
+      {
+        var gltfName = evt.detail.component.el.components['gltf-model'].data;
+        const SAMSUNG_DEVICE = '045E-065D';
+        if (!!gltfName)
+        {
+          if (gltfName.indexOf(SAMSUNG_DEVICE) >= 0)
+          {
+            controllerName = "windows-motion-samsung-controls";
+          }
+        }
+      }
+
       tooltips = Utils.getTooltips(controllerName);
-      if (controllerName === 'windows-motion-controls') {
+      if (controllerName.indexOf('windows-motion') >= 0) {
         // el.setAttribute('teleport-controls', {button: 'trackpad'});
       } else if (controllerName === 'oculus-touch-controls') {
         var hand = evt.detail.component.data.hand;

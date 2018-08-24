@@ -15,6 +15,10 @@ window.Utils = (function() {
         var tooltips;
         var tooltipName;
         switch (controllerName) {
+            case 'windows-motion-samsung-controls': {
+                tooltipName = '.windows-motion-samsung-tooltips';
+                break;
+            }
             case 'windows-motion-controls': {
                 tooltipName = '.windows-motion-tooltips';
                 break;
