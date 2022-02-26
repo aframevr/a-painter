@@ -22,9 +22,10 @@ AFRAME.registerComponent('paint-controls', {
     el.addEventListener('model-loaded', this.onModelLoaded);
 
     el.addEventListener('changeBrushSizeAbs', function (evt) {
-      if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
+      if (evt.detail.axis[1] === 0 && evt.detail.axis[3] === 0) { return; }
 
-      var delta = evt.detail.axis[1] / 300;
+      var magnitude = evt.detail.axis[1] || evt.detail.axis[3];
+      var delta = magnitude / 300;
       var size = el.components.brush.schema.size;
       var value = THREE.Math.clamp(self.el.getAttribute('brush').size - delta, size.min, size.max);
 
@@ -32,14 +33,16 @@ AFRAME.registerComponent('paint-controls', {
     });
 
     el.addEventListener('changeBrushSizeInc', function (evt) {
-      if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || self.previousAxis === evt.detail.axis[1]) { return; }
+      if (evt.detail.axis[1] === 0 && evt.detail.axis[3] === 0) { return; }
+
+      var magnitude = evt.detail.axis[1] || evt.detail.axis[3];
 
       if (self.touchStarted) {
         self.touchStarted = false;
-        self.startAxis = (evt.detail.axis[1] + 1) / 2;
+        self.startAxis = (magnitude + 1) / 2;
       }
 
-      var currentAxis = (evt.detail.axis[1] + 1) / 2;
+      var currentAxis = (magnitude + 1) / 2;
       var delta = (self.startAxis - currentAxis) / 2;
 
       self.startAxis = currentAxis;
