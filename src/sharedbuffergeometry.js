@@ -62,7 +62,7 @@ SharedBufferGeometry.prototype = {
 
     var mesh = new THREE.Mesh(geometry, this.material);
 
-    mesh.drawMode = this.primitiveMode;
+    //mesh.drawMode = this.primitiveMode;
 
     mesh.frustumCulled = false;
     mesh.vertices = vertices;
@@ -79,10 +79,10 @@ SharedBufferGeometry.prototype = {
     this.object3D.add(mesh);
 
     geometry.setDrawRange(0, 0);
-    geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3).setDynamic(true));
-    geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2).setDynamic(true));
-    geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3).setDynamic(true));
-    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage));
 
 
     this.previous = null;
