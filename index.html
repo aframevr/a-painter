@@ -12,11 +12,11 @@
     </script>
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
-    <script src="vendor/aframe-master.min.js"></script>
+    <script src="vendor/aframe.min.js"></script>
     <script src="vendor/aframe-input-mapping-component.js"></script>
     <script src="build.js"></script>
     <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
-    <script src="vendor/aframe-teleport-controls.min.js"></script>
+    <script src="vendor/aframe-blink-controls.min.js"></script>
     <script src="vendor/aframe-tooltip-component.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
@@ -60,7 +60,7 @@
                   brush
                   if-no-vr-headset="visible: false"
                   paint-controls="hand: left"
-                  teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
+                  blink-controls="cameraRig: #cameraRig; startEvents: 'aim'; endEvents: 'teleport'; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
                   ui>
                     <a-entity class="vive-tooltips" visible="false">
                       <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
@@ -138,7 +138,7 @@
                   brush
                   if-no-vr-headset="visible: false"
                   paint-controls="hand: right"
-                  teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
+                  blink-controls="cameraRig: #cameraRig; startEvents: 'aim'; endEvents: 'teleport'; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
                   ui>
                     <a-entity class="vive-tooltips" visible="false">
                       <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"

@@ -2,7 +2,7 @@
 var utils = AFRAME.utils;
 
 /**
- * Set properties if headset is not connected by checking getVRDisplays().
+ * Set properties if headset is not connected by checking isSessionSupported().
  */
 AFRAME.registerComponent('if-no-vr-headset', {
   schema: {
@@ -19,10 +19,9 @@ AFRAME.registerComponent('if-no-vr-headset', {
       return;
     }
 
-    // Check VRDisplays to determine if headset is connected.
-    navigator.getVRDisplays().then(function (displays) {
-      // Special case for WebVR emulator.
-      if (displays.length && displays[0].displayName !== 'Emulated HTC Vive DVT') { return; }
+    // Check isSessionSupported() to determine if headset is connected.
+    navigator.xr.isSessionSupported('immersive-vr').then(function (supported) {
+      if (supported) return;
       self.setProperties();
     });
   },
