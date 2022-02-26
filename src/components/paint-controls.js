@@ -105,6 +105,9 @@ AFRAME.registerComponent('paint-controls', {
     this.startAxis = 0;
 
     this.numberStrokes = 0;
+    this.hideTooltips = null;
+    this.hidingTooltips = false;
+    this.time = 0;
 
     document.addEventListener('stroke-started', function (event) {
       if (event.detail.entity.components['paint-controls'] !== self) { return; }
@@ -115,22 +118,27 @@ AFRAME.registerComponent('paint-controls', {
       // 3 Strokes to hide
       if (self.system.numberStrokes === 3) {
         var tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
-        var object = { opacity: 1.0 };
+        var animObject = { opacity: 1.0 };
 
-        var tween = new AFRAME.TWEEN.Tween(object)
-          .to({opacity: 0.0}, 1000)
-          .onComplete(function () {
+        self.hideTooltips = AFRAME.ANIME({
+          targets: animObject,
+          opacity: 0,
+          duration: 1000,
+          delay: 2000,
+          update: function () {
+            tooltips.forEach(function (tooltip) {
+              tooltip.setAttribute('tooltip', { opacity: animObject.opacity });
+            });
+          },
+          complete: function () {
             tooltips.forEach(function (tooltip) {
               tooltip.setAttribute('visible', false);
             });
-          })
-          .delay(2000)
-          .onUpdate(function () {
-            tooltips.forEach(function (tooltip) {
-              tooltip.setAttribute('tooltip', {opacity: object.opacity});
-            });
-          });
-        tween.start();
+            this.hidingTooltips = false;
+          }
+        })
+        self.hideTooltips.play();
+        self.hidingTooltips = true;
       }
     });
   },
@@ -171,6 +179,13 @@ AFRAME.registerComponent('paint-controls', {
     el.setAttribute('vive-controls', {hand: data.hand, model: false});
     el.setAttribute('oculus-touch-controls', {hand: data.hand, model: false});
     el.setAttribute('windows-motion-controls', {hand: data.hand});
+  },
+
+  tick: function (t, dt) {
+    if (this.hidingTooltips) {
+      this.time += dt;
+      this.hideTooltips.tick(this.time);
+    }
   },
 
   play: function () {

@@ -105,21 +105,29 @@ AFRAME.registerSystem('painter', {
       });
     }
 
-    this.startPainting = false;
+    this.logoFade = null;
+    this.logoFading = false;
+    this.time = 0;
     var self = this;
     document.addEventListener('stroke-started', function (event) {
-      if (!self.startPainting) {
+      if (!self.logoFading) {
         var logo = document.getElementById('logo');
         var mesh = logo.getObject3D('mesh');
-        var tween = new AFRAME.TWEEN.Tween({ alpha: 1.0 })
-          .to({alpha: 0.0}, 4000)
-          .onComplete(function () {
+        var animObject = { alpha: 1.0 };
+        self.logoFade = AFRAME.ANIME({
+          targets: animObject,
+          alpha: 0,
+          duration: 4000,
+          update: function () {
+            mesh.children[0].material.opacity = animObject.alpha;
+          },
+          complete: function () {
             logo.setAttribute('visible', false);
-          })
-          .onUpdate(function () {
-            mesh.children[0].material.opacity = this.alpha;
-          }).start();
-        self.startPainting = true;
+            self.logoFading = false;
+          }
+        });
+        self.logoFade.play();
+        self.logoFading = true;
       }
     });
 
@@ -185,6 +193,12 @@ AFRAME.registerSystem('painter', {
     });
 
     console.info('A-PAINTER Version: ' + this.version);
+  },
+  tick: function(t, dt) {
+    if (this.logoFading) {
+      this.time += dt;
+      this.logoFade.tick(this.time);
+    }
   },
   saveJSON: function () {
     var json = this.brushSystem.getJSON();

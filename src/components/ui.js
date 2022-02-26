@@ -25,6 +25,13 @@ AFRAME.registerComponent('ui', {
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
     this.rayAngle = 45;
     this.rayDistance = 0.2;
+    this.openMenu = null;
+    this.openingMenu = false;
+    this.closeMenu = null;
+    this.closingMenu = false;
+    this.showMessageWindow = null;
+    this.showingMessage = false;
+    this.time = 0;
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -145,16 +152,27 @@ AFRAME.registerComponent('ui', {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onStrokeStarted = this.onStrokeStarted.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
   },
 
-  tick: function () {
-    // Hack until https://github.com/aframevr/aframe/issues/1886
-    // is fixed.
-    this.el.components['ui-raycaster'].refreshObjects();
+  tick: function (t, dt) {
     if (!this.closed && this.handEl) {
       this.updateIntersections();
       this.handleHover();
       this.handlePressedButtons();
+    }
+    if (this.openingMenu) {
+      this.time += dt;
+      this.openMenu.tick(this.time);
+    }
+    else if (this.closingMenu) {
+      this.time += dt;
+      this.closeMenu.tick(this.time);
+    }
+    else if (this.showingMessage) {
+      this.time += dt;
+      this.showMessageWindow.tick(this.time);
     }
   },
 
@@ -552,25 +570,33 @@ AFRAME.registerComponent('ui', {
 
     function showMessage (msgObject) {
       msgObject.visible = true;
-      var object = { opacity: 0.0 };
-      var tween = new AFRAME.TWEEN.Tween(object)
-        .to({opacity: 1.0}, 500)
-        .onUpdate(function () {
-          self.messagesMaterial.opacity = object.opacity;
-        })
-        .chain(
-          new AFRAME.TWEEN.Tween(object)
-            .to({opacity: 0.0}, 500)
-            .delay(3000)
-            .onComplete(function () {
-              msgObject.visible = false;
-            })
-            .onUpdate(function () {
-              self.messagesMaterial.opacity = object.opacity;
-            })
-          );
+      var animObject = { opacity: 0.0 };
 
-      tween.start();
+      self.showMessageWindow = AFRAME.ANIME.timeline({ duration: 4000 });
+      self.showMessageWindow.add({
+        targets: animObject,
+        opacity: 1,
+        duration: 500,
+        update: function () {
+          self.messagesMaterial.opacity = animObject.opacity;
+        }
+      });
+      self.showMessageWindow.add({
+        targets: animObject,
+        opacity: 0,
+        duration: 500,
+        delay: 3000,
+        update: function () {
+          self.messagesMaterial.opacity = animObject.opacity;
+        },
+        complete: function () {
+          msgObject.visible = false;
+          self.showingMessage = false;
+          self.time = 0;
+        }
+      });
+      self.showMessageWindow.play();
+      self.showingMessage = true;
     }
 
     this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
@@ -729,16 +755,28 @@ AFRAME.registerComponent('ui', {
   open: function () {
     var uiEl = this.uiEl;
     var coords = { x: 0, y: 0, z: 0 };
-    var tween;
     if (!this.closed) { return; }
     this.uiEl.setAttribute('visible', true);
-    tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 1, y: 1, z: 1 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();
+ 
+    var self = this;
+    this.openMenu = AFRAME.ANIME({
+      targets: coords,
+      x: 1,
+      y: 1,
+      z: 1,
+      duration: 100,
+      easing: 'easeOutExpo',
+      update: function () {
+        uiEl.setAttribute('scale', coords);
+      },
+      complete: function () {
+        self.openingMenu = false;
+        self.time = 0;
+      }
+    });
+    this.openMenu.play();
+    this.openingMenu = true;
+
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
@@ -920,20 +958,29 @@ AFRAME.registerComponent('ui', {
   close: function () {
     var uiEl = this.uiEl;
     var coords = { x: 1, y: 1, z: 1 };
-    var tween;
     if (this.closed) { return; }
-    tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 0, y: 0, z: 0 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .onComplete(function () {
-          uiEl.setAttribute('visible', false);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();
+
+    var self = this;
+    this.closeMenu = AFRAME.ANIME({
+      targets: coords,
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 100,
+      easing: 'easeOutExpo',
+      update: function () {
+        uiEl.setAttribute('scale', coords);
+      },
+      complete: function() {
+        uiEl.setAttribute('visible', false);
+        self.closingMenu = false;
+        self.time = 0;
+      }
+    });
+    this.closeMenu.play();
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
+    this.closingMenu = true;
 
     if (!!this.tooltips && this.isTooltipPaused) {
       this.isTooltipPaused = false;
