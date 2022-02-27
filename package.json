@@ -13,7 +13,8 @@
   "license": "MIT",
   "semistandard": {
     "ignore": [
-      "**/vendor/**"
+      "**/vendor/**",
+      "build.js"
     ]
   },
   "devDependencies": {
