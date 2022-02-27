@@ -42,13 +42,12 @@
         this.linepositions = new Float32Array(this.options.maxPoints);
 
         this.geometry.setDrawRange(0, 0);
-        this.geometry.addAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setDynamic(true));
-        this.geometry.addAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setDynamic(true));
-        this.geometry.addAttribute('lineposition', new THREE.BufferAttribute(this.linepositions, 1).setDynamic(true));
+        this.geometry.setAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
+        this.geometry.setAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setUsage(THREE.DynamicDrawUsage));
+        this.geometry.setAttribute('lineposition', new THREE.BufferAttribute(this.linepositions, 1).setUsage(THREE.DynamicDrawUsage));
 
         this.material = material;
         var mesh = new THREE.Mesh(this.geometry, this.material);
-        mesh.drawMode = THREE.TriangleStripDrawMode;
 
         mesh.frustumCulled = false;
         mesh.vertices = this.vertices;

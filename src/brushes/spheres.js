@@ -8,7 +8,7 @@ AFRAME.registerBrush('spheres',
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
-        shading: THREE.FlatShading
+        flatShading: true
       });
       this.geometry = new THREE.IcosahedronGeometry(1, 0);
     },
@@ -28,7 +28,7 @@ AFRAME.registerBrush('spheres',
 
       // Set the position of the sphere to match the controller positoin
       sphere.position.copy(pointerPosition);
-      sphere.rotation.copy(orientation);
+      sphere.quaternion.copy(orientation);
 
       // Add the sphere to the object3D
       this.object3D.add(sphere);

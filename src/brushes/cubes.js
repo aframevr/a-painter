@@ -7,7 +7,7 @@ AFRAME.registerBrush('cubes',
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
-        shading: THREE.FlatShading
+        flatShading: true
       });
       this.geometry = new THREE.BoxGeometry(1, 1, 1);
     },
@@ -17,7 +17,7 @@ AFRAME.registerBrush('cubes',
       var sca = pressure * this.data.size * Math.random();
       box.scale.set(sca, sca, sca);
       box.position.copy(pointerPosition);
-      box.rotation.copy(orientation);
+      box.quaternion.copy(orientation);
 
       this.object3D.add(box);
 
