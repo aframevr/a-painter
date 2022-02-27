@@ -30,9 +30,9 @@ var onLoaded = require('../onloaded.js');
       alphaTest: 0.5
     };
 
-    sharedBufferGeometryManager.addSharedBuffer('strip-flat', new THREE.MeshBasicMaterial(optionsBasic), THREE.TriangleStripDrawMode);
-    sharedBufferGeometryManager.addSharedBuffer('strip-shaded', new THREE.MeshStandardMaterial(optionsStandard), THREE.TriangleStripDrawMode);
-    sharedBufferGeometryManager.addSharedBuffer('strip-textured', new THREE.MeshStandardMaterial(optionTextured), THREE.TriangleStripDrawMode);
+    sharedBufferGeometryManager.addSharedBuffer('strip-flat', new THREE.MeshBasicMaterial(optionsBasic));
+    sharedBufferGeometryManager.addSharedBuffer('strip-shaded', new THREE.MeshStandardMaterial(optionsStandard));
+    sharedBufferGeometryManager.addSharedBuffer('strip-textured', new THREE.MeshStandardMaterial(optionTextured));
   });
 
   var line = {
@@ -113,12 +113,12 @@ var onLoaded = require('../onloaded.js');
         this.idx = Object.assign({}, this.sharedBuffer.idx);
 
         this.sharedBuffer.update();
-        this.computeStripVertexNormals();
+        this.computeVertexNormals();
         return true;
       };
     })(),
 
-    computeStripVertexNormals: (function () {
+    computeVertexNormals: (function () {
       var pA = new THREE.Vector3();
       var pB = new THREE.Vector3();
       var pC = new THREE.Vector3();
@@ -167,7 +167,7 @@ var onLoaded = require('../onloaded.js');
         }
 
         /*
-        first and last vertice (0 and 8) belongs just to one triangle
+        first and last vertices (0 and 8) belongs just to one triangle
         second and penultimate (1 and 7) belongs to two triangles
         the rest of the vertices belongs to three triangles
 

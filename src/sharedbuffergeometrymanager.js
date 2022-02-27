@@ -5,8 +5,8 @@ function SharedBufferGeometryManager () {
 }
 
 SharedBufferGeometryManager.prototype = {
-  addSharedBuffer: function (name, material, primitiveMode) {
-    var bufferGeometry = new SharedBufferGeometry(material, primitiveMode);
+  addSharedBuffer: function (name, material) {
+    var bufferGeometry = new SharedBufferGeometry(material);
     this.sharedBuffers[name] = bufferGeometry;
   },
 
