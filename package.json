@@ -6,7 +6,7 @@
     "atlas": "spritesheet-js --name brush_atlas --path assets/images brushes/*.png",
     "build": "webpack --mode=production",
     "build-dev": "webpack --mode=development",
-    "start": "webpack-dev-server --host 0.0.0.0",
+    "start": "webpack-dev-server --host 0.0.0.0 --mode=development",
     "lint": "semistandard -v | snazzy"
   },
   "repository": "aframevr/a-painter",

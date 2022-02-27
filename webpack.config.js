@@ -9,10 +9,15 @@ module.exports = {
   module: {},
   optimization: {
     minimizer: [new TerserPlugin({
-      extractComments: false,
-    })],
+      extractComments: false
+    })]
   },
   devServer: {
-    disableHostCheck: true
+    historyApiFallback: true,
+    allowedHosts: "all",
+    static: {
+      directory: __dirname,
+      publicPath: '/'
+    }
   }
 };
