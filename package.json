@@ -4,7 +4,8 @@
   "description": "A-Painter",
   "scripts": {
     "atlas": "spritesheet-js --name brush_atlas --path assets/images brushes/*.png",
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "webpack --mode=production",
+    "build-dev": "webpack --mode=development",
     "start": "webpack-dev-server --host 0.0.0.0",
     "lint": "semistandard -v | snazzy"
   },
@@ -16,15 +17,15 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^2.0.1",
-    "json-loader": "^0.5.7",
-    "semistandard": "^9.0.0",
-    "snazzy": "^4.0.1",
+    "semistandard": "^16.0.1",
+    "snazzy": "^9.0.0",
     "spritesheet-js": "^1.2.6",
-    "webpack": "^1.13.2",
-    "webpack-dev-server": "^1.16.1"
+    "terser-webpack-plugin": "^5.3.1",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
-    "aframe-tooltip-component": "^0.1.0"
+    "aframe-tooltip-component": "^0.1.2"
   }
 }

@@ -1,9 +1,4 @@
-const webpack = require('webpack');
-
-let PLUGINS = [];
-if (process.env.NODE_ENV === 'production') {
-  PLUGINS.push(new webpack.optimize.UglifyJsPlugin());
-}
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -11,15 +6,12 @@ module.exports = {
     path: __dirname,
     filename: 'build.js'
   },
-  module: {
-    loaders: [
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
-      }
-    ]
+  module: {},
+  optimization: {
+    minimizer: [new TerserPlugin({
+      extractComments: false,
+    })],
   },
-  plugins: PLUGINS,
   devServer: {
     disableHostCheck: true
   }
