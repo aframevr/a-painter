@@ -185,7 +185,6 @@ AFRAME.registerSystem('brush', {
   },
   clear: function () {
     // Remove all the stroke entities
-    //for (var i = 0; i < this.strokes.length; i++) {
     for (var i = this.strokes.length - 1; i >= 0; i--) {
       if(this.strokes[i].data.owner !== 'local') continue;
       var stroke = this.strokes[i];

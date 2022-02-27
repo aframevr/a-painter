@@ -47,6 +47,10 @@ SharedBufferGeometry.prototype = {
   },
 
   undo: function (prevIdx) {
+    for (let i = prevIdx.position; i < this.idx.position; i++) {
+      this.current.attributes.position.setXYZ(i, 0, 0, 0);
+      this.current.index.setXYZ(i, 0, 0, 0);
+    }
     this.idx = prevIdx;
     this.update();
   },
