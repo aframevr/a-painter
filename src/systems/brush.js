@@ -507,7 +507,7 @@ AFRAME.registerSystem('brush', {
     console.timeEnd('Binary Loading');
   },
   loadFromUrl: function (url, binary) {
-    var loader = new THREE.XHRLoader(this.manager);
+    var loader = new THREE.FileLoader(this.manager);
     loader.crossOrigin = 'anonymous';
     if (binary === true) {
       loader.setResponseType('arraybuffer');
