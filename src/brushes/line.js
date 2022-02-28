@@ -40,6 +40,7 @@ var onLoaded = require('../onloaded.js');
     init: function (color, brushSize) {
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('strip-' + this.materialOptions.type);
       this.sharedBuffer.restartPrimitive();
+      this.sharedBuffer.strip = true;
 
       this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
       this.idx = Object.assign({}, this.sharedBuffer.idx);

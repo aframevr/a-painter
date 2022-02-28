@@ -4,6 +4,7 @@ function SharedBufferGeometry (material) {
   this.maxBufferSize = 1000000;
   this.geometries = [];
   this.current = null;
+  this.strip = true;
   this.addBuffer(false);
 }
 
@@ -141,9 +142,28 @@ SharedBufferGeometry.prototype = {
       buffer = this.current.attributes.position;
     }
     buffer.setXYZ(this.idx.position++, x, y, z);
-    if ((this.idx.position + 1) % 2 == 0 && this.idx.position > 1) {
-      this.current.index.setXYZ(this.idx.position - 3, this.idx.position - 3, this.idx.position - 2, this.idx.position - 1);
-      this.current.index.setXYZ(this.idx.position - 2, this.idx.position - 1, this.idx.position - 2, this.idx.position);
+    if (this.strip) {
+      if ((this.idx.position + 1) % 2 == 0 && this.idx.position > 1) {
+        /* Line brushes
+          2---3
+          | \ |
+          0---1
+          {0, 1, 2}, {2, 1, 3}
+        */
+        this.current.index.setXYZ(this.idx.position - 3, this.idx.position - 3, this.idx.position - 2, this.idx.position - 1);
+        this.current.index.setXYZ(this.idx.position - 2, this.idx.position - 1, this.idx.position - 2, this.idx.position);
+      }
+    }
+    else {
+      if ((this.idx.position + 1) % 3 == 0) {
+        /* Stamp brushes
+          0---1  0
+            \ |  | \
+              2  3---2
+          {0, 1, 2}, {2, 3, 0}
+        */
+        this.current.index.setXYZ(this.idx.position, this.idx.position - 2, this.idx.position - 1, this.idx.position);
+      }
     }
   },
 
