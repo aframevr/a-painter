@@ -60,7 +60,7 @@ SharedBufferGeometry.prototype = {
     var geometry = new THREE.BufferGeometry();
 
     var vertices = new Float32Array(this.maxBufferSize * 3);
-    var indices = new Uint32Array(this.maxBufferSize * 1.5);
+    var indices = new Uint32Array(this.maxBufferSize * 4.5);
     var normals = new Float32Array(this.maxBufferSize * 3);
     var uvs = new Float32Array(this.maxBufferSize * 2);
     var colors = new Float32Array(this.maxBufferSize * 3);

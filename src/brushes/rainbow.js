@@ -38,11 +38,13 @@
         this.idx = 0;
         this.geometry = new THREE.BufferGeometry();
         this.vertices = new Float32Array(this.options.maxPoints * 3 * 3);
+        this.indices = new Uint32Array(this.options.maxPoints * 4.5 * 4.5)
         this.uvs = new Float32Array(this.options.maxPoints * 2 * 2);
         this.linepositions = new Float32Array(this.options.maxPoints);
 
         this.geometry.setDrawRange(0, 0);
         this.geometry.setAttribute('position', new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
+        this.geometry.setIndex(new THREE.BufferAttribute(this.indices, 3).setUsage(THREE.DynamicDrawUsage));
         this.geometry.setAttribute('uv', new THREE.BufferAttribute(this.uvs, 2).setUsage(THREE.DynamicDrawUsage));
         this.geometry.setAttribute('lineposition', new THREE.BufferAttribute(this.linepositions, 1).setUsage(THREE.DynamicDrawUsage));
 
@@ -53,6 +55,8 @@
         mesh.vertices = this.vertices;
 
         this.object3D.add(mesh);
+        this.drawing = document.querySelector('.a-drawing');
+        this.drawing.object3D.add(this.object3D);
       },
       addPoint: (function () {
         var direction = new THREE.Vector3();
@@ -88,11 +92,18 @@
           this.vertices[this.idx++] = posB.x;
           this.vertices[this.idx++] = posB.y;
           this.vertices[this.idx++] = posB.z;
+          
+          // Same principle as line brush strips
+          if (this.idx > 6) {
+            this.geometry.index.setXYZ(this.idx / 3 - 4, this.idx / 3 - 4, this.idx / 3 - 3, this.idx / 3 - 2);
+            this.geometry.index.setXYZ(this.idx / 3 - 3, this.idx / 3 - 2, this.idx / 3 - 3, this.idx / 3 - 1);
+          }
 
           this.geometry.attributes.position.needsUpdate = true;
+          this.geometry.index.needsUpdate = true;
           this.geometry.attributes.uv.needsUpdate = true;
 
-          this.geometry.setDrawRange(0, this.data.numPoints * 2);
+          this.geometry.setDrawRange(0, this.data.numPoints * 2 * 6);
 
           return true;
         }        
@@ -100,6 +111,9 @@
       tick: function(timeOffset, delta) {
         this.material.uniforms.time.value = timeOffset;
       },
+      undo: function () {
+        this.drawing.object3D.children.pop();
+      }
     },
     {thumbnail:'brushes/thumb_rainbow.png', maxPoints: 3000}
   );

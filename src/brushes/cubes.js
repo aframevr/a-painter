@@ -10,6 +10,8 @@ AFRAME.registerBrush('cubes',
         flatShading: true
       });
       this.geometry = new THREE.BoxGeometry(1, 1, 1);
+      this.drawing = document.querySelector('.a-drawing');
+      this.drawing.object3D.add(this.object3D);
     },
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
       var box = new THREE.Mesh(this.geometry, this.material);
@@ -22,6 +24,9 @@ AFRAME.registerBrush('cubes',
       this.object3D.add(box);
 
       return true;
+    },
+    undo: function () {
+      this.drawing.object3D.children.pop();
     }
   },
   {thumbnail: 'brushes/thumb_cubes.gif', spacing: 0.01}

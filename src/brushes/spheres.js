@@ -11,6 +11,8 @@ AFRAME.registerBrush('spheres',
         flatShading: true
       });
       this.geometry = new THREE.IcosahedronGeometry(1, 0);
+      this.drawing = document.querySelector('.a-drawing');
+      this.drawing.object3D.add(this.object3D);
     },
     // This function is called every time we need to add a point to our stroke
     // It should returns true if the point is added correctly, false otherwise.
@@ -45,6 +47,9 @@ AFRAME.registerBrush('spheres',
         var sin = (Math.sin(sphere.phase + time / 500.0) + 1) / 2 + 0.1;
         sphere.scale.copy(sphere.initialScale).multiplyScalar(sin);
       }
+    },
+    undo: function () {
+      this.drawing.object3D.children.pop();
     }
   },
   // Define extra options for this brush
