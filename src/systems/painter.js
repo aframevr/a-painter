@@ -76,13 +76,12 @@ AFRAME.registerSystem('painter', {
     if (urlParams.url || urlParams.urljson) {
       var isBinary = urlParams.urljson === undefined;
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
-      document.getElementById('logo').setAttribute('visible', false);
-      document.getElementById('acamera').setAttribute('orbit-controls', 'initialPosition: 0 1.6 3');
-      document.getElementById('apainter-logo').classList.remove('hidden');
-      //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
-    } else { // No painting to load, move camera in front of logo
-      const cameraEl = document.getElementById('acamera')
-      cameraEl.setAttribute('position', '0 1.6 0');
+      document.addEventListener('DOMContentLoaded', e => {
+        document.getElementById('logo').setAttribute('visible', false);
+        document.getElementById('acamera').setAttribute('position', '0 1.6 3');
+        document.getElementById('apainter-logo').classList.remove('hidden');
+        //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
+      });
     }
 
     if (urlParams.bgcolor !== undefined) {
