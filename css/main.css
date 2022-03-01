@@ -1,3 +1,7 @@
+html, body {
+  background-color:#030404;
+}
+
 #apainter-ui{
   font-family: Helvetica, Arial, sans-serif;
   position: absolute;
