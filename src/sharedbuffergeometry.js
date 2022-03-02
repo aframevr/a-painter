@@ -62,8 +62,6 @@ SharedBufferGeometry.prototype = {
 
     var mesh = new THREE.Mesh(geometry, this.material);
 
-    //mesh.drawMode = this.primitiveMode;
-
     mesh.frustumCulled = false;
     mesh.vertices = vertices;
 
