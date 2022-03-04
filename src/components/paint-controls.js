@@ -17,6 +17,10 @@ AFRAME.registerComponent('paint-controls', {
     var tooltips = null;
     this.controller = null;
     this.modelLoaded = false;
+    
+    this.onEnterVR = this.onEnterVR.bind(this);
+    el.sceneEl.addEventListener('enter-vr', this.onEnterVR);
+    el.object3D.visible = false;
 
     this.onModelLoaded = this.onModelLoaded.bind(this);
     el.addEventListener('model-loaded', this.onModelLoaded);
@@ -177,6 +181,10 @@ AFRAME.registerComponent('paint-controls', {
   },
 
   pause: function () {
+  },
+
+  onEnterVR: function () {
+    this.el.object3D.visible = true;
   },
 
   onModelLoaded: function (evt) {
