@@ -172,7 +172,9 @@ SharedBufferGeometry.prototype = {
   },
 
   update: function () {
-    this.current.setDrawRange(0, this.idx.position * 3);
+    // Draw one less triangle to prevent indexing into blank positions
+    // on an even-number-positioned undo
+    this.current.setDrawRange(0, (this.idx.position * 3) - 4);
 
     this.current.attributes.color.needsUpdate = true;
     this.current.attributes.normal.needsUpdate = true;
