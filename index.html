@@ -11,13 +11,13 @@
       UPLOADCARE_PUBLIC_KEY = 'eb0df3191b88f403ad76';
     </script>
     <script src="https://ucarecdn.com/widget/2.5.5/uploadcare/uploadcare.full.min.js"></script>
-    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.12/dist/clipboard.min.js"></script>
-    <script src="vendor/aframe-master.min.js"></script>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="vendor/aframe-input-mapping-component.js"></script>
     <script src="build.js"></script>
-    <script src="https://unpkg.com/aframe-gltf-exporter-component/dist/aframe-gltf-exporter-component.min.js"></script>
-    <script src="vendor/aframe-teleport-controls.min.js"></script>
-    <script src="vendor/aframe-tooltip-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@1.5.12/dist/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-gltf-exporter-component@0.1.0/dist/aframe-gltf-exporter-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-blink-controls@0.3.0/src/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-tooltip-component@0.1.2/dist/aframe-tooltip-component.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
@@ -58,9 +58,8 @@
         <!-- hand controls -->
         <a-entity id="left-hand"
                   brush
-                  if-no-vr-headset="visible: false"
                   paint-controls="hand: left"
-                  teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
+                  blink-controls="cameraRig: #cameraRig; startEvents: 'aim'; endEvents: 'teleport'; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
                   ui>
                     <a-entity class="vive-tooltips" visible="false">
                       <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
@@ -136,9 +135,8 @@
         </a-entity>
         <a-entity id="right-hand"
                   brush
-                  if-no-vr-headset="visible: false"
                   paint-controls="hand: right"
-                  teleport-controls="cameraRig: #cameraRig; button: trackpad; ground: #ground; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
+                  blink-controls="cameraRig: #cameraRig; startEvents: 'aim'; endEvents: 'teleport'; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
                   ui>
                     <a-entity class="vive-tooltips" visible="false">
                       <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.1; height: 0.04; targetPosition: 0 0.016 0.0073; src: assets/images/tooltip.png"
