@@ -28,19 +28,6 @@ AFRAME.registerComponent('brush', {
 
     var self = this;
 
-    this.previousAxis = 0;
-/*
-    this.el.addEventListener('axismove', function (evt) {
-      if (evt.detail.axis[0] === 0 && evt.detail.axis[1] === 0 || this.previousAxis === evt.detail.axis[1]) {
-        return;
-      }
-
-      this.previousAxis = evt.detail.axis[1];
-      var size = (evt.detail.axis[1] + 1) / 2 * self.schema.size.max;
-
-      self.el.setAttribute('brush', 'size', size);
-    });
-*/
     this.el.addEventListener('undo', function(evt) {
       if (!self.data.enabled) { return; }
       self.system.undo();
