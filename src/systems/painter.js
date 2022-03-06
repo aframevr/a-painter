@@ -15,7 +15,7 @@ AFRAME.registerSystem('painter', {
           },
 
           'vive-controls': {
-            'axis.move': 'changeBrushSizeInc',
+            'axismove': 'changeBrushSizeInc',
             'trackpad.touchstart': 'startChangeBrushSize',
             'menu.down': 'toggleMenu',
 
@@ -25,7 +25,7 @@ AFRAME.registerSystem('painter', {
           },
 
           'oculus-touch-controls': {
-            'axis.move': 'changeBrushSizeAbs',
+            'axismove': 'changeBrushSizeAbs',
             'abutton.down': 'toggleMenu',
             'xbutton.down': 'toggleMenu',
 
@@ -38,7 +38,7 @@ AFRAME.registerSystem('painter', {
           },
 
           'windows-motion-controls': {
-            'axis.move': 'changeBrushSizeAbs',
+            'axismove': 'changeBrushSizeAbs',
             'menu.down': 'toggleMenu',
 
             // Teleport
