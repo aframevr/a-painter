@@ -25,13 +25,6 @@ AFRAME.registerComponent('ui', {
     this.hsv = { h: 0.0, s: 0.0, v: 1.0 };
     this.rayAngle = 45;
     this.rayDistance = 0.2;
-    this.openMenu = null;
-    this.openingMenu = false;
-    this.closeMenu = null;
-    this.closingMenu = false;
-    this.showMessageWindow = null;
-    this.showingMessage = false;
-    this.time = 0;
 
     // The cursor is centered in 0,0 to allow scale it easily
     // This is the offset to put it back in its original position on the slider
@@ -161,18 +154,6 @@ AFRAME.registerComponent('ui', {
       this.updateIntersections();
       this.handleHover();
       this.handlePressedButtons();
-    }
-    if (this.openingMenu) {
-      this.time += dt;
-      this.openMenu.tick(this.time);
-    }
-    else if (this.closingMenu) {
-      this.time += dt;
-      this.closeMenu.tick(this.time);
-    }
-    else if (this.showingMessage) {
-      this.time += dt;
-      this.showMessageWindow.tick(this.time);
     }
   },
 
@@ -568,35 +549,14 @@ AFRAME.registerComponent('ui', {
       material.needsUpdate = true;
     });
 
+    this.el.setAttribute('animation__showmessage', { dur: 500, property: 'components.ui.messagesMaterial.opacity', from: 0, to: 1, startEvents: 'showmessage' });
+    this.el.setAttribute('animation__hidemessage', { dur: 500, delay: 3000, property: 'components.ui.messagesMaterial.opacity', from: 1, to: 0, startEvents: 'hidemessage' });
+    this.el.addEventListener('animationcomplete__showmessage', function (evt) {
+      self.el.emit('hidemessage');
+    });
     function showMessage (msgObject) {
       msgObject.visible = true;
-      var animObject = { opacity: 0.0 };
-
-      self.showMessageWindow = AFRAME.ANIME.timeline({ duration: 4000 });
-      self.showMessageWindow.add({
-        targets: animObject,
-        opacity: 1,
-        duration: 500,
-        update: function () {
-          self.messagesMaterial.opacity = animObject.opacity;
-        }
-      });
-      self.showMessageWindow.add({
-        targets: animObject,
-        opacity: 0,
-        duration: 500,
-        delay: 3000,
-        update: function () {
-          self.messagesMaterial.opacity = animObject.opacity;
-        },
-        complete: function () {
-          msgObject.visible = false;
-          self.showingMessage = false;
-          self.time = 0;
-        }
-      });
-      self.showMessageWindow.play();
-      self.showingMessage = true;
+      self.el.emit('showmessage');
     }
 
     this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
@@ -754,28 +714,10 @@ AFRAME.registerComponent('ui', {
 
   open: function () {
     var uiEl = this.uiEl;
-    var coords = { x: 0, y: 0, z: 0 };
     if (!this.closed) { return; }
     this.uiEl.setAttribute('visible', true);
  
-    var self = this;
-    this.openMenu = AFRAME.ANIME({
-      targets: coords,
-      x: 1,
-      y: 1,
-      z: 1,
-      duration: 100,
-      easing: 'easeOutExpo',
-      update: function () {
-        uiEl.setAttribute('scale', coords);
-      },
-      complete: function () {
-        self.openingMenu = false;
-        self.time = 0;
-      }
-    });
-    this.openMenu.play();
-    this.openingMenu = true;
+    this.uiEl.setAttribute('animation', { dur: 100, easing: 'easeOutExpo', property: 'scale', from: { x: 0, y: 0, z: 0 }, to: { x: 1, y: 1, z: 1 } });
 
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
@@ -956,31 +898,11 @@ AFRAME.registerComponent('ui', {
   })(),
 
   close: function () {
-    var uiEl = this.uiEl;
-    var coords = { x: 1, y: 1, z: 1 };
     if (this.closed) { return; }
 
-    var self = this;
-    this.closeMenu = AFRAME.ANIME({
-      targets: coords,
-      x: 0,
-      y: 0,
-      z: 0,
-      duration: 100,
-      easing: 'easeOutExpo',
-      update: function () {
-        uiEl.setAttribute('scale', coords);
-      },
-      complete: function() {
-        uiEl.setAttribute('visible', false);
-        self.closingMenu = false;
-        self.time = 0;
-      }
-    });
-    this.closeMenu.play();
+    this.uiEl.setAttribute('animation', { dur: 100, easing: 'easeOutExpo', property: 'scale', from: { x: 1, y: 1, z: 1 }, to: { x: 0, y: 0, z: 0 } });
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
-    this.closingMenu = true;
 
     if (!!this.tooltips && this.isTooltipPaused) {
       this.isTooltipPaused = false;

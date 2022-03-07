@@ -105,29 +105,13 @@ AFRAME.registerSystem('painter', {
       });
     }
 
-    this.logoFade = null;
-    this.logoFading = false;
-    this.time = 0;
+    this.startedPainting = false;
     var self = this;
     document.addEventListener('stroke-started', function (event) {
-      if (!self.logoFading) {
-        var logo = document.getElementById('logo');
-        var mesh = logo.getObject3D('mesh');
-        var animObject = { alpha: 1.0 };
-        self.logoFade = AFRAME.ANIME({
-          targets: animObject,
-          alpha: 0,
-          duration: 4000,
-          update: function () {
-            mesh.children[0].material.opacity = animObject.alpha;
-          },
-          complete: function () {
-            logo.setAttribute('visible', false);
-            self.logoFading = false;
-          }
-        });
-        self.logoFade.play();
-        self.logoFading = true;
+      if (!self.startedPainting) {
+        const logo = document.getElementById('logo');
+        logo.emit('started-painting');
+        self.startedPainting = true;
       }
     });
 
@@ -193,12 +177,6 @@ AFRAME.registerSystem('painter', {
     });
 
     console.info('A-PAINTER Version: ' + this.version);
-  },
-  tick: function(t, dt) {
-    if (this.logoFading) {
-      this.time += dt;
-      this.logoFade.tick(this.time);
-    }
   },
   saveJSON: function () {
     var json = this.brushSystem.getJSON();

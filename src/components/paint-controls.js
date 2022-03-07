@@ -14,7 +14,7 @@ AFRAME.registerComponent('paint-controls', {
     var el = this.el;
     var self = this;
     var highLightTextureUrl = 'assets/images/controller-pressed.png';
-    var tooltips = null;
+    var tooltipGroups = null;
     this.controller = null;
     this.modelLoaded = false;
 
@@ -72,7 +72,7 @@ AFRAME.registerComponent('paint-controls', {
         }
       }
 
-      tooltips = Utils.getTooltips(controllerName);
+      tooltipGroups = Utils.getTooltips(controllerName);
       if (controllerName.indexOf('windows-motion') >= 0) {
         // el.setAttribute('teleport-controls', {button: 'trackpad'});
       } else if (controllerName === 'oculus-touch-controls') {
@@ -83,9 +83,13 @@ AFRAME.registerComponent('paint-controls', {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
       } else { return; }
 
-      if (!!tooltips) {
-        tooltips.forEach(function (tooltip) {
-          tooltip.setAttribute('visible', true);
+      if (!!tooltipGroups) {
+        tooltipGroups.forEach(function (tooltipGroup) {
+          tooltipGroup.setAttribute('visible', true);
+          const tooltips = Array.prototype.slice.call(tooltipGroup.querySelectorAll('[tooltip]'));
+          tooltips.forEach(function (tooltip) {
+            tooltip.setAttribute('animation', { dur: 1000, delay: 2000, property: 'tooltip.opacity', from: 1.0, to: 0.0, startEvents: 'tooltip-fade' });
+          });
         });
       }
 
@@ -105,9 +109,6 @@ AFRAME.registerComponent('paint-controls', {
     this.startAxis = 0;
 
     this.numberStrokes = 0;
-    this.hideTooltips = null;
-    this.hidingTooltips = false;
-    this.time = 0;
 
     document.addEventListener('stroke-started', function (event) {
       if (event.detail.entity.components['paint-controls'] !== self) { return; }
@@ -117,28 +118,10 @@ AFRAME.registerComponent('paint-controls', {
 
       // 3 Strokes to hide
       if (self.system.numberStrokes === 3) {
-        var tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
-        var animObject = { opacity: 1.0 };
-
-        self.hideTooltips = AFRAME.ANIME({
-          targets: animObject,
-          opacity: 0,
-          duration: 1000,
-          delay: 2000,
-          update: function () {
-            tooltips.forEach(function (tooltip) {
-              tooltip.setAttribute('tooltip', { opacity: animObject.opacity });
-            });
-          },
-          complete: function () {
-            tooltips.forEach(function (tooltip) {
-              tooltip.setAttribute('visible', false);
-            });
-            this.hidingTooltips = false;
-          }
-        })
-        self.hideTooltips.play();
-        self.hidingTooltips = true;
+        const tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
+        tooltips.forEach(function (tooltip) {
+          tooltip.emit('tooltip-fade');
+        });
       }
     });
   },
@@ -179,13 +162,6 @@ AFRAME.registerComponent('paint-controls', {
     el.setAttribute('vive-controls', {hand: data.hand, model: false});
     el.setAttribute('oculus-touch-controls', {hand: data.hand, model: false});
     el.setAttribute('windows-motion-controls', {hand: data.hand});
-  },
-
-  tick: function (t, dt) {
-    if (this.hidingTooltips) {
-      this.time += dt;
-      this.hideTooltips.tick(this.time);
-    }
   },
 
   play: function () {
