@@ -11,8 +11,8 @@ AFRAME.registerBrush('spheres',
         flatShading: true
       });
       this.geometry = new THREE.IcosahedronGeometry(1, 0);
-      this.drawing = document.querySelector('.a-drawing');
-      this.drawing.object3D.add(this.object3D);
+      this.drawingEl = document.querySelector('.a-drawing');
+      this.drawingEl.object3D.add(this.object3D);
     },
     // This function is called every time we need to add a point to our stroke
     // It should returns true if the point is added correctly, false otherwise.
@@ -49,7 +49,7 @@ AFRAME.registerBrush('spheres',
       }
     },
     undo: function () {
-      this.drawing.object3D.children.pop();
+      this.drawingEl.object3D.children.pop();
     }
   },
   // Define extra options for this brush

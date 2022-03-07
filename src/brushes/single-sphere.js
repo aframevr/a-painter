@@ -13,8 +13,8 @@ AFRAME.registerBrush('single-sphere',
       this.mesh = new THREE.Mesh(this.geometry, this.material);
       this.object3D.add(this.mesh);
       this.mesh.visible = false;
-      this.drawing = document.querySelector('.a-drawing');
-      this.drawing.object3D.add(this.object3D);
+      this.drawingEl = document.querySelector('.a-drawing');
+      this.drawingEl.object3D.add(this.object3D);
     },
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
       if (!this.firstPoint) {
@@ -27,7 +27,7 @@ AFRAME.registerBrush('single-sphere',
       return true;
     },
     undo: function () {
-      this.drawing.object3D.children.pop();
+      this.drawingEl.object3D.children.pop();
     }
   },
   {thumbnail: 'brushes/thumb_single_sphere.png', spacing: 0.0}
