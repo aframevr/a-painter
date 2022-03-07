@@ -149,7 +149,7 @@ AFRAME.registerComponent('ui', {
     this.close = this.close.bind(this);
   },
 
-  tick: function (t, dt) {
+  tick: function (time, delta) {
     if (!this.closed && this.handEl) {
       this.updateIntersections();
       this.handleHover();
