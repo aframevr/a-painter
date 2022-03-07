@@ -109,8 +109,8 @@ AFRAME.registerSystem('painter', {
     var self = this;
     document.addEventListener('stroke-started', function (event) {
       if (!self.startedPainting) {
-        const logo = document.getElementById('logo');
-        logo.emit('started-painting');
+        const logoEl = document.getElementById('logo');
+        logoEl.emit('started-painting');
         self.startedPainting = true;
       }
     });
