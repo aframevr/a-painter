@@ -43,8 +43,8 @@
       <a-light type="point" light="color: #fff; intensity:0.6" position="3 10 1"></a-light>
       <a-light type="point" light="color: #fff; intensity:0.2" position="-3 -10 0"></a-light>
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
-      <a-entity id="logo" obj-model="obj: #logoobj; mtl: #logomtl"
-                animation="dur: 4000; property: components.obj-model.model.children.0.material.opacity; from: 1; to: 0; startEvents: started-painting"></a-entity>
+      <a-entity id="logo" logo-model
+                animation="dur: 4000; property: logo-model.opacity; from: 1; to: 0; startEvents: started-painting"></a-entity>
       <a-entity id="ground"
                 geometry="primitive: box; width: 12; height: 0.01; depth: 12"
                 material="shader: flat; src: #floor">
