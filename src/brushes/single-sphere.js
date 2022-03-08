@@ -7,12 +7,14 @@ AFRAME.registerBrush('single-sphere',
         roughness: 0.6,
         metalness: 0.2,
         side: THREE.FrontSide,
-        shading: THREE.SmoothShading
+        flatShading: true
       });
       this.geometry = new THREE.IcosahedronGeometry(1, 2);
       this.mesh = new THREE.Mesh(this.geometry, this.material);
       this.object3D.add(this.mesh);
-      this.mesh.visible = false
+      this.mesh.visible = false;
+      this.drawingEl = document.querySelector('.a-drawing');
+      this.drawingEl.object3D.add(this.object3D);
     },
     addPoint: function (position, orientation, pointerPosition, pressure, timestamp) {
       if (!this.firstPoint) {
@@ -23,6 +25,9 @@ AFRAME.registerBrush('single-sphere',
       var distance = this.firstPoint.distanceTo(pointerPosition);
       this.mesh.scale.set(distance, distance, distance);
       return true;
+    },
+    undo: function () {
+      this.drawingEl.object3D.children.pop();
     }
   },
   {thumbnail: 'brushes/thumb_single_sphere.png', spacing: 0.0}

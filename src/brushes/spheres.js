@@ -8,9 +8,11 @@ AFRAME.registerBrush('spheres',
         roughness: 0.5,
         metalness: 0.5,
         side: THREE.DoubleSide,
-        shading: THREE.FlatShading
+        flatShading: true
       });
       this.geometry = new THREE.IcosahedronGeometry(1, 0);
+      this.drawingEl = document.querySelector('.a-drawing');
+      this.drawingEl.object3D.add(this.object3D);
     },
     // This function is called every time we need to add a point to our stroke
     // It should returns true if the point is added correctly, false otherwise.
@@ -28,7 +30,7 @@ AFRAME.registerBrush('spheres',
 
       // Set the position of the sphere to match the controller positoin
       sphere.position.copy(pointerPosition);
-      sphere.rotation.copy(orientation);
+      sphere.quaternion.copy(orientation);
 
       // Add the sphere to the object3D
       this.object3D.add(sphere);
@@ -45,6 +47,9 @@ AFRAME.registerBrush('spheres',
         var sin = (Math.sin(sphere.phase + time / 500.0) + 1) / 2 + 0.1;
         sphere.scale.copy(sphere.initialScale).multiplyScalar(sin);
       }
+    },
+    undo: function () {
+      this.drawingEl.object3D.children.pop();
     }
   },
   // Define extra options for this brush

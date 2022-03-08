@@ -22,8 +22,8 @@ var onLoaded = require('../onloaded.js');
         alphaTest: 0.5
     });
 
-    sharedBufferGeometryManager.addSharedBuffer('tris-flat', flat, THREE.TrianglesDrawMode);
-    sharedBufferGeometryManager.addSharedBuffer('tris-shaded', shaded, THREE.TrianglesDrawMode);
+    sharedBufferGeometryManager.addSharedBuffer('tris-flat', flat);
+    sharedBufferGeometryManager.addSharedBuffer('tris-shaded', shaded);
   });
 
   var stamp = {
@@ -32,7 +32,7 @@ var onLoaded = require('../onloaded.js');
       this.sharedBuffer = sharedBufferGeometryManager.getSharedBuffer('tris-' + this.materialOptions.type);
       this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
       this.idx = Object.assign({}, this.sharedBuffer.idx);
-
+      this.sharedBuffer.strip = false;
 
       this.currAngle = 0;
       this.subTextures = 1;

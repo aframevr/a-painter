@@ -1,10 +1,10 @@
-function SharedBufferGeometry (material, primitiveMode) {
+function SharedBufferGeometry (material) {
   this.material = material;
-  this.primitiveMode = primitiveMode;
 
   this.maxBufferSize = 1000000;
   this.geometries = [];
   this.current = null;
+  this.strip = true;
   this.addBuffer(false);
 }
 
@@ -48,6 +48,10 @@ SharedBufferGeometry.prototype = {
   },
 
   undo: function (prevIdx) {
+    for (let i = prevIdx.position; i < this.idx.position; i++) {
+      this.current.attributes.position.setXYZ(i, 0, 0, 0);
+      this.current.index.setXYZ(i, 0, 0, 0);
+    }
     this.idx = prevIdx;
     this.update();
   },
@@ -56,6 +60,7 @@ SharedBufferGeometry.prototype = {
     var geometry = new THREE.BufferGeometry();
 
     var vertices = new Float32Array(this.maxBufferSize * 3);
+    var indices = new Uint32Array(this.maxBufferSize * 4.5);
     var normals = new Float32Array(this.maxBufferSize * 3);
     var uvs = new Float32Array(this.maxBufferSize * 2);
     var colors = new Float32Array(this.maxBufferSize * 3);
@@ -78,9 +83,15 @@ SharedBufferGeometry.prototype = {
 
     geometry.setDrawRange(0, 0);
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.attributes.position.updateRange.count = 0;
+    geometry.setIndex(new THREE.BufferAttribute(indices, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.index.updateRange.count = 0;
     geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2).setUsage(THREE.DynamicDrawUsage));
+    geometry.attributes.uv.updateRange.count = 0;
     geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.attributes.normal.updateRange.count = 0;
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage));
+    geometry.attributes.color.updateRange.count = 0;
 
 
     this.previous = null;
@@ -136,6 +147,29 @@ SharedBufferGeometry.prototype = {
       buffer = this.current.attributes.position;
     }
     buffer.setXYZ(this.idx.position++, x, y, z);
+    if (this.strip) {
+      if ((this.idx.position + 1) % 2 == 0 && this.idx.position > 1) {
+        /* Line brushes
+          2---3
+          | \ |
+          0---1
+          {0, 1, 2}, {2, 1, 3}
+        */
+        this.current.index.setXYZ(this.idx.position - 3, this.idx.position - 3, this.idx.position - 2, this.idx.position - 1);
+        this.current.index.setXYZ(this.idx.position - 2, this.idx.position - 1, this.idx.position - 2, this.idx.position);
+      }
+    }
+    else {
+      if ((this.idx.position + 1) % 3 == 0) {
+        /* Stamp brushes
+          0---1  0
+            \ |  | \
+              2  3---2
+          {0, 1, 2}, {2, 3, 0}
+        */
+        this.current.index.setXYZ(this.idx.position, this.idx.position - 2, this.idx.position - 1, this.idx.position);
+      }
+    }
   },
 
   addUV: function (u, v) {
@@ -143,12 +177,20 @@ SharedBufferGeometry.prototype = {
   },
 
   update: function () {
-    this.current.setDrawRange(0, this.idx.position);
+    // Draw one less triangle to prevent indexing into blank positions
+    // on an even-number-positioned undo
+    this.current.setDrawRange(0, (this.idx.position * 3) - 4);
 
+    this.current.attributes.color.updateRange.count = this.idx.position * 3;
     this.current.attributes.color.needsUpdate = true;
+    this.current.attributes.normal.updateRange.count = this.idx.position * 3;
     this.current.attributes.normal.needsUpdate = true;
+    this.current.attributes.position.updateRange.count = this.idx.position * 3;
     this.current.attributes.position.needsUpdate = true;
+    this.current.attributes.uv.updateRange.count = this.idx.position * 2;
     this.current.attributes.uv.needsUpdate = true;
+    this.current.index.updateRange.count = this.idx.position * 3;
+    this.current.index.needsUpdate = true;
   }
 };
 
