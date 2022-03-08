@@ -1,6 +1,9 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
-  schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 } },
+  schema: { 
+    brightness: { default: 1.0, max: 1.0, min: 0.0 },
+    opacity: { default: 0 }
+  },
   dependencies: ['ui-raycaster'],
 
   init: function () {
@@ -145,16 +148,21 @@ AFRAME.registerComponent('ui', {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onStrokeStarted = this.onStrokeStarted.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
   },
 
   tick: function () {
-    // Hack until https://github.com/aframevr/aframe/issues/1886
-    // is fixed.
-    this.el.components['ui-raycaster'].refreshObjects();
     if (!this.closed && this.handEl) {
       this.updateIntersections();
       this.handleHover();
       this.handlePressedButtons();
+    }
+  },
+
+  update: function () {
+    if (this.messagesMaterial) {
+      this.messagesMaterial.opacity = this.data.opacity;
     }
   },
 
@@ -550,27 +558,11 @@ AFRAME.registerComponent('ui', {
       material.needsUpdate = true;
     });
 
+    this.el.setAttribute('animation__showmessage', { dur: 500, property: 'ui.opacity', from: 0, to: 1, startEvents: 'showmessage' });
+    this.el.setAttribute('animation__hidemessage', { dur: 500, delay: 3000, property: 'ui.opacity', from: 1, to: 0, startEvents: 'animationcomplete__showmessage' });
     function showMessage (msgObject) {
       msgObject.visible = true;
-      var object = { opacity: 0.0 };
-      var tween = new AFRAME.TWEEN.Tween(object)
-        .to({opacity: 1.0}, 500)
-        .onUpdate(function () {
-          self.messagesMaterial.opacity = object.opacity;
-        })
-        .chain(
-          new AFRAME.TWEEN.Tween(object)
-            .to({opacity: 0.0}, 500)
-            .delay(3000)
-            .onComplete(function () {
-              msgObject.visible = false;
-            })
-            .onUpdate(function () {
-              self.messagesMaterial.opacity = object.opacity;
-            })
-          );
-
-      tween.start();
+      self.el.emit('showmessage');
     }
 
     this.el.sceneEl.addEventListener('drawing-upload-completed', function (event) {
@@ -728,17 +720,11 @@ AFRAME.registerComponent('ui', {
 
   open: function () {
     var uiEl = this.uiEl;
-    var coords = { x: 0, y: 0, z: 0 };
-    var tween;
     if (!this.closed) { return; }
     this.uiEl.setAttribute('visible', true);
-    tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 1, y: 1, z: 1 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();
+ 
+    this.uiEl.setAttribute('animation', { dur: 100, easing: 'easeOutExpo', property: 'scale', from: { x: 0, y: 0, z: 0 }, to: { x: 1, y: 1, z: 1 } });
+
     this.el.setAttribute('brush', 'enabled', false);
     this.rayEl.setAttribute('visible', false);
     this.closed = false;
@@ -918,20 +904,9 @@ AFRAME.registerComponent('ui', {
   })(),
 
   close: function () {
-    var uiEl = this.uiEl;
-    var coords = { x: 1, y: 1, z: 1 };
-    var tween;
     if (this.closed) { return; }
-    tween = new AFRAME.TWEEN.Tween(coords)
-        .to({ x: 0, y: 0, z: 0 }, 100)
-        .onUpdate(function () {
-          uiEl.setAttribute('scale', this);
-        })
-        .onComplete(function () {
-          uiEl.setAttribute('visible', false);
-        })
-        .easing(AFRAME.TWEEN.Easing.Exponential.Out);
-    tween.start();
+
+    this.uiEl.setAttribute('animation', { dur: 100, easing: 'easeOutExpo', property: 'scale', from: { x: 1, y: 1, z: 1 }, to: { x: 0, y: 0, z: 0 } });
     this.el.setAttribute('brush', 'enabled', true);
     this.closed = true;
 

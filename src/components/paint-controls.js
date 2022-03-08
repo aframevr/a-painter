@@ -14,7 +14,7 @@ AFRAME.registerComponent('paint-controls', {
     var el = this.el;
     var self = this;
     var highLightTextureUrl = 'assets/images/controller-pressed.png';
-    var tooltips = null;
+    var tooltipGroups = null;
     this.controller = null;
     this.modelLoaded = false;
     
@@ -79,7 +79,7 @@ AFRAME.registerComponent('paint-controls', {
         }
       }
 
-      tooltips = Utils.getTooltips(controllerName);
+      tooltipGroups = Utils.getTooltips(controllerName);
       if (controllerName.indexOf('windows-motion') >= 0) {
         // el.setAttribute('teleport-controls', {button: 'trackpad'});
       } else if (controllerName === 'oculus-touch-controls') {
@@ -90,9 +90,13 @@ AFRAME.registerComponent('paint-controls', {
         el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
       } else { return; }
 
-      if (!!tooltips) {
-        tooltips.forEach(function (tooltip) {
-          tooltip.setAttribute('visible', true);
+      if (!!tooltipGroups) {
+        tooltipGroups.forEach(function (tooltipGroup) {
+          tooltipGroup.setAttribute('visible', true);
+          const tooltips = Array.prototype.slice.call(tooltipGroup.querySelectorAll('[tooltip]'));
+          tooltips.forEach(function (tooltip) {
+            tooltip.setAttribute('animation', { dur: 1000, delay: 2000, property: 'tooltip.opacity', from: 1.0, to: 0.0, startEvents: 'tooltip-fade' });
+          });
         });
       }
 
@@ -121,23 +125,10 @@ AFRAME.registerComponent('paint-controls', {
 
       // 3 Strokes to hide
       if (self.system.numberStrokes === 3) {
-        var tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
-        var object = { opacity: 1.0 };
-
-        var tween = new AFRAME.TWEEN.Tween(object)
-          .to({opacity: 0.0}, 1000)
-          .onComplete(function () {
-            tooltips.forEach(function (tooltip) {
-              tooltip.setAttribute('visible', false);
-            });
-          })
-          .delay(2000)
-          .onUpdate(function () {
-            tooltips.forEach(function (tooltip) {
-              tooltip.setAttribute('tooltip', {opacity: object.opacity});
-            });
-          });
-        tween.start();
+        const tooltips = Array.prototype.slice.call(document.querySelectorAll('[tooltip]'));
+        tooltips.forEach(function (tooltip) {
+          tooltip.emit('tooltip-fade');
+        });
       }
     });
   },

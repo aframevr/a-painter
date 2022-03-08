@@ -105,21 +105,13 @@ AFRAME.registerSystem('painter', {
       });
     }
 
-    this.startPainting = false;
+    this.paintingStarted = false;
     var self = this;
     document.addEventListener('stroke-started', function (event) {
-      if (!self.startPainting) {
-        var logo = document.getElementById('logo');
-        var mesh = logo.getObject3D('mesh');
-        var tween = new AFRAME.TWEEN.Tween({ alpha: 1.0 })
-          .to({alpha: 0.0}, 4000)
-          .onComplete(function () {
-            logo.setAttribute('visible', false);
-          })
-          .onUpdate(function () {
-            mesh.children[0].material.opacity = this.alpha;
-          }).start();
-        self.startPainting = true;
+      if (!self.paintingStarted) {
+        const logoEl = document.getElementById('logo');
+        logoEl.emit('painting-started');
+        self.paintingStarted = true;
       }
     });
 
