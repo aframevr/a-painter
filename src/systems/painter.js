@@ -188,7 +188,7 @@ AFRAME.registerSystem('painter', {
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
     saveAs(blob, 'demo.apa');
   },
-  upload: function (success, error) {
+  upload: function () {
     this.sceneEl.emit('drawing-upload-started');
     var self = this;
 
@@ -196,39 +196,25 @@ AFRAME.registerSystem('painter', {
 
     var dataviews = this.brushSystem.getBinary();
     var blob = new Blob(dataviews, {type: 'application/octet-binary'});
-    var uploader = 'uploadcare'; // or 'fileio'
-    if (uploader === 'fileio') {
-      // Using file.io
-      var fd = new window.FormData();
-      fd.append('file', blob);
-      var xhr = new window.XMLHttpRequest();
-      xhr.open('POST', 'https://file.io'); // ?expires=1y
-      xhr.onreadystatechange = function (data) {
-        if (xhr.readyState === 4) {
-          var response = JSON.parse(xhr.response);
-          if (response.success) {
-            console.log('Uploaded link: ', baseUrl + response.link);
-            self.sceneEl.emit('drawing-upload-completed', {url: baseUrl + response.link});
-            if (success) { success(); }
-          }
-        } else {
-          self.sceneEl.emit('drawing-upload-error', {errorInfo: null, fileInfo: null});
-          if (error) { error(); }
-        }
-      };
-      xhr.send(fd);
-    } else {
-      var file = uploadcare.fileFrom('object', blob);
-      file.done(function (fileInfo) {
-        console.log('Uploaded link: ', baseUrl + fileInfo.cdnUrl);
-        self.sceneEl.emit('drawing-upload-completed', {url: baseUrl + fileInfo.cdnUrl});
-        if (success) { success(); }
-      }).fail(function (errorInfo, fileInfo) {
-        self.sceneEl.emit('drawing-upload-error', {errorInfo: errorInfo, fileInfo: fileInfo});
-        if (error) { error(errorInfo); }
-      }).progress(function (uploadInfo) {
-        self.sceneEl.emit('drawing-upload-progress', {progress: uploadInfo.progress});
-      });
-    }
+
+    const cloudName = 'a-painter';
+    const unsignedUploadPreset = 'upload_painting';
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+    const fd = new FormData();
+    
+    fd.append('upload_preset', unsignedUploadPreset);
+    fd.append('file', blob);
+    fetch(url, { method: 'POST', body: fd }).then(res => {
+      if (!res.ok) {
+        throw new Error(`Network request failed with status ${res.status}: ${res.statusText}`);
+      }
+      return res.json();
+    }).then(json => {
+      console.log('Uploaded link: ', baseUrl + json.secure_url);
+      self.sceneEl.emit('drawing-upload-completed', { url: baseUrl + json.secure_url });
+    }).catch(err => {
+      console.error(err);
+      self.sceneEl.emit('drawing-upload-error', { errorInfo: err });
+    })
   }
 });
