@@ -1,6 +1,9 @@
 /* globals AFRAME THREE */
 AFRAME.registerComponent('ui', {
-  schema: { brightness: { default: 1.0, max: 1.0, min: 0.0 }, opacity: { default: 0 } },
+  schema: { 
+    brightness: { default: 1.0, max: 1.0, min: 0.0 },
+    opacity: { default: 0 }
+  },
   dependencies: ['ui-raycaster'],
 
   init: function () {
@@ -149,7 +152,7 @@ AFRAME.registerComponent('ui', {
     this.close = this.close.bind(this);
   },
 
-  tick: function (time, delta) {
+  tick: function () {
     if (!this.closed && this.handEl) {
       this.updateIntersections();
       this.handleHover();
@@ -556,10 +559,7 @@ AFRAME.registerComponent('ui', {
     });
 
     this.el.setAttribute('animation__showmessage', { dur: 500, property: 'ui.opacity', from: 0, to: 1, startEvents: 'showmessage' });
-    this.el.setAttribute('animation__hidemessage', { dur: 500, delay: 3000, property: 'ui.opacity', from: 1, to: 0, startEvents: 'hidemessage' });
-    this.el.addEventListener('animationcomplete__showmessage', function (evt) {
-      self.el.emit('hidemessage');
-    });
+    this.el.setAttribute('animation__hidemessage', { dur: 500, delay: 3000, property: 'ui.opacity', from: 1, to: 0, startEvents: 'animationcomplete__showmessage' });
     function showMessage (msgObject) {
       msgObject.visible = true;
       self.el.emit('showmessage');

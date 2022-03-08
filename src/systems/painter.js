@@ -105,13 +105,13 @@ AFRAME.registerSystem('painter', {
       });
     }
 
-    this.startedPainting = false;
+    this.paintingStarted = false;
     var self = this;
     document.addEventListener('stroke-started', function (event) {
-      if (!self.startedPainting) {
+      if (!self.paintingStarted) {
         const logoEl = document.getElementById('logo');
-        logoEl.emit('started-painting');
-        self.startedPainting = true;
+        logoEl.emit('painting-started');
+        self.paintingStarted = true;
       }
     });
 
