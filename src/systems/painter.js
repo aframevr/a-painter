@@ -4,7 +4,6 @@ var saveAs = require('../../vendor/saveas.js').saveAs;
 
 AFRAME.registerSystem('painter', {
   init: function () {
-
     var mappings = {
       behaviours: {},
       mappings: {
@@ -78,9 +77,12 @@ AFRAME.registerSystem('painter', {
       var isBinary = urlParams.urljson === undefined;
       this.brushSystem.loadFromUrl(urlParams.url || urlParams.urljson, isBinary);
       document.getElementById('logo').setAttribute('visible', false);
-      document.getElementById('acamera').setAttribute('orbit-controls', 'position', '0 1.6 3');
+      document.getElementById('acamera').setAttribute('orbit-controls', 'initialPosition: 0 1.6 3');
       document.getElementById('apainter-logo').classList.remove('hidden');
       //document.getElementById('apainter-author').classList.remove('hidden'); // not used yet
+    } else { // No painting to load, move camera in front of logo
+      const cameraEl = document.getElementById('acamera')
+      cameraEl.setAttribute('position', '0 1.6 0');
     }
 
     if (urlParams.bgcolor !== undefined) {

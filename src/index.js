@@ -3,7 +3,6 @@ window.saveAs = require('../vendor/saveas.js').saveAs;
 require('./atlas.js');
 require('./dragndrop.js');
 require('./binarymanager.js');
-require('../vendor/OrbitControls.js');
 require('./sharedbuffergeometrymanager.js');
 require('./sharedbuffergeometry.js');
 
@@ -16,7 +15,6 @@ require('./systems/painter.js');
 
 require('./components/brush.js');
 require('./components/json-model.js');
-require('./components/orbit-controls.js');
 require('./components/paint-controls.js');
 require('./components/ui.js');
 require('./components/ui-raycaster.js');
