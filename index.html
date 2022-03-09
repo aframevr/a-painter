@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-gltf-exporter-component@0.1.0/dist/aframe-gltf-exporter-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-blink-controls@0.3.0/src/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-tooltip-component@0.1.2/dist/aframe-tooltip-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-orbit-controls@1.3.0/dist/aframe-orbit-controls.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
@@ -49,7 +50,7 @@
       <a-entity id="hitEntityRight" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
       <a-entity id="cameraRig">
         <!-- camera -->
-        <a-entity id="acamera" camera wasd-controls look-controls orbit-controls></a-entity>
+        <a-entity id="acamera" camera></a-entity>
         <!-- hand controls -->
         <a-entity id="left-hand"
                   brush
