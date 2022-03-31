@@ -392,26 +392,35 @@ AFRAME.registerSystem('brush', {
     var pointerPosition = new THREE.Vector3();
     var controllerOffset = {
       'vive-controls': {
-        vec: new THREE.Vector3(0, 0.7, 1),
+        vec: {
+          left: new THREE.Vector3(0, 0.7, 1),
+          right: new THREE.Vector3(0, 0.7, 1),
+        },
         mult: -0.03
       },
       'oculus-touch-controls': {
-        vec: new THREE.Vector3(0, 0, 2.8),
-        mult: -0.05
+        vec: {
+          left: new THREE.Vector3(-2, 0, 2.8),
+          right: new THREE.Vector3(2, 0, 2.8)
+        },
+        mult: -0.025
       },
       'windows-motion-controls': {
-        vec: new THREE.Vector3(0, 0, 1),
+        vec: {
+          left: new THREE.Vector3(0, 0, 1),
+          right: new THREE.Vector3(0, 0, 1),
+        },
         mult: -.12
       }
     };
 
-    return function getPointerPosition (position, orientation) {
+    return function getPointerPosition (position, orientation, hand) {
       if (!this.controllerName) {
         return position;
       }
 
       var offsets = controllerOffset[this.controllerName];
-      var pointer = offsets.vec
+      var pointer = offsets.vec[hand]
         .clone()
         .applyQuaternion(orientation)
         .normalize()

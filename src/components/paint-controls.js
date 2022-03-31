@@ -66,6 +66,18 @@ AFRAME.registerComponent('paint-controls', {
 
     el.addEventListener('controllerconnected', function (evt) {
       var controllerName = evt.detail.name;
+      var hand = evt.detail.component.data.hand;
+
+      const createBrushTip = (controllerVersion, hand) => {
+        // Create brush tip and position it dynamically based on our current controller
+        this.brushTip = document.createElement('a-entity');
+        this.brushTip.id = `${hand}-tip`;
+        this.brushTip.setAttribute('gltf-model', '#tipObj');
+        this.brushTip.setAttribute('brush-tip', `controller: ${controllerVersion}; hand: ${hand}`);
+        this.brushTip.addEventListener('model-loaded', self.onModelLoaded);
+        el.appendChild(this.brushTip);
+      }
+
       if (controllerName === 'windows-motion-controls')
       {
         var gltfName = evt.detail.component.el.components['gltf-model'].data;
@@ -83,11 +95,12 @@ AFRAME.registerComponent('paint-controls', {
       if (controllerName.indexOf('windows-motion') >= 0) {
         // el.setAttribute('teleport-controls', {button: 'trackpad'});
       } else if (controllerName === 'oculus-touch-controls') {
-        var hand = evt.detail.component.data.hand;
-        //el.setAttribute('teleport-controls', {button: hand === 'left' ? 'ybutton' : 'bbutton'});
-        el.setAttribute('obj-model', {obj: 'assets/models/oculus-' + hand + '-controller.obj', mtl: 'https://cdn.aframe.io/controllers/oculus/oculus-touch-controller-' + hand + '.mtl'});
+        const controllerModelURL = el.components[controllerName].displayModel[hand].modelUrl;
+        const versionMatchPattern = /[^\/]*(?=-(?:left|right)\.)/; // Matches the "oculus-touch-controller-[version]" part of URL
+        const controllerVersion = versionMatchPattern.exec(controllerModelURL)[0];
+        createBrushTip(controllerVersion, hand);
       } else if (controllerName === 'vive-controls') {
-        el.setAttribute('json-model', {src: 'assets/models/controller_vive.json'});
+        el.setAttribute('gltf-model', 'url(assets/models/vive-controller.glb)');
       } else { return; }
 
       if (!!tooltipGroups) {
@@ -143,7 +156,7 @@ AFRAME.registerComponent('paint-controls', {
   changeBrushSize: function (size) {
     var scale = size / 2 * 10;
     if (this.modelLoaded && !!this.buttonMeshes.sizeHint) {
-      this.buttonMeshes.sizeHint.scale.set(scale, scale, 1);
+      this.buttonMeshes.sizeHint.scale.set(scale, 1, scale);
     }
   },
 
@@ -167,7 +180,7 @@ AFRAME.registerComponent('paint-controls', {
     var data = this.data;
     var el = this.el;
     el.setAttribute('vive-controls', {hand: data.hand, model: false});
-    el.setAttribute('oculus-touch-controls', {hand: data.hand, model: false});
+    el.setAttribute('oculus-touch-controls', {hand: data.hand, model: true});
     el.setAttribute('windows-motion-controls', {hand: data.hand});
   },
 
@@ -182,7 +195,8 @@ AFRAME.registerComponent('paint-controls', {
   },
 
   onModelLoaded: function (evt) {
-    if (evt.target !== this.el) { return; }
+    // Only act on lone brush tip or custom model to set the button meshes, ignore anything else.
+    if ((evt.target !== this.el && !evt.target.id.includes('-tip')) || this.buttonMeshes) { return; }
 
     var controllerObject3D = evt.detail.model;
     var buttonMeshes;

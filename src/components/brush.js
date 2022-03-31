@@ -52,6 +52,8 @@ AFRAME.registerComponent('brush', {
         self.active = false;
       }
     });
+
+    this.hand = this.el.id === 'right-hand' ? 'right' : 'left';
   },
   update: function (oldData) {
     var data = this.data;
@@ -71,7 +73,7 @@ AFRAME.registerComponent('brush', {
     return function tick (time, delta) {
       if (this.currentStroke && this.active) {
         this.obj.matrixWorld.decompose(position, rotation, scale);
-        var pointerPosition = this.system.getPointerPosition(position, rotation);
+        var pointerPosition = this.system.getPointerPosition(position, rotation, this.hand);
         this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
       }
     };
