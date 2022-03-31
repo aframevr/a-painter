@@ -8,7 +8,7 @@ AFRAME.registerComponent('brush-tip', {
   },
 
   init: function () {
-    const toRad = degrees => THREE.MathUtils.degToRad(degrees);
+    var toRad = degrees => THREE.MathUtils.degToRad(degrees);
     
     this.controllers = {
       'oculus-touch-controller-v3': {
