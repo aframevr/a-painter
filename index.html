@@ -28,6 +28,7 @@
         <a-asset-item id="logomtl" src="assets/models/logo.mtl"></a-asset-item>
         <a-asset-item id="uiobj" src="assets/models/ui.obj"></a-asset-item>
         <a-asset-item id="hitEntityObj" src="assets/models/teleportHitEntity.obj"></a-asset-item>
+        <a-asset-item id="tipObj" src="assets/models/controller-tip.glb"></a-asset-item>
         <audio id="ui_click0" src="https://cdn.aframe.io/a-painter/sounds/ui_click0.ogg">
         <audio id="ui_click1" src="https://cdn.aframe.io/a-painter/sounds/ui_click1.ogg">
         <audio id="ui_menu" src="https://cdn.aframe.io/a-painter/sounds/ui_menu.ogg">
@@ -76,20 +77,20 @@
                       </a-entity>
                     </a-entity>
                     <a-entity class="oculus-tooltips" visible="false">
-                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: -0.009 0.0 -0.002; rotation: -90 0 0; src: assets/images/tooltip.png"
-                              position="0.066 0.013 0.013">
+                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: 0.011 0.005 0.045; rotation: -90 0 0; src: assets/images/tooltip.png"
+                              position="0.12 0.016 0.06">
                       </a-entity>
-                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: 0.008 0 -0.001; rotation: -90 0 0; src: assets/images/tooltip.png"
-                          position="0.059 0.015 -0.028">
+                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: 0.015 0 0.035; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.08 0.035 -0.02">
                       </a-entity>
-                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: -0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
-                          position="-0.07 0.01 0.06">
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0 0.01 0.03; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="-0.07 0.01 0.093">
                       </a-entity>
-                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0.002 -0.023 -0.02; lineHorizontalAlign: right; rotation: -90 0 0; src: assets/images/tooltip.png"
+                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: 0.022 -0.023 0.02; lineHorizontalAlign: right; rotation: -90 0 0; src: assets/images/tooltip.png"
                           position="-0.09 0.020 -0.067">
                       </a-entity>
-                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: 0.005 -0.022 0.027; rotation: -90 0 0; src: assets/images/tooltip.png"
-                          position="0.058 -0.01 0.055">
+                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: 0.01 -0.03 0.047; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.07 -0.01 0.088">
                       </a-entity>
                     </a-entity>
                     <a-entity class="windows-motion-samsung-tooltips" visible="false">
@@ -153,20 +154,20 @@
                       </a-entity>
                     </a-entity>
                     <a-entity class="oculus-tooltips" visible="false">
-                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: 0.009 0.0 -0.002; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                          position="-0.066 0.013 0.013">
+                      <a-entity tooltip="text: Main Menu; width: 0.07; height: 0.03; targetPosition: -0.011 0.005 0.045; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.12 0.016 0.06">
                       </a-entity>
-                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: -0.008 0 -0.001; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                          position="-0.059 0.015 -0.028">
+                      <a-entity tooltip="text: Teleport; width: 0.06; height: 0.03; targetPosition: -0.015 0 0.035; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.08 0.035 -0.02">
                       </a-entity>
-                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0.009 0.01 -0.01; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
-                          position="0.07 0.01 0.06">
+                      <a-entity tooltip="text: Brush size\n(slide up/down); width: 0.09; height: 0.04; targetPosition: 0 0.01 0.03; lineHorizontalAlign: center; lineVerticalAlign: top; rotation: -90 0 0; src: assets/images/tooltip.png"
+                          position="0.07 0.01 0.093">
                       </a-entity>
-                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: -0.002 -0.023 -0.02; lineHorizontalAlign: left; rotation: -90 0 0; src: assets/images/tooltip.png"
+                      <a-entity tooltip="text: Press to paint!\n(pressure sensitive); width: 0.11; height: 0.04; targetPosition: -0.022 -0.023 0.02; lineHorizontalAlign: left; rotation: -90 0 0; src: assets/images/tooltip.png"
                           position="0.09 0.020 -0.067">
                       </a-entity>
-                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: -0.005 -0.022 0.027; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
-                          position="-0.058 -0.01 0.055">
+                      <a-entity tooltip="text: Undo; width: 0.05; height: 0.03; targetPosition: -0.01 -0.03 0.047; rotation: -90 0 0; lineHorizontalAlign: right; src: assets/images/tooltip.png"
+                          position="-0.07 -0.01 0.088">
                       </a-entity>
                     </a-entity>
                     <a-entity class="windows-motion-samsung-tooltips" visible="false">
