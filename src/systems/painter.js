@@ -9,8 +9,8 @@ AFRAME.registerSystem('painter', {
       mappings: {
         painting: {
           common: {
-            'grip.down': 'paint',
-            'trigger.changed': 'undo'
+            'grip.changed': 'paint',
+            'trigger.down': 'undo'
           },
 
           'vive-controls': {
