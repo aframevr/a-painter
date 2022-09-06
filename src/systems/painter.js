@@ -13,6 +13,11 @@ AFRAME.registerSystem('painter', {
             'trigger.down': 'undo'
           },
 
+          'hand-tracking-controls': {
+            'pinchmoved': 'paint-hand-start',
+            'pinchended': 'paint-hand-end',
+          },
+
           'vive-controls': {
             'axismove': 'changeBrushSizeInc',
             'trackpad.touchstart': 'startChangeBrushSize',

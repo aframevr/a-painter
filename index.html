@@ -53,7 +53,7 @@
         <!-- camera -->
         <a-entity id="acamera" camera></a-entity>
         <!-- hand controls -->
-        <a-entity id="left-hand"
+        <!-- <a-entity id="left-hand"
                   brush
                   paint-controls="hand: left"
                   blink-controls="cameraRig: #cameraRig; startEvents: aim; endEvents: teleport; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityLeft"
@@ -129,8 +129,10 @@
                                 rotation="-90 0 0">
                       </a-entity>
                   </a-entity>
-        </a-entity>
-        <a-entity id="right-hand"
+        </a-entity> -->
+        <!-- <a-entity id="leftHand" hand-tracking-controls="hand: left; modelColor: purple" brush paint-controls="hand: left" ui></a-entity> -->
+        <a-entity id="rightHand" hand-tracking-controls="hand: right; modelColor: purple" right-hand-log brush paint-controls="hand: right" ui></a-entity>
+        <!-- <a-entity id="right-hand"
                   brush
                   paint-controls="hand: right"
                   blink-controls="cameraRig: #cameraRig; startEvents: aim; endEvents: teleport; hitCylinderColor: #ff3468; curveHitColor: #ff3468; curveMissColor: #333333; curveLineWidth: 0.01; hitEntity: #hitEntityRight"
@@ -206,7 +208,7 @@
                                 rotation="-90 0 0">
                       </a-entity>
                     </a-entity>
-        </a-entity>
+        </a-entity> -->
       </a-entity>
     </a-scene>
     <a href="https://aframe.io/a-painter/"><div id="apainter-logo" class="hidden"></div><div id="apainter-author" style="display:none" class="hidden">authorname</div></a>
