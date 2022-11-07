@@ -411,7 +411,14 @@ AFRAME.registerSystem('brush', {
           right: new THREE.Vector3(0, 0, 1),
         },
         mult: -.12
-      }
+      },
+      'hand-tracking-controls': {
+        vec: {
+          left: new THREE.Vector3(-2, 0, 2.8),
+          right: new THREE.Vector3(2, 0, 2.8)
+        },
+        mult: -0.025
+      },
     };
 
     return function getPointerPosition (position, orientation, hand) {

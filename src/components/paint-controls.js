@@ -65,6 +65,8 @@ AFRAME.registerComponent('paint-controls', {
     });
 
     el.addEventListener('controllerconnected', function (evt) {
+      console.log(evt);
+      
       var controllerName = evt.detail.name;
       var hand = evt.detail.component.data.hand;
 

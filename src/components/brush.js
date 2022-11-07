@@ -26,6 +26,8 @@ AFRAME.registerComponent('brush', {
     this.model = this.el.getObject3D('mesh');
     this.drawing = false;
 
+    this.self = this;
+
     var self = this;
 
     this.el.addEventListener('undo', function(evt) {
@@ -33,6 +35,34 @@ AFRAME.registerComponent('brush', {
       self.system.undo();
       document.getElementById('ui_undo').play();
     });
+
+    console.log('system is');
+    console.log(this.system);
+    console.log('el is');
+    console.log(this);
+    console.log('obj is');
+    console.log(this.obj);
+
+    this.el.addEventListener('paint-hand-start', function (evt) {
+      // console.log(self.el.components['hand-tracking-controls'].indexTipPosition);
+     //  console.log(this.components['hand-tracking-controls'].indexTipPosition);
+        if (!self.active) {
+          console.log('starting stroke');
+          self.startNewStroke();
+          self.active = true;
+        }
+        this.hand = 'right';
+      });
+
+      this.el.addEventListener('paint-hand-end', function (evt) {
+        if (self.active) {
+          self.previousEntity = self.currentEntity;
+          self.currentStroke = null;
+        }
+        self.active = false;
+        this.hand = 'right';
+        console.log('ending stroke');
+      });
 
     this.el.addEventListener('paint', function (evt) {
       if (!self.data.enabled) { return; }
@@ -72,9 +102,20 @@ AFRAME.registerComponent('brush', {
 
     return function tick (time, delta) {
       if (this.currentStroke && this.active) {
+        //  console.log('wutbegin');
+        //  console.log(this);
+        //  console.log(this.el.components['hand-tracking-controls'].indexTipPosition);
+        //  console.log('wutend');
+
+        const lol = this.el.components['hand-tracking-controls'].indexTipPosition.clone();
+        console.log(lol);
         this.obj.matrixWorld.decompose(position, rotation, scale);
+        console.log(lol);
+        position = lol;
+        
         var pointerPosition = this.system.getPointerPosition(position, rotation, this.hand);
-        this.currentStroke.addPoint(position, rotation, pointerPosition, this.sizeModifier, time);
+        //console.log(pointerPosition);
+        this.currentStroke.addPoint(position, rotation, pointerPosition, 3.0, time);
       }
     };
   })(),
