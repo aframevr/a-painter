@@ -62,6 +62,8 @@ BrushInterface.prototype = {
 *Development Tip*: set your brush as the default brush at the top of
 `src/components/brush.js` (`brush: {default: 'yourbrush'}`) while developing so
 you don't have to re-select it every time you reload.
+Alternatively, use the strokes.json sketch to develop without an HMD by editing
+the json to use your brush at the top.
 
 ### Common Data
 
