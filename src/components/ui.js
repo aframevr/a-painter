@@ -335,8 +335,8 @@ AFRAME.registerComponent('ui', {
 
   hsv2rgb: function (hsv) {
     var r, g, b, i, f, p, q, t;
-    var h = THREE.Math.clamp(hsv.h, 0, 1);
-    var s = THREE.Math.clamp(hsv.s, 0, 1);
+    var h = THREE.MathUtils.clamp(hsv.h, 0, 1);
+    var s = THREE.MathUtils.clamp(hsv.s, 0, 1);
     var v = hsv.v;
 
     i = Math.floor(h * 6);
@@ -386,7 +386,7 @@ AFRAME.registerComponent('ui', {
     slider.worldToLocal(position);
     var brightness = 1.0 - (position.z - sliderBoundingBox.min.z) / sliderHeight;
     // remove object border padding
-    brightness = THREE.Math.clamp(brightness * 1.29 - 0.12, 0.0, 1.0);
+    brightness = THREE.MathUtils.clamp(brightness * 1.29 - 0.12, 0.0, 1.0);
     this.objects.hueWheel.material.uniforms['brightness'].value = brightness;
     this.objects.brightnessCursor.rotation.y = brightness * 1.5 - 1.5;
     this.hsv.v = brightness;

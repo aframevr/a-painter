@@ -31,7 +31,7 @@ AFRAME.registerComponent('paint-controls', {
       var magnitude = evt.detail.axis[1] || evt.detail.axis[3];
       var delta = magnitude / 300;
       var size = el.components.brush.schema.size;
-      var value = THREE.Math.clamp(self.el.getAttribute('brush').size - delta, size.min, size.max);
+      var value = THREE.MathUtils.clamp(self.el.getAttribute('brush').size - delta, size.min, size.max);
 
       self.el.setAttribute('brush', 'size', value);
     });
@@ -53,7 +53,7 @@ AFRAME.registerComponent('paint-controls', {
 
       var startValue = self.el.getAttribute('brush').size;
       var size = el.components.brush.schema.size;
-      var value = THREE.Math.clamp(startValue - delta, size.min, size.max);
+      var value = THREE.MathUtils.clamp(startValue - delta, size.min, size.max);
 
       self.el.setAttribute('brush', 'size', value);
     });
