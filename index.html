@@ -41,14 +41,27 @@
       <a-light type="hemisphere" groundColor="#888" intensity="0.8"></a-light>
       <a-entity id="logo" logo-model
                 animation="dur: 4000; property: logo-model.opacity; from: 1; to: 0; startEvents: painting-started"></a-entity>
-      <a-entity id="ground"
-                geometry="primitive: box; width: 12; height: 0.01; depth: 12"
-                material="shader: flat; src: #floor">
-      </a-entity>
-      <a-entity id="sky" geometry="primitive:sphere; radius:30; phiLength:360; phiStart:0; thetaLength:90" material="shader:flat; side:back; height:2048; src:#skymap; width:2048"></a-entity>
+      <a-box id="ground"
+	     width="12"
+	     height="0.01"
+	     depth="12"
+             material="shader:flat"
+	     src="#floor">
+      </a-box>
+      <a-sky id="sky"
+	     radius="30"
+	     theta-length="90"
+	     src="#skymap">
+      </a-sky>
 
-      <a-entity id="hitEntityLeft" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
-      <a-entity id="hitEntityRight" material="shader:flat; color: #ff3468" obj-model="obj: #hitEntityObj"></a-entity>
+      <a-obj-model id="hitEntityLeft"
+		   material="shader:flat; color: #ff3468"
+		   src="#hitEntityObj">
+      </a-obj-model>
+      <a-obj-model id="hitEntityRight"
+		   material="shader:flat; color: #ff3468"
+		   src="#hitEntityObj">
+      </a-obj-model>
       <a-entity id="cameraRig">
         <!-- camera -->
         <a-entity id="acamera" camera></a-entity>
