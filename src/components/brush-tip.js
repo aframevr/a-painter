@@ -9,9 +9,18 @@ AFRAME.registerComponent('brush-tip', {
 
   init: function () {
     var toRad = degrees => THREE.MathUtils.degToRad(degrees);
-    
     this.controllers = {
       'oculus-touch-controller-v3': {
+        left: {
+          positionOffset: { x: 0, y: -0.025, z: -0.042 },
+          rotationOffset: { x: toRad(-45), y: toRad(7), z: toRad(-7) }
+        },
+        right: {
+          positionOffset: { x: 0, y: -0.025, z: -0.042 },
+          rotationOffset: { x: toRad(-45), y: toRad(-7), z: toRad(7) }
+        }
+      },
+      'quest-touch-plus': {
         left: {
           positionOffset: { x: 0, y: -0.025, z: -0.042 },
           rotationOffset: { x: toRad(-45), y: toRad(7), z: toRad(-7) }

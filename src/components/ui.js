@@ -94,8 +94,58 @@ AFRAME.registerComponent('ui', {
       if (self.el.isPlaying) {
         self.addToggleEvent();
       }
+
+      self.adjustTooltips();
     });
   },
+
+  adjustTooltips: (function () {
+    // Adjust the line coming out of the tooltips to point exactly at
+    // the button they map to.
+    //
+    // To do this, we wait for the controller model to load, then we
+    // map the model objects to the right tooltip via a custom
+    // attribute set in the tooltip markup.
+    //
+    // Currently, we do this only for oculus controllers, which are
+    // already a few, but could be extended/reworked to do something
+    // similar also for other controller types.
+    const bBox = new THREE.Box3();
+    const vec3 = new THREE.Vector3();
+    return function () {
+      if (this.controller.name !== 'oculus-touch-controls') { return; }
+      const self = this;
+      const tooltips = this.el.querySelector('.oculus-tooltips');
+      this.el.addEventListener('model-loaded', function (evt) {
+	if (evt.target !== self.el) { return; }
+	evt.detail.model.traverse(function (obj) {
+	  let tooltip;
+	  if (obj.name === 'a_button_pressed_value' || obj.name === 'x_button_pressed_value') {
+	    tooltip = tooltips.querySelector('[data-tooltip=menu]');
+	  }
+	  if (obj.name === 'b_button_pressed_value' || obj.name === 'y_button_pressed_value') {
+	    tooltip = tooltips.querySelector('[data-tooltip=teleport]');
+	  }
+	  if (obj.name === 'xr_standard_thumbstick_pressed_value') {
+	    tooltip = tooltips.querySelector('[data-tooltip=brush-size]');
+	  }
+	  if (obj.name === 'xr_standard_trigger_pressed_value') {
+	    tooltip = tooltips.querySelector('[data-tooltip=paint]');
+	  }
+	  if (obj.name === 'xr_standard_squeeze_pressed_value') {
+	    tooltip = tooltips.querySelector('[data-tooltip=undo]');
+	  }
+	  if (tooltip) {
+	    // We use the center of the bounding box rather than the
+	    // position, as the object's mesh may not be centered.
+	    bBox.setFromObject(obj, true).getCenter(vec3);
+	    vec3.add(obj.parent.position);
+	    tooltip.setAttribute('tooltip', {targetPosition: vec3});
+	  }
+	});
+      });
+    };
+  })(),
 
   initColorWheel: function () {
     var colorWheel = this.objects.hueWheel;
@@ -335,8 +385,8 @@ AFRAME.registerComponent('ui', {
 
   hsv2rgb: function (hsv) {
     var r, g, b, i, f, p, q, t;
-    var h = THREE.Math.clamp(hsv.h, 0, 1);
-    var s = THREE.Math.clamp(hsv.s, 0, 1);
+    var h = THREE.MathUtils.clamp(hsv.h, 0, 1);
+    var s = THREE.MathUtils.clamp(hsv.s, 0, 1);
     var v = hsv.v;
 
     i = Math.floor(h * 6);
@@ -386,7 +436,7 @@ AFRAME.registerComponent('ui', {
     slider.worldToLocal(position);
     var brightness = 1.0 - (position.z - sliderBoundingBox.min.z) / sliderHeight;
     // remove object border padding
-    brightness = THREE.Math.clamp(brightness * 1.29 - 0.12, 0.0, 1.0);
+    brightness = THREE.MathUtils.clamp(brightness * 1.29 - 0.12, 0.0, 1.0);
     this.objects.hueWheel.material.uniforms['brightness'].value = brightness;
     this.objects.brightnessCursor.rotation.y = brightness * 1.5 - 1.5;
     this.hsv.v = brightness;

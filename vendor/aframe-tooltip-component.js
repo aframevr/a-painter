@@ -201,7 +201,7 @@
 	  init: function () {
 	    var data = this.data;
 	    var material = this.material = new THREE.MeshBasicMaterial({color: data.color, opacity: data.opacity, transparent: data.transparent, wireframe: data.debug});
-	    var geometry = this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
+	    var geometry = this.geometry = new THREE.PlaneGeometry(data.width, data.height, 3, 3);
 
 	    var textureLoader = new THREE.TextureLoader();
 	    this.plane = new THREE.Mesh(geometry, material);

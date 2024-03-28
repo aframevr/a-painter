@@ -8,7 +8,7 @@ var onLoaded = require('../onloaded.js');
      var shaded = new THREE.MeshStandardMaterial({
         side: THREE.DoubleSide,
         map: window.atlas.map,
-        vertexColors: THREE.VertexColors,
+        vertexColors: true,
         transparent: true,
         alphaTest: 0.5,
         roughness: 0.75,
@@ -17,7 +17,7 @@ var onLoaded = require('../onloaded.js');
     var flat = new THREE.MeshBasicMaterial({
         side: THREE.DoubleSide,
         map: window.atlas.map,
-        vertexColors: THREE.VertexColors,
+        vertexColors: true,
         transparent: true,
         alphaTest: 0.5
     });

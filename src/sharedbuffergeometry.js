@@ -83,16 +83,10 @@ SharedBufferGeometry.prototype = {
 
     geometry.setDrawRange(0, 0);
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3).setUsage(THREE.DynamicDrawUsage));
-    geometry.attributes.position.updateRange.count = 0;
     geometry.setIndex(new THREE.BufferAttribute(indices, 3).setUsage(THREE.DynamicDrawUsage));
-    geometry.index.updateRange.count = 0;
     geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2).setUsage(THREE.DynamicDrawUsage));
-    geometry.attributes.uv.updateRange.count = 0;
     geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3).setUsage(THREE.DynamicDrawUsage));
-    geometry.attributes.normal.updateRange.count = 0;
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage));
-    geometry.attributes.color.updateRange.count = 0;
-
 
     this.previous = null;
     if (this.geometries.length > 0) {
@@ -181,15 +175,34 @@ SharedBufferGeometry.prototype = {
     // on an even-number-positioned undo
     this.current.setDrawRange(0, (this.idx.position * 3) - 4);
 
-    this.current.attributes.color.updateRange.count = this.idx.position * 3;
+    if (this.current.attributes.color.updateRanges.length === 0) {
+      this.current.attributes.color.addUpdateRange(0, 0);
+    }
+    this.current.attributes.color.updateRanges[0].count = this.idx.position * 3;
     this.current.attributes.color.needsUpdate = true;
-    this.current.attributes.normal.updateRange.count = this.idx.position * 3;
+
+    if (this.current.attributes.normal.updateRanges.length === 0) {
+      this.current.attributes.normal.addUpdateRange(0, 0);
+    }
+    this.current.attributes.normal.updateRanges[0].count = this.idx.position * 3;
     this.current.attributes.normal.needsUpdate = true;
-    this.current.attributes.position.updateRange.count = this.idx.position * 3;
+
+    if (this.current.attributes.position.updateRanges.length === 0) {
+      this.current.attributes.position.addUpdateRange(0, 0);
+    }
+    this.current.attributes.position.updateRanges[0].count = this.idx.position * 3;
     this.current.attributes.position.needsUpdate = true;
-    this.current.attributes.uv.updateRange.count = this.idx.position * 2;
+
+    if (this.current.attributes.uv.updateRanges.length === 0) {
+      this.current.attributes.uv.addUpdateRange(0, 0);
+    }
+    this.current.attributes.uv.updateRanges[0].count = this.idx.position * 2;
     this.current.attributes.uv.needsUpdate = true;
-    this.current.index.updateRange.count = this.idx.position * 3;
+
+    if (this.current.index.updateRanges.length === 0) {
+      this.current.index.addUpdateRange(0, 0);
+    }
+    this.current.index.updateRanges[0].count = this.idx.position * 3;
     this.current.index.needsUpdate = true;
   }
 };
