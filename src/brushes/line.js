@@ -8,14 +8,14 @@ var onLoaded = require('../onloaded.js');
 
   onLoaded(function () {
     var optionsBasic = {
-      vertexColors: THREE.VertexColors,
+      vertexColors: true,
       side: THREE.DoubleSide
     };
 
     var optionsStandard = {
       roughness: 0.75,
       metalness: 0.25,
-      vertexColors: THREE.VertexColors,
+      vertexColors: true,
       map: window.atlas.map,
       side: THREE.DoubleSide
     };
@@ -23,7 +23,7 @@ var onLoaded = require('../onloaded.js');
     var optionTextured = {
       roughness: 0.75,
       metalness: 0.25,
-      vertexColors: THREE.VertexColors,
+      vertexColors: true,
       side: THREE.DoubleSide,
       map: window.atlas.map,
       transparent: true,

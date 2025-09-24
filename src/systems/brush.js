@@ -203,12 +203,6 @@ AFRAME.registerSystem('brush', {
   init: function () {
     this.version = VERSION;
     this.clear();
-    this.controllerName = null;
-
-    var self = this;
-    this.sceneEl.addEventListener('controllerconnected', function (evt) {
-      self.controllerName = evt.detail.name;
-    });
   },
   tick: function (time, delta) {
     if (!this.strokes.length) { return; }
@@ -389,44 +383,36 @@ AFRAME.registerSystem('brush', {
     return dataViews;
   },
   getPointerPosition: (function () {
-    var pointerPosition = new THREE.Vector3();
-    var controllerOffset = {
-      'vive-controls': {
-        vec: {
-          left: new THREE.Vector3(0, 0.7, 1),
-          right: new THREE.Vector3(0, 0.7, 1),
-        },
-        mult: -0.03
-      },
-      'oculus-touch-controls': {
-        vec: {
-          left: new THREE.Vector3(-2, 0, 2.8),
-          right: new THREE.Vector3(2, 0, 2.8)
-        },
-        mult: -0.025
-      },
-      'windows-motion-controls': {
-        vec: {
-          left: new THREE.Vector3(0, 0, 1),
-          right: new THREE.Vector3(0, 0, 1),
-        },
-        mult: -.12
-      }
+    const brushTips = {
+      left: null,
+      right: null
     };
-
-    return function getPointerPosition (position, orientation, hand) {
-      if (!this.controllerName) {
-        return position;
+    // Obtain a handle to the tip of the pointer. Possibly, we go for
+    // the sizehint child, but we fall back to the entity if this is
+    // missing.
+    window.addEventListener('model-loaded', function (evt) {
+      if (evt.target.id === 'left-tip') {
+	brushTips.left = evt.target.object3D;
+	evt.detail.model.traverse(function (obj) {
+	  if (obj.name === 'sizehint') {
+	    brushTips.left = obj;
+	  }
+	});
+      } else if (evt.target.id === 'right-tip') {
+	brushTips.right = evt.target.object3D;
+	evt.detail.model.traverse(function (obj) {
+	  if (obj.name === 'sizehint') {
+	    brushTips.right = obj;
+	  }
+	});
       }
-
-      var offsets = controllerOffset[this.controllerName];
-      var pointer = offsets.vec[hand]
-        .clone()
-        .applyQuaternion(orientation)
-        .normalize()
-        .multiplyScalar(offsets.mult);
-      pointerPosition.copy(position).add(pointer);
-      return pointerPosition;
+    });
+    return function getPointerPosition (position, orientation, hand) {
+      // When drawing by hand, strokes will originate from the brush tip.
+      if (typeof hand !== 'undfined' && brushTips[hand]) {
+	brushTips[hand].getWorldPosition(position);
+      }
+      return position;
     };
   })(),
   loadJSON: function (data) {
@@ -507,7 +493,7 @@ AFRAME.registerSystem('brush', {
     console.timeEnd('Binary Loading');
   },
   loadFromUrl: function (url, binary) {
-    var loader = new THREE.XHRLoader(this.manager);
+    var loader = new THREE.FileLoader(this.manager);
     loader.crossOrigin = 'anonymous';
     if (binary === true) {
       loader.setResponseType('arraybuffer');
